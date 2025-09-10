@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ershu 二十五 - Homebar</title>
+    <meta name="description" content="Welcome to ershu (二十五) - A unique homebar experience featuring curated cocktails and intimate atmosphere">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="logo.jpeg" alt="ershu logo" class="logo">
+                <span class="brand-name">ershu <span class="chinese">二十五</span></span>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#menu" class="nav-link">Menu</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#instagram" class="nav-link">Instagram</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome to <span class="highlight">ershu</span></h1>
+            <h2 class="hero-subtitle">二十五</h2>
+            <p class="hero-description">Experience the art of craft cocktails in an intimate homebar setting</p>
+            <div class="hero-buttons">
+                <a href="#menu" class="btn btn-primary">View Menu</a>
+                <a href="#instagram" class="btn btn-secondary">Follow Us</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="纽约第一深情.JPG" alt="Signature cocktail" class="hero-drink">
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu-section">
+        <div class="container">
+            <h2 class="section-title">Our Menu</h2>
+            <p class="section-subtitle">Carefully crafted cocktails with premium ingredients</p>
+            
+            <div class="menu-categories">
+                <button class="category-btn active" data-category="signature">Signature Cocktails</button>
+                <button class="category-btn" data-category="classic">Classic Cocktails</button>
+                <button class="category-btn" data-category="mocktails">Mocktails</button>
+            </div>
+
+            <div class="menu-grid">
+                <!-- Signature Cocktails -->
+                <div class="menu-category" id="signature">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="纽约第一深情.JPG" alt="纽约第一深情">
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">纽约第一深情</h3>
+                            <p class="item-description">A sophisticated blend of premium spirits with a touch of elegance</p>
+                            <span class="item-price">¥88</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">ershu Special</h3>
+                            <p class="item-description">Our house signature cocktail with unique flavors</p>
+                            <span class="item-price">¥78</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classic Cocktails -->
+                <div class="menu-category" id="classic" style="display: none;">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Old Fashioned</h3>
+                            <p class="item-description">Classic whiskey cocktail with a modern twist</p>
+                            <span class="item-price">¥65</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Negroni</h3>
+                            <p class="item-description">Italian classic with gin, vermouth, and campari</p>
+                            <span class="item-price">¥68</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mocktails -->
+                <div class="menu-category" id="mocktails" style="display: none;">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Virgin Mojito</h3>
+                            <p class="item-description">Refreshing mint and lime mocktail</p>
+                            <span class="item-price">¥35</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Sunset Breeze</h3>
+                            <p class="item-description">Tropical fruit blend with sparkling water</p>
+                            <span class="item-price">¥38</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">About ershu</h2>
+                    <p class="about-description">
+                        At ershu (二十五), we believe that the best cocktails are crafted with passion, precision, and a personal touch. 
+                        Our homebar offers an intimate setting where every drink tells a story and every guest becomes part of our family.
+                    </p>
+                    <p class="about-description">
+                        We specialize in both classic cocktails and innovative creations, using only the finest ingredients 
+                        and traditional techniques to deliver an exceptional drinking experience.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature">
+                            <i class="fas fa-star"></i>
+                            <span>Premium Ingredients</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-users"></i>
+                            <span>Intimate Setting</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-cocktail"></i>
+                            <span>Expert Craftsmanship</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="logo.jpeg" alt="ershu logo" class="about-logo">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Section -->
+    <section id="instagram" class="instagram-section">
+        <div class="container">
+            <h2 class="section-title">Follow Our Journey</h2>
+            <p class="section-subtitle">See our latest creations and behind-the-scenes moments</p>
+            
+            <div class="instagram-content">
+                <div class="instagram-feed">
+                    <div class="instagram-placeholder">
+                        <i class="fab fa-instagram"></i>
+                        <h3>Follow us on Instagram</h3>
+                        <p>@ershu_homebar</p>
+                        <a href="https://instagram.com/ershu_homebar" target="_blank" class="btn btn-primary">Follow Us</a>
+                    </div>
+                </div>
+                
+                <div class="instagram-highlights">
+                    <h3>Recent Highlights</h3>
+                    <div class="highlight-grid">
+                        <div class="highlight-item">
+                            <img src="纽约第一深情.JPG" alt="Signature drink">
+                            <p>纽约第一深情 - Our signature creation</p>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="placeholder-highlight">
+                                <i class="fas fa-camera"></i>
+                                <p>More photos coming soon</p>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="placeholder-highlight">
+                                <i class="fas fa-camera"></i>
+                                <p>More photos coming soon</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="section-subtitle">Ready to experience ershu? Contact us for reservations</p>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>Private Homebar<br>By Appointment Only</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Reservations</h4>
+                            <p>Contact us for availability</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fab fa-instagram"></i>
+                        <div>
+                            <h4>Follow Us</h4>
+                            <p>@ershu_homebar</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <form id="contact-form">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="logo.jpeg" alt="ershu logo" class="footer-logo">
+                    <h3>ershu <span class="chinese">二十五</span></h3>
+                    <p>Crafting exceptional cocktail experiences</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <a href="#menu">Menu</a>
+                        <a href="#about">About</a>
+                        <a href="#instagram">Instagram</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Follow Us</h4>
+                        <a href="https://instagram.com/ershu_homebar" target="_blank">
+                            <i class="fab fa-instagram"></i> Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 ershu (二十五). All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
