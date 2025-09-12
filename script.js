@@ -285,4 +285,61 @@ if (navMenu) {
     trapFocus(navMenu);
 }
 
+// Language Switching
+let currentLang = 'zh'; // Default to Chinese
+
+function switchLanguage(lang) {
+    currentLang = lang;
+    
+    // Update all elements with data attributes
+    document.querySelectorAll('[data-zh][data-en]').forEach(element => {
+        if (lang === 'zh') {
+            element.innerHTML = element.getAttribute('data-zh');
+        } else {
+            element.innerHTML = element.getAttribute('data-en');
+        }
+    });
+    
+    // Update language buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-lang') === lang) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update HTML lang attribute
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    
+    // Update page title
+    if (lang === 'zh') {
+        document.title = '二十五 - 温馨小聚';
+    } else {
+        document.title = 'ershu - Cozy Homebar';
+    }
+    
+    // Store language preference
+    localStorage.setItem('preferred-language', lang);
+}
+
+// Initialize language on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Check for saved language preference
+    const savedLang = localStorage.getItem('preferred-language');
+    if (savedLang && (savedLang === 'zh' || savedLang === 'en')) {
+        switchLanguage(savedLang);
+    } else {
+        // Default to Chinese
+        switchLanguage('zh');
+    }
+    
+    // Add click listeners to language buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.getAttribute('data-lang');
+            switchLanguage(lang);
+        });
+    });
+});
+
 console.log('ershu website loaded successfully! 🍸');

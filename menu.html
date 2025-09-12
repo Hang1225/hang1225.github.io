@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜单 - 二十五</title>
+    <meta name="description" content="探索二十五精心策划的鸡尾酒菜单 - 特色鸡尾酒、经典饮品和清爽无酒精饮品">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <img src="logo.jpeg" alt="ershu logo" class="logo">
+                    <span class="brand-name" data-zh="二十五" data-en="ershu">二十五</span>
+                </a>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-link" data-zh="首页" data-en="Home">首页</a>
+                <a href="menu.html" class="nav-link active" data-zh="菜单" data-en="Menu">菜单</a>
+                <a href="index.html#about" class="nav-link" data-zh="关于" data-en="About">关于</a>
+                <a href="index.html#instagram" class="nav-link" data-zh="Instagram" data-en="Instagram">Instagram</a>
+            </div>
+            <div class="language-switcher">
+                <button class="lang-btn active" data-lang="zh">中</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Hero Section -->
+    <section class="menu-hero">
+        <div class="container">
+            <h1 class="menu-hero-title" data-zh="我们的菜单" data-en="Our Menu">我们的菜单</h1>
+            <p class="menu-hero-subtitle" data-zh="精心调制的鸡尾酒，选用优质原料" data-en="Carefully crafted cocktails with premium ingredients">精心调制的鸡尾酒，选用优质原料</p>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section class="menu-section">
+        <div class="container">
+            <div class="menu-categories">
+                <button class="category-btn active" data-category="signature" data-zh="招牌鸡尾酒" data-en="Signature Cocktails">招牌鸡尾酒</button>
+                <button class="category-btn" data-category="classic" data-zh="经典鸡尾酒" data-en="Classic Cocktails">经典鸡尾酒</button>
+                <button class="category-btn" data-category="mocktails" data-zh="无酒精饮品" data-en="Mocktails">无酒精饮品</button>
+            </div>
+
+            <div class="menu-grid">
+                <!-- Signature Cocktails -->
+                <div class="menu-category" id="signature">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <img src="纽约第一深情.JPG" alt="纽约第一深情">
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">纽约第一深情</h3>
+                            <p class="item-description">A sophisticated blend of premium spirits with a touch of elegance. Our signature creation that captures the essence of New York's cocktail culture.</p>
+                            <span class="item-price">¥88</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">ershu Special</h3>
+                            <p class="item-description">Our house signature cocktail featuring unique flavors and premium ingredients, crafted exclusively for ershu.</p>
+                            <span class="item-price">¥78</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Midnight Whisper</h3>
+                            <p class="item-description">A mysterious blend of dark spirits with subtle hints of vanilla and spice, perfect for late-night conversations.</p>
+                            <span class="item-price">¥85</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Golden Hour</h3>
+                            <p class="item-description">A bright and refreshing cocktail that captures the magic of golden hour with citrus and floral notes.</p>
+                            <span class="item-price">¥82</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classic Cocktails -->
+                <div class="menu-category" id="classic" style="display: none;">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Old Fashioned</h3>
+                            <p class="item-description">Classic whiskey cocktail with a modern twist, featuring premium bourbon and house-made simple syrup.</p>
+                            <span class="item-price">¥65</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Negroni</h3>
+                            <p class="item-description">Italian classic with gin, vermouth, and campari, served with an orange twist.</p>
+                            <span class="item-price">¥68</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Manhattan</h3>
+                            <p class="item-description">Timeless whiskey cocktail with sweet vermouth and aromatic bitters, garnished with a cherry.</p>
+                            <span class="item-price">¥70</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Mojito</h3>
+                            <p class="item-description">Refreshing Cuban classic with white rum, fresh mint, lime, and soda water.</p>
+                            <span class="item-price">¥58</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Margarita</h3>
+                            <p class="item-description">Classic tequila cocktail with fresh lime juice and triple sec, served with a salted rim.</p>
+                            <span class="item-price">¥62</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-cocktail"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Martini</h3>
+                            <p class="item-description">Sophisticated gin or vodka cocktail with dry vermouth, served with an olive or lemon twist.</p>
+                            <span class="item-price">¥72</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mocktails -->
+                <div class="menu-category" id="mocktails" style="display: none;">
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Virgin Mojito</h3>
+                            <p class="item-description">Refreshing mint and lime mocktail with soda water, perfect for a non-alcoholic option.</p>
+                            <span class="item-price">¥35</span>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Sunset Breeze</h3>
+                            <p class="item-description">Tropical fruit blend with sparkling water and a splash of grenadine for a beautiful sunset effect.</p>
+                            <span class="item-price">¥38</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Ginger Fizz</h3>
+                            <p class="item-description">Spicy ginger beer with fresh lime and mint, served over ice for a refreshing kick.</p>
+                            <span class="item-price">¥32</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Berry Sparkle</h3>
+                            <p class="item-description">Mixed berry mocktail with sparkling water and fresh herbs for a fruity, effervescent experience.</p>
+                            <span class="item-price">¥40</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-item-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-glass-martini"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <h3 class="item-name">Cucumber Cooler</h3>
+                            <p class="item-description">Light and refreshing cucumber mocktail with fresh herbs and a hint of citrus.</p>
+                            <span class="item-price">¥30</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="logo.jpeg" alt="ershu logo" class="footer-logo">
+                    <h3>ershu <span class="chinese">二十五</span></h3>
+                    <p>Crafting exceptional cocktail experiences</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <a href="index.html">Home</a>
+                        <a href="menu.html">Menu</a>
+                        <a href="index.html#about">About</a>
+                        <a href="index.html#instagram">Instagram</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Follow Me</h4>
+                        <a href="https://instagram.com/ershu.25" target="_blank">
+                            <i class="fab fa-instagram"></i> @ershu.25
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 ershu (二十五). All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

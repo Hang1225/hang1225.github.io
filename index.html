@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ershu 二十五 - Homebar</title>
-    <meta name="description" content="Welcome to ershu (二十五) - A unique homebar experience featuring curated cocktails and intimate atmosphere">
+    <title>二十五 - 温馨小聚</title>
+    <meta name="description" content="欢迎来到二十五 - 一个温馨的私人酒吧，提供精心调制的鸡尾酒和亲密氛围">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -15,14 +15,17 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <img src="logo.jpeg" alt="ershu logo" class="logo">
-                <span class="brand-name">ershu <span class="chinese">二十五</span></span>
+                <span class="brand-name" data-zh="二十五" data-en="ershu">二十五</span>
             </div>
             <div class="nav-menu" id="nav-menu">
-                <a href="#home" class="nav-link">Home</a>
-                <a href="#menu" class="nav-link">Menu</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="#instagram" class="nav-link">Instagram</a>
-                <a href="#contact" class="nav-link">Contact</a>
+                <a href="#home" class="nav-link" data-zh="首页" data-en="Home">首页</a>
+                <a href="menu.html" class="nav-link" data-zh="菜单" data-en="Menu">菜单</a>
+                <a href="#about" class="nav-link" data-zh="关于" data-en="About">关于</a>
+                <a href="#instagram" class="nav-link" data-zh="Instagram" data-en="Instagram">Instagram</a>
+            </div>
+            <div class="language-switcher">
+                <button class="lang-btn active" data-lang="zh">中</button>
+                <button class="lang-btn" data-lang="en">EN</button>
             </div>
             <div class="hamburger" id="hamburger">
                 <span class="bar"></span>
@@ -34,152 +37,79 @@
 
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Welcome to <span class="highlight">ershu</span></h1>
-            <h2 class="hero-subtitle">二十五</h2>
-            <p class="hero-description">Experience the art of craft cocktails in an intimate homebar setting</p>
-            <div class="hero-buttons">
-                <a href="#menu" class="btn btn-primary">View Menu</a>
-                <a href="#instagram" class="btn btn-secondary">Follow Us</a>
-            </div>
-        </div>
-        <div class="hero-image">
-            <img src="纽约第一深情.JPG" alt="Signature cocktail" class="hero-drink">
-        </div>
-    </section>
-
-    <!-- Menu Section -->
-    <section id="menu" class="menu-section">
         <div class="container">
-            <h2 class="section-title">Our Menu</h2>
-            <p class="section-subtitle">Carefully crafted cocktails with premium ingredients</p>
-            
-            <div class="menu-categories">
-                <button class="category-btn active" data-category="signature">Signature Cocktails</button>
-                <button class="category-btn" data-category="classic">Classic Cocktails</button>
-                <button class="category-btn" data-category="mocktails">Mocktails</button>
-            </div>
-
-            <div class="menu-grid">
-                <!-- Signature Cocktails -->
-                <div class="menu-category" id="signature">
-                    <div class="menu-item">
-                        <div class="menu-item-image">
-                            <img src="纽约第一深情.JPG" alt="纽约第一深情">
-                        </div>
-                        <div class="menu-item-content">
-                            <h3 class="item-name">纽约第一深情</h3>
-                            <p class="item-description">A sophisticated blend of premium spirits with a touch of elegance</p>
-                            <span class="item-price">¥88</span>
-                        </div>
-                    </div>
-                    
-                    <div class="menu-item">
-                        <div class="menu-item-image">
-                            <div class="placeholder-image">
-                                <i class="fas fa-cocktail"></i>
-                            </div>
-                        </div>
-                        <div class="menu-item-content">
-                            <h3 class="item-name">ershu Special</h3>
-                            <p class="item-description">Our house signature cocktail with unique flavors</p>
-                            <span class="item-price">¥78</span>
-                        </div>
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge" data-zh="温馨小聚" data-en="Cozy Gathering">温馨小聚</div>
+                    <h1 class="hero-title" data-zh="欢迎来到 <span class='highlight'>二十五</span>" data-en="Welcome to <span class='highlight'>ershu</span>">欢迎来到 <span class="highlight">二十五</span></h1>
+                    <h2 class="hero-subtitle" data-zh="二十五" data-en="ershu">二十五</h2>
+                    <p class="hero-description" data-zh="一个温馨的角落，朋友们在这里相聚，分享故事，每一杯饮品都用心调制。欢迎你的到来，带着新的回忆离开。" data-en="A cozy corner where friends gather, stories are shared, and every drink is crafted with love. Come as you are, leave with new memories.">一个温馨的角落，朋友们在这里相聚，分享故事，每一杯饮品都用心调制。欢迎你的到来，带着新的回忆离开。</p>
+                    <div class="hero-buttons">
+                        <a href="menu.html" class="btn btn-primary">
+                            <i class="fas fa-cocktail"></i>
+                            <span data-zh="查看菜单" data-en="View Menu">查看菜单</span>
+                        </a>
+                        <a href="#instagram" class="btn btn-secondary">
+                            <i class="fab fa-instagram"></i>
+                            <span data-zh="关注我" data-en="Follow Me">关注我</span>
+                        </a>
                     </div>
                 </div>
-
-                <!-- Classic Cocktails -->
-                <div class="menu-category" id="classic" style="display: none;">
-                    <div class="menu-item">
-                        <div class="menu-item-image">
-                            <div class="placeholder-image">
-                                <i class="fas fa-cocktail"></i>
+                <div class="hero-image-card">
+                    <div class="image-container">
+                        <img src="纽约第一深情.JPG" alt="Signature cocktail" class="hero-drink">
+                        <div class="image-overlay">
+                            <div class="overlay-content">
+                                <h3>纽约第一深情</h3>
+                                <p data-zh="招牌创作" data-en="Signature Creation">招牌创作</p>
                             </div>
-                        </div>
-                        <div class="menu-item-content">
-                            <h3 class="item-name">Old Fashioned</h3>
-                            <p class="item-description">Classic whiskey cocktail with a modern twist</p>
-                            <span class="item-price">¥65</span>
-                        </div>
-                    </div>
-                    
-                    <div class="menu-item">
-                        <div class="menu-item-image">
-                            <div class="placeholder-image">
-                                <i class="fas fa-cocktail"></i>
-                            </div>
-                        </div>
-                        <div class="menu-item-content">
-                            <h3 class="item-name">Negroni</h3>
-                            <p class="item-description">Italian classic with gin, vermouth, and campari</p>
-                            <span class="item-price">¥68</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mocktails -->
-                <div class="menu-category" id="mocktails" style="display: none;">
-                    <div class="menu-item">
-                        <div class="menu-item-image">
-                            <div class="placeholder-image">
-                                <i class="fas fa-glass-martini"></i>
-                            </div>
-                        </div>
-                        <div class="menu-item-content">
-                            <h3 class="item-name">Virgin Mojito</h3>
-                            <p class="item-description">Refreshing mint and lime mocktail</p>
-                            <span class="item-price">¥35</span>
-                        </div>
-                    </div>
-                    
-                    <div class="menu-item">
-                        <div class="menu-item-image">
-                            <div class="placeholder-image">
-                                <i class="fas fa-glass-martini"></i>
-                            </div>
-                        </div>
-                        <div class="menu-item-content">
-                            <h3 class="item-name">Sunset Breeze</h3>
-                            <p class="item-description">Tropical fruit blend with sparkling water</p>
-                            <span class="item-price">¥38</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- About Section -->
     <section id="about" class="about-section">
         <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2 class="section-title">About ershu</h2>
-                    <p class="about-description">
-                        At ershu (二十五), we believe that the best cocktails are crafted with passion, precision, and a personal touch. 
-                        Our homebar offers an intimate setting where every drink tells a story and every guest becomes part of our family.
-                    </p>
-                    <p class="about-description">
-                        We specialize in both classic cocktails and innovative creations, using only the finest ingredients 
-                        and traditional techniques to deliver an exceptional drinking experience.
-                    </p>
-                    <div class="about-features">
-                        <div class="feature">
-                            <i class="fas fa-star"></i>
-                            <span>Premium Ingredients</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-users"></i>
-                            <span>Intimate Setting</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-cocktail"></i>
-                            <span>Expert Craftsmanship</span>
-                        </div>
+            <div class="section-header">
+                <h2 class="section-title" data-zh="关于二十五" data-en="About ershu">关于二十五</h2>
+                <p class="section-subtitle" data-zh="一个温馨的空间，有美酒和美好的对话" data-en="A personal space for good drinks and great conversations">一个温馨的空间，有美酒和美好的对话</p>
+            </div>
+            
+            <div class="about-cards">
+                <div class="about-card main-card">
+                    <div class="card-content">
+                        <h3 data-zh="我的故事" data-en="My Story">我的故事</h3>
+                        <p data-zh="你好，我是二十五的主人 - 一个温馨的私人酒吧，我喜欢与朋友和新认识的人分享我对调酒的激情。这不是一个生意，这是我的个人空间，我在这里创造讲述故事的饮品，把人们聚集在一起。" data-en="Hi, I'm the host of ershu (二十五) - a cozy homebar where I love sharing my passion for craft cocktails with friends and new acquaintances. This isn't a business, it's my personal space where I create drinks that tell stories and bring people together.">你好，我是二十五的主人 - 一个温馨的私人酒吧，我喜欢与朋友和新认识的人分享我对调酒的激情。这不是一个生意，这是我的个人空间，我在这里创造讲述故事的饮品，把人们聚集在一起。</p>
+                        <p data-zh="每天晚上，我精心挑选原料，尝试不同的口味，创造一些特别的东西。无论你是调酒爱好者还是只是好奇，都欢迎加入我们这个小型的酒友和故事分享者社区。" data-en="Every evening, I carefully select ingredients and experiment with flavors to create something special. Whether you're a cocktail enthusiast or just curious, you're welcome to join our little community of drink lovers and storytellers.">每天晚上，我精心挑选原料，尝试不同的口味，创造一些特别的东西。无论你是调酒爱好者还是只是好奇，都欢迎加入我们这个小型的酒友和故事分享者社区。</p>
                     </div>
                 </div>
-                <div class="about-image">
-                    <img src="logo.jpeg" alt="ershu logo" class="about-logo">
+                
+                <div class="about-card feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4 data-zh="用心制作" data-en="Made with Love">用心制作</h4>
+                    <p data-zh="每一杯饮品都用心调制，充满个人关怀" data-en="Every drink is crafted with care and personal attention">每一杯饮品都用心调制，充满个人关怀</p>
+                </div>
+                
+                <div class="about-card feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h4 data-zh="温馨氛围" data-en="Cozy Atmosphere">温馨氛围</h4>
+                    <p data-zh="一个温暖、欢迎的空间，让每个人都感到宾至如归" data-en="A warm, welcoming space where everyone feels at home">一个温暖、欢迎的空间，让每个人都感到宾至如归</p>
+                </div>
+                
+                <div class="about-card feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4 data-zh="美好对话" data-en="Great Conversations">美好对话</h4>
+                    <p data-zh="在这里，陌生人通过分享故事成为朋友" data-en="Where strangers become friends over shared stories">在这里，陌生人通过分享故事成为朋友</p>
                 </div>
             </div>
         </div>
@@ -188,94 +118,63 @@
     <!-- Instagram Section -->
     <section id="instagram" class="instagram-section">
         <div class="container">
-            <h2 class="section-title">Follow Our Journey</h2>
-            <p class="section-subtitle">See our latest creations and behind-the-scenes moments</p>
+            <div class="section-header">
+                <h2 class="section-title" data-zh="关注我的旅程" data-en="Follow My Journey">关注我的旅程</h2>
+                <p class="section-subtitle" data-zh="看看我在创造什么，以及我们分享的温馨时刻" data-en="See what I'm creating and the cozy moments we share">看看我在创造什么，以及我们分享的温馨时刻</p>
+            </div>
             
-            <div class="instagram-content">
-                <div class="instagram-feed">
-                    <div class="instagram-placeholder">
+            <div class="instagram-grid">
+                <div class="instagram-card main-card">
+                    <div class="card-header">
                         <i class="fab fa-instagram"></i>
-                        <h3>Follow us on Instagram</h3>
-                        <p>@ershu_homebar</p>
-                        <a href="https://instagram.com/ershu_homebar" target="_blank" class="btn btn-primary">Follow Us</a>
+                        <h3>@ershu.25</h3>
+                    </div>
+                    <p data-zh="关注我获取每日更新、幕后花絮，以及我正在实验的最新饮品" data-en="Follow me for daily updates, behind-the-scenes moments, and the latest drinks I'm experimenting with">关注我获取每日更新、幕后花絮，以及我正在实验的最新饮品</p>
+                    <a href="https://instagram.com/ershu.25" target="_blank" class="btn btn-primary">
+                        <i class="fab fa-instagram"></i>
+                        <span data-zh="关注我" data-en="Follow Me">关注我</span>
+                    </a>
+                </div>
+                
+                <div class="instagram-card image-card">
+                    <div class="image-wrapper">
+                        <img src="纽约第一深情.JPG" alt="Signature drink">
+                        <div class="image-overlay">
+                            <i class="fas fa-heart"></i>
+                            <span>1.2k</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h4>纽约第一深情</h4>
+                        <p data-zh="我们的招牌创作，一切从这里开始" data-en="Our signature creation that started it all">我们的招牌创作，一切从这里开始</p>
                     </div>
                 </div>
                 
-                <div class="instagram-highlights">
-                    <h3>Recent Highlights</h3>
-                    <div class="highlight-grid">
-                        <div class="highlight-item">
-                            <img src="纽约第一深情.JPG" alt="Signature drink">
-                            <p>纽约第一深情 - Our signature creation</p>
-                        </div>
-                        <div class="highlight-item">
-                            <div class="placeholder-highlight">
-                                <i class="fas fa-camera"></i>
-                                <p>More photos coming soon</p>
-                            </div>
-                        </div>
-                        <div class="highlight-item">
-                            <div class="placeholder-highlight">
-                                <i class="fas fa-camera"></i>
-                                <p>More photos coming soon</p>
-                            </div>
-                        </div>
+                <div class="instagram-card image-card">
+                    <div class="image-wrapper placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p data-zh="更多照片即将到来" data-en="More photos coming soon">更多照片即将到来</p>
+                    </div>
+                    <div class="card-content">
+                        <h4 data-zh="幕后花絮" data-en="Behind the Scenes">幕后花絮</h4>
+                        <p data-zh="关注获取独家内容" data-en="Follow for exclusive content">关注获取独家内容</p>
+                    </div>
+                </div>
+                
+                <div class="instagram-card image-card">
+                    <div class="image-wrapper placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p data-zh="更多照片即将到来" data-en="More photos coming soon">更多照片即将到来</p>
+                    </div>
+                    <div class="card-content">
+                        <h4 data-zh="每日特调" data-en="Daily Specials">每日特调</h4>
+                        <p data-zh="查看我们的故事获取更新" data-en="Check our stories for updates">查看我们的故事获取更新</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
-        <div class="container">
-            <h2 class="section-title">Get In Touch</h2>
-            <p class="section-subtitle">Ready to experience ershu? Contact us for reservations</p>
-            
-            <div class="contact-content">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div>
-                            <h4>Location</h4>
-                            <p>Private Homebar<br>By Appointment Only</p>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fas fa-phone"></i>
-                        <div>
-                            <h4>Reservations</h4>
-                            <p>Contact us for availability</p>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <i class="fab fa-instagram"></i>
-                        <div>
-                            <h4>Follow Us</h4>
-                            <p>@ershu_homebar</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="contact-form">
-                    <form id="contact-form">
-                        <div class="form-group">
-                            <input type="text" id="name" name="name" placeholder="Your Name" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" id="email" name="email" placeholder="Your Email" required>
-                        </div>
-                        <div class="form-group">
-                            <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Send Message</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer class="footer">
@@ -283,23 +182,22 @@
             <div class="footer-content">
                 <div class="footer-brand">
                     <img src="logo.jpeg" alt="ershu logo" class="footer-logo">
-                    <h3>ershu <span class="chinese">二十五</span></h3>
-                    <p>Crafting exceptional cocktail experiences</p>
+                    <h3 data-zh="二十五" data-en="ershu">二十五</h3>
+                    <p data-zh="精心调制非凡的鸡尾酒体验" data-en="Crafting exceptional cocktail experiences">精心调制非凡的鸡尾酒体验</p>
                 </div>
                 
                 <div class="footer-links">
                     <div class="footer-column">
-                        <h4>Quick Links</h4>
-                        <a href="#menu">Menu</a>
-                        <a href="#about">About</a>
-                        <a href="#instagram">Instagram</a>
-                        <a href="#contact">Contact</a>
+                        <h4 data-zh="快速链接" data-en="Quick Links">快速链接</h4>
+                        <a href="menu.html" data-zh="菜单" data-en="Menu">菜单</a>
+                        <a href="#about" data-zh="关于" data-en="About">关于</a>
+                        <a href="#instagram" data-zh="Instagram" data-en="Instagram">Instagram</a>
                     </div>
                     
                     <div class="footer-column">
-                        <h4>Follow Us</h4>
-                        <a href="https://instagram.com/ershu_homebar" target="_blank">
-                            <i class="fab fa-instagram"></i> Instagram
+                        <h4 data-zh="关注我" data-en="Follow Me">关注我</h4>
+                        <a href="https://instagram.com/ershu.25" target="_blank">
+                            <i class="fab fa-instagram"></i> @ershu.25
                         </a>
                     </div>
                 </div>
