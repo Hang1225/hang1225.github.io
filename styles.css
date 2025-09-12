@@ -58,7 +58,7 @@ body {
 .brand-name {
     font-size: 1.4rem;
     font-weight: 300;
-    color: #8b4513;
+    color: #000000;
     letter-spacing: 0.1em;
     font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
 }
@@ -217,6 +217,7 @@ body {
     margin-bottom: 15px;
     line-height: 1.1;
     letter-spacing: -0.02em;
+    color: #000000;
 }
 
 .highlight {
@@ -226,7 +227,7 @@ body {
 
 .hero-subtitle {
     font-size: 1.8rem;
-    color: #8b4513;
+    color: #000000;
     margin-bottom: 25px;
     font-weight: 400;
     letter-spacing: 0.02em;
