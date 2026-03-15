@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gallery — The Homebar</title>
+  <title>相册 — 二十五</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .photo-grid {
@@ -35,9 +35,9 @@
   <div id="nav"></div>
   <main>
     <div class="page-header fade-in">
-      <span class="eyebrow">Memories</span>
-      <h1>Gallery</h1>
-      <p>Moments captured by our guests</p>
+      <span class="eyebrow">回忆</span>
+      <h1>相册</h1>
+      <p>宾客记录的美好瞬间</p>
     </div>
 
     <div id="photo-grid" class="photo-grid fade-in-2"></div>
@@ -45,30 +45,32 @@
     <div class="rule fade-in-3"><span>◆</span></div>
 
     <div class="card fade-in-3">
-      <span class="eyebrow">Contribute</span>
-      <h2 style="margin-bottom:1.25rem">Share a Memory</h2>
-      <p class="muted" style="margin-bottom:1.25rem;font-style:italic">Photos are reviewed before appearing in the gallery.</p>
-      <label>Select Photo</label>
+      <span class="eyebrow">分享</span>
+      <h2 style="margin-bottom:1.25rem">分享记忆</h2>
+      <p class="muted" style="margin-bottom:1.25rem;font-style:italic">照片经审核后方可显示</p>
+      <label>选择照片</label>
       <input type="file" id="photo-file" accept="image/*">
-      <label>Caption</label>
-      <input type="text" id="photo-caption" placeholder="Describe the moment (optional)">
-      <button class="btn btn-solid" id="upload-btn">Upload Photo</button>
+      <label>图片说明</label>
+      <input type="text" id="photo-caption" placeholder="描述这一刻（可选）">
+      <button class="btn btn-solid" id="upload-btn">上传照片</button>
       <span id="upload-status"></span>
     </div>
   </main>
+  <div id="footer"></div>
   <script type="module">
     import { requirePasscode } from './js/auth.js'
-    import { renderNav } from './js/nav.js'
+    import { renderNav, renderFooter } from './js/nav.js'
     import { loadApprovedPhotos, uploadPhoto } from './js/gallery.js'
 
     requirePasscode()
-    document.getElementById('nav').innerHTML = renderNav('Gallery')
+    document.getElementById('nav').innerHTML = renderNav('相册')
+    document.getElementById('footer').innerHTML = renderFooter()
 
     const photos = await loadApprovedPhotos()
     const grid = document.getElementById('photo-grid')
 
     if (photos.length === 0) {
-      grid.innerHTML = '<p class="muted" style="font-style:italic">No photos yet — be the first to share a memory.</p>'
+      grid.innerHTML = '<p class="muted" style="font-style:italic">暂无照片，成为第一个分享的人</p>'
     } else {
       photos.forEach(p => {
         const div = document.createElement('div')
@@ -93,17 +95,17 @@
       const caption = document.getElementById('photo-caption').value.trim()
       const status = document.getElementById('upload-status')
       const btn = document.getElementById('upload-btn')
-      if (!file) { status.textContent = 'Please select a photo.'; status.className = 'error'; return }
-      btn.disabled = true; btn.textContent = 'Uploading...'
+      if (!file) { status.textContent = '请选择照片'; status.className = 'error'; return }
+      btn.disabled = true; btn.textContent = '上传中...'
       const ok = await uploadPhoto(file, caption)
-      btn.disabled = false; btn.textContent = 'Upload Photo'
+      btn.disabled = false; btn.textContent = '上传照片'
       if (ok) {
-        status.textContent = 'Uploaded — your photo is pending approval.'
+        status.textContent = '上传成功，待审核后显示'
         status.className = 'success'
         document.getElementById('photo-file').value = ''
         document.getElementById('photo-caption').value = ''
       } else {
-        status.textContent = 'Upload failed. Please try again.'
+        status.textContent = '上传失败，请重试'
         status.className = 'error'
       }
     })

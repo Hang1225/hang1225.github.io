@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home — The Homebar</title>
+  <title>首页 — 二十五</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .hero {
@@ -40,37 +40,34 @@
   <div id="nav"></div>
   <main>
     <div class="hero fade-in">
-      <span class="eyebrow">Welcome</span>
-      <h1 class="hero-title">The Homebar</h1>
-      <p class="hero-tagline">A private gathering, curated with care</p>
+      <span class="eyebrow">欢迎</span>
+      <h1 class="hero-title">二十五</h1>
+      <p class="hero-tagline">精心策划的私人聚会</p>
       <div class="hero-actions">
-        <a href="/menu.html" class="btn btn-solid">View Tonight's Menu</a>
-        <a href="/openbar.html" class="btn">OpenBar</a>
+        <a href="/menu.html" class="btn btn-solid">今晚酒单</a>
+        <a href="/openbar.html" class="btn">开放吧</a>
       </div>
     </div>
 
     <div class="fade-in-2">
-      <span class="eyebrow">About</span>
-      <h2 style="margin-bottom:1rem">Nearly a year of craft</h2>
+      <span class="eyebrow">关于</span>
+      <h2 style="margin-bottom:1rem">近一年的精心打磨</h2>
       <p class="about-text">
-        The Homebar has been a passion project nearly a year in the making — a place where
-        good drinks, good company, and good conversation come together. Every occasion brings
-        a fresh menu, handcrafted with care. Whether you're a first-time guest or a regular,
-        you're always welcome here.
+        二十五是一个近一年的激情项目——一个美酒、挚友与美好对话汇聚的地方。每次聚会都带来全新的精心调制菜单。无论是初次到访还是常客，这里永远欢迎您的到来。
       </p>
 
       <div class="stats fade-in-3">
         <div class="stat">
           <span class="stat-number">1</span>
-          <span class="stat-label">Year Running</span>
+          <span class="stat-label">年</span>
         </div>
         <div class="stat">
           <span class="stat-number">∞</span>
-          <span class="stat-label">Good Times</span>
+          <span class="stat-label">美好时光</span>
         </div>
         <div class="stat">
           <span class="stat-number">◆</span>
-          <span class="stat-label">Private Club</span>
+          <span class="stat-label">私人俱乐部</span>
         </div>
       </div>
     </div>
@@ -79,32 +76,34 @@
 
     <div class="fade-in-4" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
       <a href="/menu.html" class="card" style="text-decoration:none">
-        <span class="eyebrow">Tonight</span>
-        <h3>The Menu</h3>
-        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">See what's being crafted</p>
+        <span class="eyebrow">今晚</span>
+        <h3>酒单</h3>
+        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">查看今晚精选</p>
       </a>
       <a href="/gallery.html" class="card" style="text-decoration:none">
-        <span class="eyebrow">Memories</span>
-        <h3>Gallery</h3>
-        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">Moments from past evenings</p>
+        <span class="eyebrow">回忆</span>
+        <h3>相册</h3>
+        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">往日美好瞬间</p>
       </a>
       <a href="/community.html" class="card" style="text-decoration:none">
-        <span class="eyebrow">Guests</span>
-        <h3>Community</h3>
-        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">What guests have said</p>
+        <span class="eyebrow">宾客</span>
+        <h3>社区</h3>
+        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">宾客的心声</p>
       </a>
       <a href="/openbar.html" class="card" style="text-decoration:none">
-        <span class="eyebrow">Credits</span>
-        <h3>OpenBar</h3>
-        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">Bring a bottle, order a drink</p>
+        <span class="eyebrow">积分</span>
+        <h3>开放吧</h3>
+        <p class="muted" style="margin-top:0.4rem;font-style:italic;font-size:0.95rem">带瓶酒，换一杯</p>
       </a>
     </div>
   </main>
+  <div id="footer"></div>
   <script type="module">
     import { requirePasscode } from './js/auth.js'
-    import { renderNav } from './js/nav.js'
+    import { renderNav, renderFooter } from './js/nav.js'
     requirePasscode()
-    document.getElementById('nav').innerHTML = renderNav('Home')
+    document.getElementById('nav').innerHTML = renderNav('首页')
+    document.getElementById('footer').innerHTML = renderFooter()
   </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Homebar</title>
+  <title>二十五 · ERSHU25</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -45,14 +45,14 @@
 </head>
 <body>
   <div class="gate">
-    <span class="eyebrow">Private — Members Only</span>
-    <h1 class="gate-title">The Homebar</h1>
+    <span class="eyebrow">私人 · 仅限会员</span>
+    <h1 class="gate-title">二十五</h1>
     <p class="gate-subtitle">Est. 2024</p>
     <span class="gate-ornament">◆ ◇ ◆</span>
     <form id="passcode-form">
-      <input type="password" id="passcode" placeholder="Enter passcode" autocomplete="off" required>
-      <button class="btn btn-solid" type="submit">Enter</button>
-      <span id="error" class="error" style="display:none;margin-top:1rem">Incorrect passcode</span>
+      <input type="password" id="passcode" placeholder="输入密码" autocomplete="off" required>
+      <button class="btn btn-solid" type="submit">进入</button>
+      <span id="error" class="error" style="display:none;margin-top:1rem">密码错误</span>
     </form>
   </div>
   <script type="module">
@@ -68,9 +68,12 @@
       else {
         document.getElementById('error').style.display = 'block'
         btn.disabled = false
-        btn.textContent = 'Enter'
+        btn.textContent = '进入'
       }
     })
   </script>
+  <footer style="position:fixed;bottom:0;left:0;right:0;padding:1rem 2rem;display:flex;justify-content:center;gap:2rem;border-top:1px solid var(--border);background:rgba(7,7,15,0.9)">
+    <a href="https://www.facebook.com/ershu.25" target="_blank" rel="noopener" style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.15em;color:var(--muted)">Facebook</a>
+  </footer>
 </body>
 </html>

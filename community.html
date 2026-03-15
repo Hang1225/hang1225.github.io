@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community — The Homebar</title>
+  <title>社区 — 二十五</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .comment-card {
@@ -35,9 +35,9 @@
   <div id="nav"></div>
   <main>
     <div class="page-header fade-in">
-      <span class="eyebrow">Guest Reviews</span>
-      <h1>Community</h1>
-      <p>What our guests have to say</p>
+      <span class="eyebrow">宾客评价</span>
+      <h1>社区</h1>
+      <p>听听宾客怎么说</p>
     </div>
 
     <div id="comments-list" class="fade-in-2"></div>
@@ -45,21 +45,23 @@
     <div class="rule fade-in-3"><span>◆</span></div>
 
     <div class="card fade-in-3">
-      <span class="eyebrow">Leave a Review</span>
-      <h2 style="margin-bottom:1.25rem">Share Your Experience</h2>
-      <input type="text" id="author" placeholder="Your name (optional)">
-      <textarea id="body" rows="4" placeholder="Tell us about your evening…"></textarea>
-      <button class="btn btn-solid" id="submit-btn">Submit Review</button>
+      <span class="eyebrow">留下评价</span>
+      <h2 style="margin-bottom:1.25rem">分享您的体验</h2>
+      <input type="text" id="author" placeholder="您的名字（可选）">
+      <textarea id="body" rows="4" placeholder="告诉我们您的感受…"></textarea>
+      <button class="btn btn-solid" id="submit-btn">提交评价</button>
       <span id="status"></span>
     </div>
   </main>
+  <div id="footer"></div>
   <script type="module">
     import { requirePasscode } from './js/auth.js'
-    import { renderNav } from './js/nav.js'
+    import { renderNav, renderFooter } from './js/nav.js'
     import { loadGeneralComments, submitGeneralComment } from './js/community.js'
 
     requirePasscode()
-    document.getElementById('nav').innerHTML = renderNav('Community')
+    document.getElementById('nav').innerHTML = renderNav('社区')
+    document.getElementById('footer').innerHTML = renderFooter()
 
     function escapeHtml(str) {
       if (!str) return ''
@@ -70,7 +72,7 @@
     const list = document.getElementById('comments-list')
 
     if (comments.length === 0) {
-      list.innerHTML = '<p class="muted" style="font-style:italic">No reviews yet. Be the first to leave one.</p>'
+      list.innerHTML = '<p class="muted" style="font-style:italic">暂无评价，成为第一个留言的人</p>'
     } else {
       comments.forEach(c => {
         const div = document.createElement('div')
@@ -90,14 +92,14 @@
       const author = document.getElementById('author').value.trim()
       const body = document.getElementById('body').value.trim()
       const status = document.getElementById('status')
-      if (!body) { status.textContent = 'Please write something.'; status.className = 'error'; return }
+      if (!body) { status.textContent = '请写下您的感受'; status.className = 'error'; return }
       const ok = await submitGeneralComment(author || null, body)
       if (ok) {
-        status.textContent = 'Thank you — your review is pending approval.'
+        status.textContent = '感谢评价，待审核后显示'
         status.className = 'success'
         document.getElementById('body').value = ''
       } else {
-        status.textContent = 'Something went wrong. Please try again.'
+        status.textContent = '出现错误，请重试'
         status.className = 'error'
       }
     })
