@@ -371,7 +371,8 @@ footer .footer-copy {
   }
   .lang-toggle {
     order: 0;
-    align-self: center;
+    align-self: auto;
+    margin-bottom: 0.85rem;
   }
   /* full-width break between row 1 (brand+toggle) and row 2 (links) */
   nav::after {
