@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — The Homebar</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>Welcome to The Homebar</h1>
+    <div class="card">
+      <p style="line-height:1.8; font-size:1.05rem;">
+        The Homebar has been a passion project nearly a year in the making — a place where good drinks,
+        good company, and good conversation come together. Every occasion brings a fresh menu, handcrafted
+        with care. Whether you're a first-time guest or a regular, you're always welcome here.
+      </p>
+    </div>
+    <div style="display:flex; gap:1rem; margin-top:1.5rem; flex-wrap:wrap;">
+      <a href="/menu.html" class="btn">View the Menu</a>
+      <a href="/openbar.html" class="btn btn-outline">OpenBar</a>
+    </div>
+  </main>
+  <script type="module">
+    import { requirePasscode } from './js/auth.js'
+    import { renderNav } from './js/nav.js'
+    requirePasscode()
+    document.getElementById('nav').innerHTML = renderNav('Home')
+  </script>
+</body>
+</html>
