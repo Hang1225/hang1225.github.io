@@ -90,6 +90,8 @@
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('OpenBar')
 
+    let currentAttendee = null
+
     function escapeHtml(str) {
       if (!str) return ''
       return String(str)
@@ -122,7 +124,27 @@
       document.getElementById('pin').value = ''
     })
 
+    document.getElementById('order-btn').addEventListener('click', async () => {
+      if (!currentAttendee) return
+      const drinkId = document.getElementById('order-drink').value
+      const statusEl = document.getElementById('order-status')
+      if (!drinkId) return
+      const result = await placeOrder(currentAttendee.id, drinkId)
+      if (result.ok) {
+        statusEl.textContent = 'Order placed! Waiting for approval.'
+        statusEl.className = 'success'
+        const newCredits = await refreshAttendeeCredits(currentAttendee.id)
+        if (newCredits !== null) {
+          document.getElementById('credits-display').textContent = `${newCredits} credits`
+        }
+      } else {
+        statusEl.textContent = result.reason
+        statusEl.className = 'error'
+      }
+    })
+
     async function showDashboard(attendee) {
+      currentAttendee = attendee
       document.getElementById('login-section').style.display = 'none'
       document.getElementById('dashboard-section').style.display = 'block'
       document.getElementById('greeting').textContent = `Hey, ${attendee.alias || attendee.username}`
@@ -174,24 +196,6 @@
         })
       }
 
-      // Place order
-      document.getElementById('order-btn').addEventListener('click', async () => {
-        const drinkId = orderSelect.value
-        const statusEl = document.getElementById('order-status')
-        if (!drinkId) return
-        const result = await placeOrder(attendee.id, drinkId)
-        if (result.ok) {
-          statusEl.textContent = 'Order placed! Waiting for approval.'
-          statusEl.className = 'success'
-          const newCredits = await refreshAttendeeCredits(attendee.id)
-          if (newCredits !== null) {
-            document.getElementById('credits-display').textContent = `${newCredits} credits`
-          }
-        } else {
-          statusEl.textContent = result.reason
-          statusEl.className = 'error'
-        }
-      })
     }
   </script>
 </body>
