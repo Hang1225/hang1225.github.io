@@ -334,6 +334,25 @@ footer .footer-copy {
   font-style: italic;
 }
 
+/* ---- LANG TOGGLE ---- */
+.lang-toggle {
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.3rem 0.65rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.lang-toggle:hover {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+}
+
 @media (max-width: 680px) {
   nav { padding: 1rem 1.25rem; gap: 1.5rem; }
   nav a:not(.brand) { font-size: 0.52rem; letter-spacing: 0.14em; }

@@ -84,9 +84,9 @@
   <div id="nav"></div>
   <main>
     <div class="page-header fade-in">
-      <span class="eyebrow">今晚精选</span>
-      <h1>酒单</h1>
-      <p>悬停查看宾客评论</p>
+      <span class="eyebrow" data-zh="今晚精选" data-en="Tonight's Selection">今晚精选</span>
+      <h1 data-zh="酒单" data-en="The Menu">酒单</h1>
+      <p data-zh="悬停查看宾客评论" data-en="Hover a drink to read what guests have said">悬停查看宾客评论</p>
     </div>
 
     <div id="drinks-grid" class="drinks-grid fade-in-2"></div>
@@ -94,25 +94,27 @@
     <div class="rule fade-in-3"><span>◆</span></div>
 
     <div class="card fade-in-3">
-      <span class="eyebrow">留下您的评论</span>
-      <h2 style="margin-bottom:1.25rem">评论</h2>
-      <input type="text" id="comment-author" placeholder="您的名字（可选）">
-      <label>评论哪款酒？</label>
+      <span class="eyebrow" data-zh="留下您的评论" data-en="Share Your Thoughts">留下您的评论</span>
+      <h2 style="margin-bottom:1.25rem" data-zh="评论" data-en="Leave a Comment">评论</h2>
+      <input type="text" id="comment-author" placeholder="您的名字（可选）" data-placeholder-zh="您的名字（可选）" data-placeholder-en="Your name (optional)">
+      <label data-zh="评论哪款酒？" data-en="Which drink?">评论哪款酒？</label>
       <select id="comment-drink"></select>
-      <textarea id="comment-body" rows="3" placeholder="您觉得这款酒怎么样？"></textarea>
-      <button class="btn btn-solid" id="submit-comment">提交</button>
+      <textarea id="comment-body" rows="3" placeholder="您觉得这款酒怎么样？" data-placeholder-zh="您觉得这款酒怎么样？" data-placeholder-en="What did you think of this drink?"></textarea>
+      <button class="btn btn-solid" id="submit-comment" data-zh="提交" data-en="Submit">提交</button>
       <span id="comment-status"></span>
     </div>
   </main>
   <div id="footer"></div>
   <script type="module">
     import { requirePasscode } from './js/auth.js'
-    import { renderNav, renderFooter } from './js/nav.js'
+    import { renderNav, renderFooter, initLang } from './js/nav.js'
     import { loadDrinks, loadCommentsForDrink, submitComment } from './js/menu.js'
+    import { t } from './js/i18n.js'
 
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('酒单')
     document.getElementById('footer').innerHTML = renderFooter()
+    initLang()
 
     function escapeHtml(str) {
       if (!str) return ''
@@ -124,7 +126,7 @@
     const select = document.getElementById('comment-drink')
 
     if (drinks.length === 0) {
-      grid.innerHTML = '<p class="muted" style="font-style:italic">暂无酒单，敬请期待</p>'
+      grid.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无酒单，敬请期待', 'No menu yet — check back soon.')}</p>`
     }
 
     for (const drink of drinks) {
@@ -133,10 +135,10 @@
       const commentsHtml = comments.length
         ? comments.map(c => `
           <div class="comment-entry">
-            <div class="comment-author">${escapeHtml(c.author_name) || 'Anonymous'}</div>
+            <div class="comment-author">${escapeHtml(c.author_name) || t('匿名', 'Anonymous')}</div>
             <div class="comment-body">${escapeHtml(c.body)}</div>
           </div>`).join('')
-        : '<p class="muted" style="font-style:italic;margin:0">暂无评论</p>'
+        : `<p class="muted" style="font-style:italic;margin:0">${t('暂无评论', 'No comments yet')}</p>`
 
       const card = document.createElement('div')
       card.className = 'card drink-card'
@@ -159,15 +161,15 @@
       const drinkId = document.getElementById('comment-drink').value
       const body = document.getElementById('comment-body').value.trim()
       const status = document.getElementById('comment-status')
-      if (!body) { status.textContent = '请写下您的评论'; status.className = 'error'; return }
-      if (!drinkId) { status.textContent = '暂无饮品'; status.className = 'error'; return }
+      if (!body) { status.textContent = t('请写下您的评论', 'Please write a comment.'); status.className = 'error'; return }
+      if (!drinkId) { status.textContent = t('暂无饮品', 'No drinks available.'); status.className = 'error'; return }
       const ok = await submitComment(drinkId, author || null, body)
       if (ok) {
-        status.textContent = '感谢评论，待审核后显示'
+        status.textContent = t('感谢评论，待审核后显示', 'Thank you — your comment is pending approval.')
         status.className = 'success'
         document.getElementById('comment-body').value = ''
       } else {
-        status.textContent = '出现错误，请重试'
+        status.textContent = t('出现错误，请重试', 'Something went wrong. Please try again.')
         status.className = 'error'
       }
     })

@@ -1,17 +1,19 @@
+import { applyLang, getLang, setLang } from './i18n.js'
+
 export function renderNav(activePage = '') {
   const pages = [
-    { href: '/home.html', label: '首页' },
-    { href: '/menu.html', label: '酒单' },
-    { href: '/gallery.html', label: '相册' },
-    { href: '/community.html', label: '社区' },
-    { href: '/openbar.html', label: '开放吧' },
+    { href: '/home.html', label: '首页', labelEn: 'Home' },
+    { href: '/menu.html', label: '酒单', labelEn: 'Menu' },
+    { href: '/gallery.html', label: '相册', labelEn: 'Gallery' },
+    { href: '/community.html', label: '社区', labelEn: 'Community' },
+    { href: '/openbar.html', label: 'OpenBar', labelEn: 'OpenBar' },
   ]
 
   const links = pages.map(p =>
-    `<a href="${p.href}"${activePage === p.label ? ' class="active"' : ''}>${p.label}</a>`
+    `<a href="${p.href}"${activePage === p.label || activePage === p.labelEn ? ' class="active"' : ''} data-zh="${p.label}" data-en="${p.labelEn}">${p.label}</a>`
   ).join('')
 
-  return `<nav><a href="/home.html" class="brand">二十五</a>${links}</nav>`
+  return `<nav><a href="/home.html" class="brand">二十五</a>${links}<button id="lang-toggle" class="lang-toggle">EN</button></nav>`
 }
 
 export function renderFooter() {
@@ -21,7 +23,14 @@ export function renderFooter() {
       <div class="footer-links">
         <a href="https://www.facebook.com/ershu.25" target="_blank" rel="noopener">Facebook</a>
       </div>
-      <span class="footer-copy">私人家庭酒吧</span>
+      <span class="footer-copy" data-zh="私人家庭酒吧" data-en="A Private Homebar">私人家庭酒吧</span>
     </footer>
   `
+}
+
+export function initLang() {
+  applyLang()
+  document.getElementById('lang-toggle')?.addEventListener('click', () => {
+    setLang(getLang() === 'zh' ? 'en' : 'zh')
+  })
 }

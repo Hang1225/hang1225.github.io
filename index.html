@@ -44,19 +44,28 @@
   </style>
 </head>
 <body>
+  <button id="lang-toggle" class="lang-toggle" style="position:fixed;top:1rem;right:1.5rem;z-index:10">EN</button>
   <div class="gate">
-    <span class="eyebrow">私人 · 仅限会员</span>
+    <span class="eyebrow" data-zh="私人 · 仅限会员" data-en="Private · Members Only">私人 · 仅限会员</span>
     <h1 class="gate-title">二十五</h1>
     <p class="gate-subtitle">Est. 2024</p>
     <span class="gate-ornament">◆ ◇ ◆</span>
     <form id="passcode-form">
-      <input type="password" id="passcode" placeholder="输入密码" autocomplete="off" required>
-      <button class="btn btn-solid" type="submit">进入</button>
-      <span id="error" class="error" style="display:none;margin-top:1rem">密码错误</span>
+      <input type="password" id="passcode" placeholder="输入密码" data-placeholder-zh="输入密码" data-placeholder-en="Enter passcode" autocomplete="off" required>
+      <button class="btn btn-solid" type="submit" data-zh="进入" data-en="Enter">进入</button>
+      <span id="error" class="error" style="display:none;margin-top:1rem" data-zh="密码错误" data-en="Incorrect passcode">密码错误</span>
     </form>
   </div>
   <script type="module">
     import { isPasscodeVerified, verifyPasscode, setPasscodeVerified } from './js/auth.js'
+    import { applyLang, getLang, setLang } from './js/i18n.js'
+
+    // Apply lang on load
+    applyLang()
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      setLang(getLang() === 'zh' ? 'en' : 'zh')
+    })
+
     if (isPasscodeVerified()) window.location.href = '/home.html'
     document.getElementById('passcode-form').addEventListener('submit', async (e) => {
       e.preventDefault()
@@ -68,7 +77,7 @@
       else {
         document.getElementById('error').style.display = 'block'
         btn.disabled = false
-        btn.textContent = '进入'
+        btn.textContent = getLang() === 'zh' ? '进入' : 'Enter'
       }
     })
   </script>

@@ -161,7 +161,7 @@
   <div id="footer"></div>
   <script type="module">
     import { requirePasscode, loginAttendee, getAttendeeSession, logoutAttendee, setPin, hashPin } from './js/auth.js'
-    import { renderNav, renderFooter } from './js/nav.js'
+    import { renderNav, renderFooter, initLang } from './js/nav.js'
     import { loadWishlist, loadAttendeeOrders, placeOrder, refreshAttendeeCredits } from './js/openbar.js'
     import { loadDrinks } from './js/menu.js'
     import { supabase } from './js/supabase-client.js'
@@ -169,6 +169,7 @@
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('开放吧')
     document.getElementById('footer').innerHTML = renderFooter()
+    initLang()
 
     function escapeHtml(str) {
       if (!str) return ''

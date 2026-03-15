@@ -35,9 +35,9 @@
   <div id="nav"></div>
   <main>
     <div class="page-header fade-in">
-      <span class="eyebrow">宾客评价</span>
-      <h1>社区</h1>
-      <p>听听宾客怎么说</p>
+      <span class="eyebrow" data-zh="宾客评价" data-en="Guest Reviews">宾客评价</span>
+      <h1 data-zh="社区" data-en="Community">社区</h1>
+      <p data-zh="听听宾客怎么说" data-en="What our guests have to say">听听宾客怎么说</p>
     </div>
 
     <div id="comments-list" class="fade-in-2"></div>
@@ -45,23 +45,25 @@
     <div class="rule fade-in-3"><span>◆</span></div>
 
     <div class="card fade-in-3">
-      <span class="eyebrow">留下评价</span>
-      <h2 style="margin-bottom:1.25rem">分享您的体验</h2>
-      <input type="text" id="author" placeholder="您的名字（可选）">
-      <textarea id="body" rows="4" placeholder="告诉我们您的感受…"></textarea>
-      <button class="btn btn-solid" id="submit-btn">提交评价</button>
+      <span class="eyebrow" data-zh="留下评价" data-en="Leave a Review">留下评价</span>
+      <h2 style="margin-bottom:1.25rem" data-zh="分享您的体验" data-en="Share Your Experience">分享您的体验</h2>
+      <input type="text" id="author" placeholder="您的名字（可选）" data-placeholder-zh="您的名字（可选）" data-placeholder-en="Your name (optional)">
+      <textarea id="body" rows="4" placeholder="告诉我们您的感受…" data-placeholder-zh="告诉我们您的感受…" data-placeholder-en="Tell us about your evening…"></textarea>
+      <button class="btn btn-solid" id="submit-btn" data-zh="提交评价" data-en="Submit Review">提交评价</button>
       <span id="status"></span>
     </div>
   </main>
   <div id="footer"></div>
   <script type="module">
     import { requirePasscode } from './js/auth.js'
-    import { renderNav, renderFooter } from './js/nav.js'
+    import { renderNav, renderFooter, initLang } from './js/nav.js'
     import { loadGeneralComments, submitGeneralComment } from './js/community.js'
+    import { t } from './js/i18n.js'
 
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('社区')
     document.getElementById('footer').innerHTML = renderFooter()
+    initLang()
 
     function escapeHtml(str) {
       if (!str) return ''
@@ -72,14 +74,14 @@
     const list = document.getElementById('comments-list')
 
     if (comments.length === 0) {
-      list.innerHTML = '<p class="muted" style="font-style:italic">暂无评价，成为第一个留言的人</p>'
+      list.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无评价，成为第一个留言的人', 'No reviews yet. Be the first to leave one.')}</p>`
     } else {
       comments.forEach(c => {
         const div = document.createElement('div')
         div.className = 'comment-card'
         div.innerHTML = `
           <div class="comment-meta">
-            <span class="comment-name">${escapeHtml(c.author_name) || 'Anonymous'}</span>
+            <span class="comment-name">${escapeHtml(c.author_name) || t('匿名', 'Anonymous')}</span>
             <span class="comment-date">${new Date(c.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</span>
           </div>
           <p class="comment-text">${escapeHtml(c.body)}</p>
@@ -92,14 +94,14 @@
       const author = document.getElementById('author').value.trim()
       const body = document.getElementById('body').value.trim()
       const status = document.getElementById('status')
-      if (!body) { status.textContent = '请写下您的感受'; status.className = 'error'; return }
+      if (!body) { status.textContent = t('请写下您的感受', 'Please write something.'); status.className = 'error'; return }
       const ok = await submitGeneralComment(author || null, body)
       if (ok) {
-        status.textContent = '感谢评价，待审核后显示'
+        status.textContent = t('感谢评价，待审核后显示', 'Thank you — your review is pending approval.')
         status.className = 'success'
         document.getElementById('body').value = ''
       } else {
-        status.textContent = '出现错误，请重试'
+        status.textContent = t('出现错误，请重试', 'Something went wrong. Please try again.')
         status.className = 'error'
       }
     })
