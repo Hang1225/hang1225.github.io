@@ -51,3 +51,13 @@ export function requirePasscode() {
     window.location.href = '/index.html'
   }
 }
+
+export async function setPin(username, newPin) {
+  const pin_hash = await hashPin(newPin)
+  const { error } = await supabase
+    .from('attendees')
+    .update({ pin_hash })
+    .eq('username', username.toLowerCase())
+    .eq('pin_hash', '')  // only works if pin is currently blank
+  return !error
+}

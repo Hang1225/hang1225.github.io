@@ -51,6 +51,15 @@
         <button class="btn" id="login-btn" style="width:100%">Log In</button>
         <p id="login-error" class="error" style="display:none">Username or PIN incorrect</p>
       </div>
+      <div id="pin-setup-card" class="card" style="display:none;margin-top:1rem">
+        <h3 style="margin-bottom:0.75rem">Set Your PIN</h3>
+        <p class="muted" style="margin-bottom:1rem">First time? Set a PIN to secure your account.</p>
+        <input type="hidden" id="setup-username">
+        <input type="password" id="setup-pin" placeholder="Choose a PIN (min 4 characters)" autocomplete="new-password">
+        <input type="password" id="setup-pin-confirm" placeholder="Confirm PIN" autocomplete="new-password">
+        <button class="btn" id="setup-pin-btn" style="width:100%">Set PIN &amp; Log In</button>
+        <p id="setup-status"></p>
+      </div>
     </div>
 
     <div id="dashboard-section" style="display:none">
@@ -82,7 +91,8 @@
     </div>
   </main>
   <script type="module">
-    import { requirePasscode, loginAttendee, getAttendeeSession, logoutAttendee } from './js/auth.js'
+    import { requirePasscode, loginAttendee, getAttendeeSession, logoutAttendee, setPin } from './js/auth.js'
+    import { supabase } from './js/supabase-client.js'
     import { renderNav } from './js/nav.js'
     import { loadWishlist, loadAttendeeOrders, placeOrder, refreshAttendeeCredits } from './js/openbar.js'
     import { loadDrinks } from './js/menu.js'
@@ -106,14 +116,61 @@
     if (session) showDashboard(session)
 
     document.getElementById('login-btn').addEventListener('click', async () => {
-      const username = document.getElementById('username').value.trim()
+      const username = document.getElementById('username').value.trim().toLowerCase()
       const pin = document.getElementById('pin').value
-      if (!username || !pin) return
+      if (!username) return
+
+      // Check if attendee exists with blank pin (needs first-time setup)
+      const { data: existing } = await supabase
+        .from('attendees').select('pin_hash').eq('username', username).single()
+
+      if (existing && existing.pin_hash === '') {
+        document.getElementById('setup-username').value = username
+        document.getElementById('pin-setup-card').style.display = 'block'
+        document.getElementById('login-error').style.display = 'none'
+        return
+      }
+
+      if (!pin) return
       const attendee = await loginAttendee(username, pin)
       if (attendee) {
         showDashboard(attendee)
       } else {
         document.getElementById('login-error').style.display = 'block'
+      }
+    })
+
+    document.getElementById('setup-pin-btn').addEventListener('click', async () => {
+      const username = document.getElementById('setup-username').value
+      const pin = document.getElementById('setup-pin').value
+      const confirm = document.getElementById('setup-pin-confirm').value
+      const status = document.getElementById('setup-status')
+
+      if (pin.length < 4) {
+        status.textContent = 'PIN must be at least 4 characters'
+        status.className = 'error'
+        return
+      }
+      if (pin !== confirm) {
+        status.textContent = 'PINs do not match'
+        status.className = 'error'
+        return
+      }
+
+      const ok = await setPin(username, pin)
+      if (!ok) {
+        status.textContent = 'Setup failed. Contact the host.'
+        status.className = 'error'
+        return
+      }
+
+      const attendee = await loginAttendee(username, pin)
+      if (attendee) {
+        document.getElementById('pin-setup-card').style.display = 'none'
+        showDashboard(attendee)
+      } else {
+        status.textContent = 'Login failed after setup. Try logging in manually.'
+        status.className = 'error'
       }
     })
 
