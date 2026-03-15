@@ -180,7 +180,7 @@ async function loadPendingPhotos() {
     const card = document.createElement('div')
     card.className = 'pending-photo-card'
     const img = document.createElement('img')
-    img.src = p.url
+    img.src = p.url.startsWith('http') ? p.url : ''
     img.alt = p.caption || 'Pending photo'
     card.appendChild(img)
     if (p.caption) {
@@ -233,7 +233,7 @@ async function loadAttendeesAdmin() {
         <span class="muted"> (${escapeHtml(a.username)})</span>
       </div>
       <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
-        <span class="badge">${a.credits} credits</span>
+        <span class="badge">${escapeHtml(String(a.credits))} credits</span>
         <input type="number" class="add-credit-input" data-id="${escapeHtml(a.id)}" data-current="${a.credits}" min="1" placeholder="Add credits" style="width:110px;margin:0">
         <button class="btn btn-sm" data-id="${escapeHtml(a.id)}" data-action="add-credits">Add</button>
         <button class="btn btn-sm btn-danger" data-id="${escapeHtml(a.id)}" data-action="delete-attendee">Remove</button>
@@ -303,7 +303,7 @@ async function loadPendingOrders() {
       <div>
         <strong>${escapeHtml(o.attendees?.alias || o.attendees?.username)}</strong> ordered <strong>${escapeHtml(o.drinks?.name)}</strong>
         <div class="muted" style="font-size:0.82rem;margin-top:0.25rem">
-          ${new Date(o.created_at).toLocaleString()} · ${o.attendees?.credits ?? 0} credits available
+          ${new Date(o.created_at).toLocaleString()} · ${escapeHtml(String(o.attendees?.credits ?? 0))} credits available
         </div>
       </div>
       <div style="display:flex;gap:0.5rem">
@@ -326,9 +326,17 @@ document.getElementById('pending-orders').addEventListener('click', async (e) =>
 
   if (btn.dataset.action === 'approve-order') {
     const attendeeId = btn.dataset.attendee
-    const currentCredits = parseInt(btn.dataset.credits) || 0
-    await supabase.from('orders').update({ status: 'approved' }).eq('id', id)
-    await supabase.from('attendees').update({ credits: Math.max(0, currentCredits - 1) }).eq('id', attendeeId)
+    // Update order status first
+    const { error: orderError } = await supabase.from('orders').update({ status: 'approved' }).eq('id', id)
+    if (orderError) { alert('Failed to approve order'); return }
+    // Re-fetch current credits before deducting (avoids stale DOM race)
+    const { data: attendeeData } = await supabase
+      .from('attendees').select('credits').eq('id', attendeeId).single()
+    if (attendeeData) {
+      await supabase.from('attendees')
+        .update({ credits: Math.max(0, attendeeData.credits - 1) })
+        .eq('id', attendeeId)
+    }
     loadPendingOrders()
     loadAttendeesAdmin()
   }
