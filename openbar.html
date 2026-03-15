@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenBar — The Homebar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .wishlist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .wishlist-item:last-child { border: none; }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .order-item:last-child { border: none; }
+    .status-pending { color: #e5c07b; }
+    .status-approved { color: #98c379; }
+    .status-rejected { color: #e06c75; }
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.9rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <div id="login-section" style="max-width:420px;margin:0 auto">
+      <h1>OpenBar</h1>
+      <p class="muted" style="margin-bottom:1.5rem">Log in to order drinks and check your credits</p>
+      <div class="card">
+        <input type="text" id="username" placeholder="Username" autocomplete="username">
+        <input type="password" id="pin" placeholder="PIN" autocomplete="current-password">
+        <button class="btn" id="login-btn" style="width:100%">Log In</button>
+        <p id="login-error" class="error" style="display:none">Username or PIN incorrect</p>
+      </div>
+    </div>
+
+    <div id="dashboard-section" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem">
+        <div>
+          <h1 id="greeting" style="margin-bottom:0.4rem"></h1>
+          <span class="badge" id="credits-display">0 credits</span>
+        </div>
+        <button class="btn btn-outline" id="logout-btn">Log out</button>
+      </div>
+
+      <div class="card">
+        <h2>Wishlist — What to Bring</h2>
+        <p class="muted" style="margin-bottom:1rem">Bring these items to earn credits</p>
+        <div id="wishlist-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Order a Drink</h2>
+        <select id="order-drink"></select>
+        <button class="btn" id="order-btn">Place Order</button>
+        <p id="order-status"></p>
+      </div>
+
+      <div class="card">
+        <h2>Order History</h2>
+        <div id="order-history"></div>
+      </div>
+    </div>
+  </main>
+  <script type="module">
+    import { requirePasscode, loginAttendee, getAttendeeSession, logoutAttendee } from './js/auth.js'
+    import { renderNav } from './js/nav.js'
+    import { loadWishlist, loadAttendeeOrders, placeOrder, refreshAttendeeCredits } from './js/openbar.js'
+    import { loadDrinks } from './js/menu.js'
+
+    requirePasscode()
+    document.getElementById('nav').innerHTML = renderNav('OpenBar')
+
+    function escapeHtml(str) {
+      if (!str) return ''
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+    }
+
+    const session = getAttendeeSession()
+    if (session) showDashboard(session)
+
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim()
+      const pin = document.getElementById('pin').value
+      if (!username || !pin) return
+      const attendee = await loginAttendee(username, pin)
+      if (attendee) {
+        showDashboard(attendee)
+      } else {
+        document.getElementById('login-error').style.display = 'block'
+      }
+    })
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      logoutAttendee()
+      document.getElementById('dashboard-section').style.display = 'none'
+      document.getElementById('login-section').style.display = 'block'
+      document.getElementById('pin').value = ''
+    })
+
+    async function showDashboard(attendee) {
+      document.getElementById('login-section').style.display = 'none'
+      document.getElementById('dashboard-section').style.display = 'block'
+      document.getElementById('greeting').textContent = `Hey, ${attendee.alias || attendee.username}`
+      document.getElementById('credits-display').textContent = `${attendee.credits} credits`
+
+      // Wishlist
+      const wishlist = await loadWishlist()
+      const wishlistEl = document.getElementById('wishlist-list')
+      if (wishlist.length === 0) {
+        wishlistEl.innerHTML = '<p class="muted">No wishlist items right now.</p>'
+      } else {
+        wishlist.forEach(w => {
+          const row = document.createElement('div')
+          row.className = 'wishlist-item'
+          row.innerHTML = `<span>${escapeHtml(w.item_name)}</span><span class="badge">${escapeHtml(String(w.credit_value))} credits</span>`
+          wishlistEl.appendChild(row)
+        })
+      }
+
+      // Order drink select
+      const drinks = await loadDrinks()
+      const orderSelect = document.getElementById('order-drink')
+      if (drinks.length === 0) {
+        orderSelect.innerHTML = '<option disabled>No menu yet</option>'
+      } else {
+        drinks.forEach(d => {
+          const opt = document.createElement('option')
+          opt.value = d.id
+          opt.textContent = d.name
+          orderSelect.appendChild(opt)
+        })
+      }
+
+      // Order history
+      const orders = await loadAttendeeOrders(attendee.id)
+      const historyEl = document.getElementById('order-history')
+      if (orders.length === 0) {
+        historyEl.innerHTML = '<p class="muted">No orders yet.</p>'
+      } else {
+        orders.forEach(o => {
+          const row = document.createElement('div')
+          row.className = 'order-item'
+          row.innerHTML = `
+            <span>${escapeHtml(o.drinks?.name || 'Unknown drink')}</span>
+            <span class="status-${escapeHtml(o.status)}">${escapeHtml(o.status)}</span>
+            <span class="muted">${new Date(o.created_at).toLocaleDateString()}</span>
+          `
+          historyEl.appendChild(row)
+        })
+      }
+
+      // Place order
+      document.getElementById('order-btn').addEventListener('click', async () => {
+        const drinkId = orderSelect.value
+        const statusEl = document.getElementById('order-status')
+        if (!drinkId) return
+        const result = await placeOrder(attendee.id, drinkId)
+        if (result.ok) {
+          statusEl.textContent = 'Order placed! Waiting for approval.'
+          statusEl.className = 'success'
+          const newCredits = await refreshAttendeeCredits(attendee.id)
+          if (newCredits !== null) {
+            document.getElementById('credits-display').textContent = `${newCredits} credits`
+          }
+        } else {
+          statusEl.textContent = result.reason
+          statusEl.className = 'error'
+        }
+      })
+    }
+  </script>
+</body>
+</html>
