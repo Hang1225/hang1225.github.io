@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community — The Homebar</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>Community</h1>
+    <p class="muted" style="margin-bottom:1.5rem">What guests have said about The Homebar</p>
+    <div id="comments-list"></div>
+
+    <div class="card" style="margin-top:2rem">
+      <h2>Leave a review</h2>
+      <input type="text" id="author" placeholder="Your name (optional)">
+      <textarea id="body" rows="4" placeholder="Share your experience..."></textarea>
+      <button class="btn" id="submit-btn">Submit (pending approval)</button>
+      <p id="status"></p>
+    </div>
+  </main>
+  <script type="module">
+    import { requirePasscode } from './js/auth.js'
+    import { renderNav } from './js/nav.js'
+    import { loadGeneralComments, submitGeneralComment } from './js/community.js'
+
+    requirePasscode()
+    document.getElementById('nav').innerHTML = renderNav('Community')
+
+    function escapeHtml(str) {
+      if (!str) return ''
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+    }
+
+    const comments = await loadGeneralComments()
+    const list = document.getElementById('comments-list')
+
+    if (comments.length === 0) {
+      list.innerHTML = '<p class="muted">No reviews yet.</p>'
+    } else {
+      comments.forEach(c => {
+        const div = document.createElement('div')
+        div.className = 'card'
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+            <strong>${escapeHtml(c.author_name) || 'Anonymous'}</strong>
+            <span class="muted">${new Date(c.created_at).toLocaleDateString()}</span>
+          </div>
+          <p style="line-height:1.7">${escapeHtml(c.body)}</p>
+        `
+        list.appendChild(div)
+      })
+    }
+
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const author = document.getElementById('author').value.trim()
+      const body = document.getElementById('body').value.trim()
+      const status = document.getElementById('status')
+      if (!body) { status.textContent = 'Please write something.'; status.className = 'error'; return }
+      const ok = await submitGeneralComment(author || null, body)
+      if (ok) {
+        status.textContent = 'Submitted! Your review is pending approval.'
+        status.className = 'success'
+        document.getElementById('body').value = ''
+      } else {
+        status.textContent = 'Something went wrong. Try again.'
+        status.className = 'error'
+      }
+    })
+  </script>
+</body>
+</html>
