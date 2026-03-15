@@ -356,8 +356,47 @@ footer .footer-copy {
 }
 
 @media (max-width: 680px) {
-  nav { padding: 1rem 1.25rem; gap: 1.5rem; }
-  nav a:not(.brand) { font-size: 0.52rem; letter-spacing: 0.14em; }
+  nav {
+    flex-wrap: wrap;
+    padding: 0.85rem 1.25rem 0;
+    gap: 0;
+  }
+  nav .brand {
+    order: 0;
+    flex: 1;
+    margin-right: 0;
+    padding-bottom: 0.85rem;
+  }
+  .lang-toggle {
+    order: 0;
+    align-self: center;
+  }
+  /* full-width break between row 1 (brand+toggle) and row 2 (links) */
+  nav::after {
+    content: '';
+    order: 1;
+    width: calc(100% + 2.5rem);
+    margin-left: -1.25rem;
+    height: 1px;
+    background: var(--border);
+  }
+  nav a:not(.brand) {
+    order: 2;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 0.65rem 0.1rem 0.75rem;
+  }
+
+  footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1.25rem;
+    gap: 0.65rem;
+  }
   main { padding: 2rem 1.25rem; }
   .form-row { grid-template-columns: 1fr; }
 }
