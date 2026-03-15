@@ -250,9 +250,10 @@ document.getElementById('attendees-list').addEventListener('click', async (e) =>
 
   if (btn.dataset.action === 'add-credits') {
     const input = document.querySelector(`.add-credit-input[data-id="${id}"]`)
-    const current = parseInt(input.dataset.current) || 0
     const amount = parseInt(input.value)
     if (isNaN(amount) || amount <= 0) return
+    const { data: att } = await supabase.from('attendees').select('credits').eq('id', id).single()
+    const current = att ? att.credits : 0
     await supabase.from('attendees').update({ credits: current + amount }).eq('id', id)
     loadAttendeesAdmin()
   }
@@ -361,7 +362,7 @@ async function loadWishlistAdmin() {
     row.innerHTML = `
       <div>
         <strong>${escapeHtml(w.item_name)}</strong>
-        <span class="badge" style="margin-left:0.5rem">${w.credit_value} credits</span>
+        <span class="badge" style="margin-left:0.5rem">${escapeHtml(String(w.credit_value))} credits</span>
         ${!w.active ? '<span class="muted" style="margin-left:0.5rem">(inactive)</span>' : ''}
       </div>
       <div style="display:flex;gap:0.5rem">
