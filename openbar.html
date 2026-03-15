@@ -6,181 +6,252 @@
   <title>OpenBar — The Homebar</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .wishlist-item {
+    .auth-container { max-width: 460px; margin: 0 auto; }
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .auth-tab {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.25rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -1px;
+    }
+    .auth-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; animation: fadeUp 0.3s ease both; }
+
+    .dashboard { max-width: 720px; margin: 0 auto; }
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .dashboard-name { font-size: clamp(1.5rem, 4vw, 2.2rem); color: var(--cream); margin-bottom: 0.3rem; }
+    .wishlist-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+    }
+    .wishlist-row:last-child { border: none; }
+    .wishlist-name { color: var(--text); }
+    .order-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0.6rem 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
-    .wishlist-item:last-child { border: none; }
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-    .order-item:last-child { border: none; }
-    .status-pending { color: #e5c07b; }
-    .status-approved { color: #98c379; }
-    .status-rejected { color: #e06c75; }
+    .order-row:last-child { border: none; }
     select {
       width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.6rem 0.9rem;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(201,168,76,0.14);
+      border-radius: 2px;
+      padding: 0.75rem 1rem;
       color: var(--text);
-      font-family: inherit;
-      font-size: 0.95rem;
-      margin-bottom: 0.75rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      margin-bottom: 0.85rem;
+      outline: none;
     }
+    select:focus { border-color: var(--gold-dim, rgba(201,168,76,0.35)); }
   </style>
 </head>
 <body>
   <div id="nav"></div>
   <main>
-    <div id="login-section" style="max-width:420px;margin:0 auto">
-      <h1>OpenBar</h1>
-      <p class="muted" style="margin-bottom:1.5rem">Log in to order drinks and check your credits</p>
-      <div class="card">
-        <input type="text" id="username" placeholder="Username" autocomplete="username">
-        <input type="password" id="pin" placeholder="PIN" autocomplete="current-password">
-        <button class="btn" id="login-btn" style="width:100%">Log In</button>
-        <p id="login-error" class="error" style="display:none">Username or PIN incorrect</p>
+    <!-- AUTH SECTION (login or signup) -->
+    <div id="auth-section">
+      <div class="page-header fade-in">
+        <span class="eyebrow">Credit System</span>
+        <h1>OpenBar</h1>
+        <p>Bring a bottle, earn credits, order drinks</p>
       </div>
-      <div id="pin-setup-card" class="card" style="display:none;margin-top:1rem">
-        <h3 style="margin-bottom:0.75rem">Set Your PIN</h3>
-        <p class="muted" style="margin-bottom:1rem">First time? Set a PIN to secure your account.</p>
-        <input type="hidden" id="setup-username">
-        <input type="password" id="setup-pin" placeholder="Choose a PIN (min 4 characters)" autocomplete="new-password">
-        <input type="password" id="setup-pin-confirm" placeholder="Confirm PIN" autocomplete="new-password">
-        <button class="btn" id="setup-pin-btn" style="width:100%">Set PIN &amp; Log In</button>
-        <p id="setup-status"></p>
+
+      <div class="auth-container fade-in-2">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-panel="login">Sign In</button>
+          <button class="auth-tab" data-panel="signup">Join OpenBar</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="auth-panel active" id="panel-login">
+          <div class="card">
+            <input type="text" id="username" placeholder="Username" autocomplete="username">
+            <input type="password" id="pin" placeholder="PIN" autocomplete="current-password">
+            <button class="btn btn-solid" id="login-btn" style="width:100%">Sign In</button>
+            <span id="login-error" class="error" style="display:none">Username or PIN incorrect</span>
+          </div>
+        </div>
+
+        <!-- SIGNUP -->
+        <div class="auth-panel" id="panel-signup">
+          <div class="card">
+            <p style="font-style:italic;color:var(--muted);margin-bottom:1.25rem;font-size:0.95rem">
+              Create your OpenBar account. You'll start with 0 credits — bring a bottle from the wishlist to earn some.
+            </p>
+            <input type="text" id="signup-username" placeholder="Choose a username" autocomplete="username">
+            <input type="password" id="signup-pin" placeholder="Choose a PIN (min 4 characters)" autocomplete="new-password">
+            <input type="password" id="signup-pin-confirm" placeholder="Confirm PIN" autocomplete="new-password">
+            <button class="btn btn-solid" id="signup-btn" style="width:100%">Create Account</button>
+            <span id="signup-status"></span>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- DASHBOARD (shown after login) -->
     <div id="dashboard-section" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem">
-        <div>
-          <h1 id="greeting" style="margin-bottom:0.4rem"></h1>
-          <span class="badge" id="credits-display">0 credits</span>
+      <div class="dashboard">
+        <div class="dashboard-header fade-in">
+          <div>
+            <span class="eyebrow">Welcome back</span>
+            <h1 class="dashboard-name" id="greeting"></h1>
+            <span class="badge" id="credits-display">0 credits</span>
+          </div>
+          <button class="btn btn-sm" id="logout-btn">Sign Out</button>
         </div>
-        <button class="btn btn-outline" id="logout-btn">Log out</button>
-      </div>
 
-      <div class="card">
-        <h2>Wishlist — What to Bring</h2>
-        <p class="muted" style="margin-bottom:1rem">Bring these items to earn credits</p>
-        <div id="wishlist-list"></div>
-      </div>
+        <div class="rule"><span>◆</span></div>
 
-      <div class="card">
-        <h2>Order a Drink</h2>
-        <select id="order-drink"></select>
-        <button class="btn" id="order-btn">Place Order</button>
-        <p id="order-status"></p>
-      </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem">
+          <div class="card fade-in-2">
+            <span class="eyebrow">What to Bring</span>
+            <h2 style="margin-bottom:1rem">Wishlist</h2>
+            <div id="wishlist-list"></div>
+          </div>
 
-      <div class="card">
-        <h2>Order History</h2>
-        <div id="order-history"></div>
+          <div class="card fade-in-3">
+            <span class="eyebrow">Redeem Credits</span>
+            <h2 style="margin-bottom:1rem">Order a Drink</h2>
+            <select id="order-drink"></select>
+            <button class="btn btn-solid" id="order-btn" style="width:100%">Place Order</button>
+            <span id="order-status"></span>
+          </div>
+        </div>
+
+        <div class="card fade-in-4" style="margin-top:1.25rem">
+          <span class="eyebrow">History</span>
+          <h2 style="margin-bottom:1rem">Your Orders</h2>
+          <div id="order-history"></div>
+        </div>
       </div>
     </div>
   </main>
+
   <script type="module">
-    import { requirePasscode, loginAttendee, getAttendeeSession, logoutAttendee, setPin } from './js/auth.js'
-    import { supabase } from './js/supabase-client.js'
+    import { requirePasscode, loginAttendee, getAttendeeSession, logoutAttendee, setPin, hashPin } from './js/auth.js'
     import { renderNav } from './js/nav.js'
     import { loadWishlist, loadAttendeeOrders, placeOrder, refreshAttendeeCredits } from './js/openbar.js'
     import { loadDrinks } from './js/menu.js'
+    import { supabase } from './js/supabase-client.js'
 
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('OpenBar')
 
-    let currentAttendee = null
-
     function escapeHtml(str) {
       if (!str) return ''
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')
     }
 
+    // Auth tabs
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'))
+        document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'))
+        tab.classList.add('active')
+        document.getElementById('panel-' + tab.dataset.panel).classList.add('active')
+      })
+    })
+
+    // Restore session
+    let currentAttendee = null
     const session = getAttendeeSession()
     if (session) showDashboard(session)
 
+    // Login
     document.getElementById('login-btn').addEventListener('click', async () => {
       const username = document.getElementById('username').value.trim().toLowerCase()
       const pin = document.getElementById('pin').value
       if (!username) return
 
-      // Check if attendee exists with blank pin (needs first-time setup)
+      // Check for blank pin (first-time setup via admin-added account)
       const { data: existing } = await supabase
         .from('attendees').select('pin_hash').eq('username', username).single()
-
       if (existing && existing.pin_hash === '') {
-        document.getElementById('setup-username').value = username
-        document.getElementById('pin-setup-card').style.display = 'block'
         document.getElementById('login-error').style.display = 'none'
+        // Prompt them to use signup tab or show inline message
+        const errEl = document.getElementById('login-error')
+        errEl.textContent = 'First time? Set a PIN via Join OpenBar tab.'
+        errEl.style.display = 'block'
         return
       }
 
       if (!pin) return
       const attendee = await loginAttendee(username, pin)
-      if (attendee) {
-        showDashboard(attendee)
-      } else {
-        document.getElementById('login-error').style.display = 'block'
-      }
+      if (attendee) { showDashboard(attendee) }
+      else { document.getElementById('login-error').style.display = 'block' }
     })
 
-    document.getElementById('setup-pin-btn').addEventListener('click', async () => {
-      const username = document.getElementById('setup-username').value
-      const pin = document.getElementById('setup-pin').value
-      const confirm = document.getElementById('setup-pin-confirm').value
-      const status = document.getElementById('setup-status')
+    // Self-signup
+    document.getElementById('signup-btn').addEventListener('click', async () => {
+      const username = document.getElementById('signup-username').value.trim().toLowerCase()
+      const pin = document.getElementById('signup-pin').value
+      const confirm = document.getElementById('signup-pin-confirm').value
+      const status = document.getElementById('signup-status')
 
-      if (pin.length < 4) {
-        status.textContent = 'PIN must be at least 4 characters'
-        status.className = 'error'
-        return
-      }
-      if (pin !== confirm) {
-        status.textContent = 'PINs do not match'
+      if (!username) { status.textContent = 'Please choose a username.'; status.className = 'error'; return }
+      if (pin.length < 4) { status.textContent = 'PIN must be at least 4 characters.'; status.className = 'error'; return }
+      if (pin !== confirm) { status.textContent = 'PINs do not match.'; status.className = 'error'; return }
+
+      const pin_hash = await hashPin(pin)
+      const { error } = await supabase
+        .from('attendees')
+        .insert({ username, pin_hash, credits: 0, alias: null })
+
+      if (error) {
+        status.textContent = error.code === '23505' ? 'That username is already taken.' : 'Signup failed. Please try again.'
         status.className = 'error'
         return
       }
 
-      const ok = await setPin(username, pin)
-      if (!ok) {
-        status.textContent = 'Setup failed. Contact the host.'
-        status.className = 'error'
-        return
-      }
+      status.textContent = 'Account created! Signing you in…'
+      status.className = 'success'
 
       const attendee = await loginAttendee(username, pin)
-      if (attendee) {
-        document.getElementById('pin-setup-card').style.display = 'none'
-        showDashboard(attendee)
-      } else {
-        status.textContent = 'Login failed after setup. Try logging in manually.'
-        status.className = 'error'
-      }
+      if (attendee) showDashboard(attendee)
     })
 
+    // Logout
     document.getElementById('logout-btn').addEventListener('click', () => {
       logoutAttendee()
+      currentAttendee = null
       document.getElementById('dashboard-section').style.display = 'none'
-      document.getElementById('login-section').style.display = 'block'
+      document.getElementById('auth-section').style.display = 'block'
       document.getElementById('pin').value = ''
     })
 
+    // Order button
     document.getElementById('order-btn').addEventListener('click', async () => {
       if (!currentAttendee) return
       const drinkId = document.getElementById('order-drink').value
@@ -188,12 +259,10 @@
       if (!drinkId) return
       const result = await placeOrder(currentAttendee.id, drinkId)
       if (result.ok) {
-        statusEl.textContent = 'Order placed! Waiting for approval.'
+        statusEl.textContent = 'Order placed — waiting for approval.'
         statusEl.className = 'success'
         const newCredits = await refreshAttendeeCredits(currentAttendee.id)
-        if (newCredits !== null) {
-          document.getElementById('credits-display').textContent = `${newCredits} credits`
-        }
+        if (newCredits !== null) document.getElementById('credits-display').textContent = `${newCredits} credits`
       } else {
         statusEl.textContent = result.reason
         statusEl.className = 'error'
@@ -202,21 +271,21 @@
 
     async function showDashboard(attendee) {
       currentAttendee = attendee
-      document.getElementById('login-section').style.display = 'none'
+      document.getElementById('auth-section').style.display = 'none'
       document.getElementById('dashboard-section').style.display = 'block'
-      document.getElementById('greeting').textContent = `Hey, ${attendee.alias || attendee.username}`
+      document.getElementById('greeting').textContent = attendee.alias || attendee.username
       document.getElementById('credits-display').textContent = `${attendee.credits} credits`
 
       // Wishlist
       const wishlist = await loadWishlist()
       const wishlistEl = document.getElementById('wishlist-list')
       if (wishlist.length === 0) {
-        wishlistEl.innerHTML = '<p class="muted">No wishlist items right now.</p>'
+        wishlistEl.innerHTML = '<p class="muted" style="font-style:italic">No wishlist items right now.</p>'
       } else {
         wishlist.forEach(w => {
           const row = document.createElement('div')
-          row.className = 'wishlist-item'
-          row.innerHTML = `<span>${escapeHtml(w.item_name)}</span><span class="badge">${escapeHtml(String(w.credit_value))} credits</span>`
+          row.className = 'wishlist-row'
+          row.innerHTML = `<span class="wishlist-name">${escapeHtml(w.item_name)}</span><span class="badge">${escapeHtml(String(w.credit_value))} cr</span>`
           wishlistEl.appendChild(row)
         })
       }
@@ -224,6 +293,7 @@
       // Order drink select
       const drinks = await loadDrinks()
       const orderSelect = document.getElementById('order-drink')
+      orderSelect.innerHTML = ''
       if (drinks.length === 0) {
         orderSelect.innerHTML = '<option disabled>No menu yet</option>'
       } else {
@@ -239,20 +309,19 @@
       const orders = await loadAttendeeOrders(attendee.id)
       const historyEl = document.getElementById('order-history')
       if (orders.length === 0) {
-        historyEl.innerHTML = '<p class="muted">No orders yet.</p>'
+        historyEl.innerHTML = '<p class="muted" style="font-style:italic">No orders yet.</p>'
       } else {
         orders.forEach(o => {
           const row = document.createElement('div')
-          row.className = 'order-item'
+          row.className = 'order-row'
           row.innerHTML = `
-            <span>${escapeHtml(o.drinks?.name || 'Unknown drink')}</span>
+            <span>${escapeHtml(o.drinks?.name || 'Unknown')}</span>
             <span class="status-${escapeHtml(o.status)}">${escapeHtml(o.status)}</span>
             <span class="muted">${new Date(o.created_at).toLocaleDateString()}</span>
           `
           historyEl.appendChild(row)
         })
       }
-
     }
   </script>
 </body>

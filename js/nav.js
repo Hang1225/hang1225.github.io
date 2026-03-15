@@ -8,8 +8,8 @@ export function renderNav(activePage = '') {
   ]
 
   const links = pages.map(p =>
-    `<a href="${p.href}" ${activePage === p.label ? 'style="color:var(--text)"' : ''}>${p.label}</a>`
+    `<a href="${p.href}"${activePage === p.label ? ' class="active"' : ''}>${p.label}</a>`
   ).join('')
 
-  return `<nav><span class="brand">The Homebar</span>${links}</nav>`
+  return `<nav><a href="/home.html" class="brand">The Homebar</a>${links}</nav>`
 }
