@@ -80,6 +80,16 @@
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('Menu')
 
+    function escapeHtml(str) {
+      if (!str) return ''
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+    }
+
     const drinks = await loadDrinks()
     const grid = document.getElementById('drinks-grid')
     const select = document.getElementById('comment-drink')
@@ -94,17 +104,17 @@
       const commentsHtml = comments.length
         ? comments.map(c => `
             <div class="comment-item">
-              <div class="comment-author">${c.author_name || 'Anonymous'}</div>
-              <div>${c.body}</div>
+              <div class="comment-author">${escapeHtml(c.author_name) || 'Anonymous'}</div>
+              <div>${escapeHtml(c.body)}</div>
             </div>`).join('')
         : '<p class="muted" style="margin:0">No comments yet</p>'
 
       const card = document.createElement('div')
       card.className = 'card drink-card'
       card.innerHTML = `
-        ${drink.photo_url ? `<img src="${drink.photo_url}" alt="${drink.name}">` : ''}
-        <h3>${drink.name}</h3>
-        <p>${drink.description || ''}</p>
+        ${drink.photo_url ? `<img src="${escapeHtml(drink.photo_url)}" alt="${escapeHtml(drink.name)}">` : ''}
+        <h3>${escapeHtml(drink.name)}</h3>
+        <p>${escapeHtml(drink.description)}</p>
         <div class="comments-tooltip">${commentsHtml}</div>
       `
       grid.appendChild(card)
@@ -116,7 +126,7 @@
     }
 
     document.getElementById('submit-comment').addEventListener('click', async () => {
-      const author = document.getElementById('comment-author').value
+      const author = document.getElementById('comment-author').value.trim()
       const drinkId = document.getElementById('comment-drink').value
       const body = document.getElementById('comment-body').value.trim()
       const status = document.getElementById('comment-status')
