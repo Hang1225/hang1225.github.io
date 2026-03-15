@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu — The Homebar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .drinks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .drink-card {
+      position: relative;
+      cursor: pointer;
+    }
+    .drink-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      margin-bottom: 0.75rem;
+    }
+    .drink-card h3 { color: var(--accent); margin-bottom: 0.4rem; }
+    .drink-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+    .comments-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0; right: 0;
+      background: #222;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      z-index: 10;
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .drink-card:hover .comments-tooltip { display: block; }
+    .comment-item { border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+    .comment-item:last-child { border: none; margin: 0; padding: 0; }
+    .comment-author { color: var(--accent); font-size: 0.8rem; margin-bottom: 0.2rem; }
+
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.9rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>Tonight's Menu</h1>
+    <div id="drinks-grid" class="drinks-grid"></div>
+
+    <div class="card" style="margin-top:2rem">
+      <h2>Leave a comment on a drink</h2>
+      <input type="text" id="comment-author" placeholder="Your name (optional)">
+      <select id="comment-drink"></select>
+      <textarea id="comment-body" rows="3" placeholder="What did you think?"></textarea>
+      <button class="btn" id="submit-comment">Submit (pending approval)</button>
+      <p id="comment-status"></p>
+    </div>
+  </main>
+  <script type="module">
+    import { requirePasscode } from './js/auth.js'
+    import { renderNav } from './js/nav.js'
+    import { loadDrinks, loadCommentsForDrink, submitComment } from './js/menu.js'
+
+    requirePasscode()
+    document.getElementById('nav').innerHTML = renderNav('Menu')
+
+    const drinks = await loadDrinks()
+    const grid = document.getElementById('drinks-grid')
+    const select = document.getElementById('comment-drink')
+
+    if (drinks.length === 0) {
+      grid.innerHTML = '<p class="muted">No menu yet — check back soon.</p>'
+    }
+
+    for (const drink of drinks) {
+      const comments = await loadCommentsForDrink(drink.id)
+
+      const commentsHtml = comments.length
+        ? comments.map(c => `
+            <div class="comment-item">
+              <div class="comment-author">${c.author_name || 'Anonymous'}</div>
+              <div>${c.body}</div>
+            </div>`).join('')
+        : '<p class="muted" style="margin:0">No comments yet</p>'
+
+      const card = document.createElement('div')
+      card.className = 'card drink-card'
+      card.innerHTML = `
+        ${drink.photo_url ? `<img src="${drink.photo_url}" alt="${drink.name}">` : ''}
+        <h3>${drink.name}</h3>
+        <p>${drink.description || ''}</p>
+        <div class="comments-tooltip">${commentsHtml}</div>
+      `
+      grid.appendChild(card)
+
+      const option = document.createElement('option')
+      option.value = drink.id
+      option.textContent = drink.name
+      select.appendChild(option)
+    }
+
+    document.getElementById('submit-comment').addEventListener('click', async () => {
+      const author = document.getElementById('comment-author').value
+      const drinkId = document.getElementById('comment-drink').value
+      const body = document.getElementById('comment-body').value.trim()
+      const status = document.getElementById('comment-status')
+      if (!body) { status.textContent = 'Please write a comment.'; status.className = 'error'; return }
+      if (!drinkId) { status.textContent = 'No drinks available.'; status.className = 'error'; return }
+      const ok = await submitComment(drinkId, author, body)
+      if (ok) {
+        status.textContent = 'Submitted! Your comment is pending approval.'
+        status.className = 'success'
+        document.getElementById('comment-body').value = ''
+      } else {
+        status.textContent = 'Something went wrong. Try again.'
+        status.className = 'error'
+      }
+    })
+  </script>
+</body>
+</html>
