@@ -48,6 +48,7 @@ function showAdmin() {
   loadAttendeesAdmin()
   loadPendingOrders()
   loadWishlistAdmin()
+  loadSignupsAdmin()
 }
 
 // --- MENU ---
@@ -407,6 +408,51 @@ document.getElementById('add-wishlist-btn').addEventListener('click', async () =
   document.getElementById('wishlist-name').value = ''
   document.getElementById('wishlist-credits').value = ''
   loadWishlistAdmin()
+})
+
+// --- SIGNUPS ---
+async function loadSignupsAdmin() {
+  const { data } = await supabase.from('attendees').select('*').order('created_at', { ascending: false })
+  const el = document.getElementById('signups-list')
+  if (!data || data.length === 0) {
+    el.innerHTML = '<p class="muted">No attendees yet.</p>'
+    return
+  }
+  el.innerHTML = ''
+  data.forEach(a => {
+    const row = document.createElement('div')
+    row.className = 'card item-row'
+    row.innerHTML = `
+      <div>
+        <strong>${escapeHtml(a.alias || a.username)}</strong>
+        <span class="muted"> @${escapeHtml(a.username)}</span>
+        <div class="muted" style="font-size:0.8rem;margin-top:0.2rem">${new Date(a.created_at).toLocaleDateString()}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+        <span class="badge">${escapeHtml(String(a.credits))} credits</span>
+        <input type="number" class="signup-credit-input" data-id="${escapeHtml(a.id)}" min="1" placeholder="Add credits" style="width:110px;margin:0">
+        <button class="btn btn-sm" data-id="${escapeHtml(a.id)}" data-action="signup-add-credits">Add</button>
+      </div>
+    `
+    el.appendChild(row)
+  })
+}
+
+document.getElementById('signups-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-action]')
+  if (!btn) return
+  const id = btn.dataset.id
+
+  if (btn.dataset.action === 'signup-add-credits') {
+    const input = document.querySelector(`.signup-credit-input[data-id="${id}"]`)
+    const amount = parseInt(input.value)
+    if (isNaN(amount) || amount <= 0) return
+    const { data: att } = await supabase.from('attendees').select('credits').eq('id', id).single()
+    const current = att ? att.credits : 0
+    await supabase.from('attendees').update({ credits: current + amount }).eq('id', id)
+    loadSignupsAdmin()
+    loadAttendeesAdmin()
+  }
 })
 
 // --- SETTINGS ---
