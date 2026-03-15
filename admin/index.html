@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — The Homebar</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .admin-login { max-width: 360px; margin: 4rem auto; }
+    .tab-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
+    .tab-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: var(--radius); padding: 0.4rem 0.9rem; cursor: pointer; font-family: inherit; font-size: 0.9rem; }
+    .tab-btn.active { border-color: var(--accent); color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid var(--border); gap: 0.75rem; flex-wrap: wrap; }
+    .item-row:last-child { border: none; }
+    .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+    .btn-danger { background: #e06c75; color: #fff; }
+    .btn-approve { background: #98c379; color: #0d0d0d; }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.3rem; margin-top: 0.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .pending-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .pending-photo-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; }
+    .pending-photo-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 4px; display: block; margin-bottom: 0.5rem; }
+    input[type="number"] { width: auto; }
+  </style>
+</head>
+<body>
+
+<div id="login-view">
+  <div class="admin-login">
+    <h1 style="text-align:center;margin-bottom:1.5rem">Admin</h1>
+    <input type="email" id="admin-email" placeholder="Email" autocomplete="email">
+    <input type="password" id="admin-password" placeholder="Password" autocomplete="current-password">
+    <button class="btn" style="width:100%" id="admin-login-btn">Log In</button>
+    <p id="login-err" class="error" style="display:none">Invalid credentials</p>
+  </div>
+</div>
+
+<div id="admin-view" style="display:none">
+  <div style="max-width:960px;margin:0 auto;padding:1.5rem">
+    <div class="admin-header">
+      <h1 style="margin:0">Admin Panel</h1>
+      <button class="btn btn-outline" id="admin-logout-btn">Log out</button>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="menu">Menu</button>
+      <button class="tab-btn" data-tab="comments">Comments</button>
+      <button class="tab-btn" data-tab="gallery">Gallery</button>
+      <button class="tab-btn" data-tab="openbar">OpenBar</button>
+      <button class="tab-btn" data-tab="wishlist">Wishlist</button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- MENU TAB -->
+    <div class="tab-panel active" id="tab-menu">
+      <h2>Menu Management</h2>
+      <div class="card">
+        <h3 style="margin-bottom:0.75rem">Add / Edit Drink</h3>
+        <input type="hidden" id="drink-edit-id">
+        <div class="form-row">
+          <div><label>Name</label><input type="text" id="drink-name" placeholder="e.g. Negroni"></div>
+          <div><label>Description</label><input type="text" id="drink-desc" placeholder="Short description"></div>
+        </div>
+        <label>Photo URL (optional)</label>
+        <input type="text" id="drink-photo" placeholder="https://...">
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
+          <button class="btn" id="save-drink-btn">Save</button>
+          <button class="btn btn-outline" id="clear-drink-btn">Clear</button>
+        </div>
+        <p id="drink-status" style="margin-top:0.5rem"></p>
+      </div>
+      <div id="drinks-list"></div>
+    </div>
+
+    <!-- COMMENTS TAB -->
+    <div class="tab-panel" id="tab-comments">
+      <h2>Pending Comments</h2>
+      <div id="pending-comments"></div>
+    </div>
+
+    <!-- GALLERY TAB -->
+    <div class="tab-panel" id="tab-gallery">
+      <h2>Pending Photos</h2>
+      <div id="pending-photos" class="pending-photo-grid"></div>
+    </div>
+
+    <!-- OPENBAR TAB -->
+    <div class="tab-panel" id="tab-openbar">
+      <h2>Add Attendee</h2>
+      <div class="card">
+        <div class="form-row">
+          <div><label>Username</label><input type="text" id="new-username" placeholder="they choose this"></div>
+          <div><label>Alias (your nickname)</label><input type="text" id="new-alias" placeholder="e.g. Big Mike"></div>
+        </div>
+        <label>Starting Credits</label>
+        <input type="number" id="new-credits" value="0" min="0" style="width:120px">
+        <div style="margin-top:0.75rem">
+          <button class="btn" id="add-attendee-btn">Add Attendee</button>
+        </div>
+        <p id="attendee-status" style="margin-top:0.5rem"></p>
+        <p class="muted" style="margin-top:0.5rem;font-size:0.82rem">Attendee sets their own PIN on first login.</p>
+      </div>
+      <div id="attendees-list" style="margin-top:1.5rem"></div>
+
+      <h2 style="margin-top:2rem">Pending Orders</h2>
+      <div id="pending-orders"></div>
+    </div>
+
+    <!-- WISHLIST TAB -->
+    <div class="tab-panel" id="tab-wishlist">
+      <h2>Wishlist</h2>
+      <div class="card">
+        <div class="form-row">
+          <div><label>Item Name</label><input type="text" id="wishlist-name" placeholder="e.g. Campari"></div>
+          <div><label>Credit Value</label><input type="number" id="wishlist-credits" placeholder="10" min="1" style="width:100%"></div>
+        </div>
+        <button class="btn" style="margin-top:0.5rem" id="add-wishlist-btn">Add Item</button>
+        <p id="wishlist-status" style="margin-top:0.5rem"></p>
+      </div>
+      <div id="wishlist-list" style="margin-top:1rem"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-panel" id="tab-settings">
+      <h2>Settings</h2>
+      <div class="card">
+        <label>Site Passcode</label>
+        <input type="text" id="new-passcode" placeholder="New passcode" style="max-width:300px">
+        <div style="margin-top:0.5rem">
+          <button class="btn" id="save-passcode-btn">Update Passcode</button>
+        </div>
+        <p id="passcode-status" style="margin-top:0.5rem"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/admin-main.js"></script>
+</body>
+</html>
