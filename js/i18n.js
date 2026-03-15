@@ -21,6 +21,8 @@ export function applyLang(lang) {
       ? el.dataset.placeholderZh
       : (el.dataset.placeholderEn || el.dataset.placeholderZh)
   })
+  // Sync lang attribute for CSS targeting
+  document.documentElement.lang = l
   // Toggle button label
   const toggle = document.getElementById('lang-toggle')
   if (toggle) toggle.textContent = l === 'zh' ? 'EN' : '中文'
