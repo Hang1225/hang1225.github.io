@@ -12,13 +12,9 @@ export function setPasscodeVerified() {
 }
 
 export async function verifyPasscode(input) {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('value')
-    .eq('key', 'site_passcode')
-    .single()
+  const { data, error } = await supabase.rpc('verify_passcode', { input })
   if (error) return false
-  return data.value === input
+  return data === true
 }
 
 export async function hashPin(pin) {
