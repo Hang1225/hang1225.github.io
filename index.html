@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome — The Homebar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 2rem;
+    }
+    .gate h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .gate p { color: var(--muted); margin-bottom: 2rem; }
+    .gate form { width: 100%; max-width: 300px; }
+    .gate input { text-align: center; letter-spacing: 0.2em; }
+  </style>
+</head>
+<body>
+  <div class="gate">
+    <h1>The Homebar</h1>
+    <p>Enter the passcode to continue</p>
+    <form id="passcode-form">
+      <input type="password" id="passcode" placeholder="••••••" autocomplete="off" required>
+      <button class="btn" type="submit" style="width:100%">Enter</button>
+      <p id="error" class="error" style="display:none">Incorrect passcode</p>
+    </form>
+  </div>
+  <script type="module">
+    import { isPasscodeVerified, verifyPasscode, setPasscodeVerified } from './js/auth.js'
+
+    if (isPasscodeVerified()) window.location.href = '/home.html'
+
+    document.getElementById('passcode-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const input = document.getElementById('passcode').value
+      const ok = await verifyPasscode(input)
+      if (ok) {
+        setPasscodeVerified()
+        window.location.href = '/home.html'
+      } else {
+        document.getElementById('error').style.display = 'block'
+      }
+    })
+  </script>
+</body>
+</html>
