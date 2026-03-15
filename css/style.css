@@ -101,13 +101,15 @@ nav .brand {
 }
 nav a:not(.brand) {
   font-family: 'Cinzel', serif;
-  font-size: 0.58rem;
+  font-size: 0.65rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
   padding-bottom: 3px;
   border-bottom: 1px solid transparent;
   transition: color 0.2s, border-color 0.2s;
+  min-width: 7em;
+  text-align: center;
 }
 nav a:not(.brand):hover,
 nav a:not(.brand).active {
