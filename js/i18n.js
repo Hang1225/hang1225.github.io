@@ -11,9 +11,25 @@ export function setLang(lang) {
 
 export function applyLang(lang) {
   const l = lang || getLang()
-  // Text content
+  // Text content — for buttons, lock width to the longest translation
   document.querySelectorAll('[data-zh]').forEach(el => {
-    el.textContent = l === 'zh' ? el.dataset.zh : (el.dataset.en || el.dataset.zh)
+    const isBtn = el.classList.contains('btn')
+    if (isBtn) {
+      // Reset width so measurements are natural
+      el.style.width = ''
+      // Measure both languages
+      const orig = el.textContent
+      el.textContent = el.dataset.zh
+      const zhW = el.getBoundingClientRect().width
+      el.textContent = el.dataset.en || el.dataset.zh
+      const enW = el.getBoundingClientRect().width
+      // Lock to the wider of the two
+      el.style.width = Math.ceil(Math.max(zhW, enW)) + 'px'
+      // Set the correct language text
+      el.textContent = l === 'zh' ? el.dataset.zh : (el.dataset.en || el.dataset.zh)
+    } else {
+      el.textContent = l === 'zh' ? el.dataset.zh : (el.dataset.en || el.dataset.zh)
+    }
   })
   // Placeholders
   document.querySelectorAll('[data-placeholder-zh]').forEach(el => {

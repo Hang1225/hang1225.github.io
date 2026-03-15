@@ -187,7 +187,7 @@ main {
   color: var(--bg);
   box-shadow: 0 0 24px rgba(201,168,76,0.22);
 }
-.btn-solid { background: var(--gold); color: var(--bg); }
+.btn-solid { background: var(--gold); color: var(--bg); font-size: 0.78rem; }
 .btn-solid:hover { background: var(--gold-light); border-color: var(--gold-light); color: var(--bg); }
 .btn-sm { padding: 0.45rem 1rem; font-size: 0.58rem; }
 .btn-danger { border-color: var(--red); color: var(--red); }
