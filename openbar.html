@@ -323,7 +323,19 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
         <div class="rule"><span>◆</span></div>
 
-        <div class="card fade-in-2">
+        <div class="card fade-in-2" id="events-dashboard-card">
+          <span class="eyebrow" data-zh="即将举办" data-en="Upcoming Events">即将举办</span>
+          <h2 style="margin-bottom:1.25rem" data-zh="活动预订" data-en="Upcoming Events">活动预订</h2>
+          <div id="events-dashboard-list"></div>
+        </div>
+
+        <div class="card fade-in-3" id="history-card">
+          <span class="eyebrow" data-zh="过往记录" data-en="History">过往记录</span>
+          <h2 style="margin-bottom:1.25rem" data-zh="出席记录" data-en="Attendance History">出席记录</h2>
+          <div id="history-list"></div>
+        </div>
+
+        <div class="card fade-in-4">
           <span class="eyebrow" data-zh="带什么来" data-en="What to Bring">带什么来</span>
           <h2 style="margin-bottom:1rem" data-zh="愿望单" data-en="Wishlist">愿望单</h2>
           <div id="wishlist-list"></div>
@@ -447,6 +459,311 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
     renderPreloginEvents()
 
+    // ---- DASHBOARD EVENTS + HISTORY ----
+
+    async function loadDashboardData() {
+      const today = new Date().toISOString().split('T')[0]
+
+      const [events, attendeeReservations, slotRes, waitRes] = await Promise.all([
+        loadEvents(),
+        loadAttendeeReservations(currentAttendee.id),
+        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed'),
+        supabase.from('reservations').select('id, event_id, created_at').eq('status', 'waitlisted')
+      ])
+
+      // Slot usage by event (all attendees)
+      const slotsByEvent = {}
+      ;(slotRes.data || []).forEach(r => {
+        slotsByEvent[r.event_id] = (slotsByEvent[r.event_id] || 0) + r.guest_count
+      })
+
+      // Waitlist positions by event (sorted by created_at ASC, position = index + 1)
+      const waitlistByEvent = {}
+      ;(waitRes.data || []).forEach(r => {
+        if (!waitlistByEvent[r.event_id]) waitlistByEvent[r.event_id] = []
+        waitlistByEvent[r.event_id].push(r)
+      })
+      Object.values(waitlistByEvent).forEach(arr => arr.sort((a, b) => a.created_at.localeCompare(b.created_at)))
+
+      // This attendee's reservations indexed by event_id
+      const myResByEvent = {}
+      attendeeReservations.forEach(r => { myResByEvent[r.event_id] = r })
+
+      // Split: upcoming events for Events card, past reservations for History card
+      const upcomingEvents = events.filter(e => e.event_date >= today)
+      const historyRows = attendeeReservations
+        .filter(r => r.events && r.events.event_date < today &&
+          ['confirmed', 'removed', 'declined'].includes(r.status))
+        .sort((a, b) => b.events.event_date.localeCompare(a.events.event_date))
+
+      await renderDashboardEvents(upcomingEvents, myResByEvent, slotsByEvent, waitlistByEvent)
+      renderHistory(historyRows)
+    }
+
+    async function renderDashboardEvents(events, myResByEvent, slotsByEvent, waitlistByEvent) {
+      const container = document.getElementById('events-dashboard-list')
+      if (!events.length) {
+        container.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无活动', 'No upcoming events')}</p>`
+        return
+      }
+
+      container.innerHTML = ''
+
+      for (const ev of events) {
+        const myRes = myResByEvent[ev.id] || null
+        const used = slotsByEvent[ev.id] || 0
+        const isCurated = ev.event_type === 'curated'
+
+        // Guest list section (if any show_* flag is set)
+        let guestListHtml = ''
+        if (ev.show_count || ev.show_names || ev.show_gender) {
+          const gl = await loadEventGuestList(ev.id, ev.show_count, ev.show_names, ev.show_gender)
+          if (gl) {
+            let inner = ''
+            if (ev.show_count && gl.count !== null) {
+              const countLabel = `${gl.count} ${t('位确认', 'confirmed')}`
+              inner += `<span class="event-guest-label">${t('出席', "WHO'S COMING")} · ${escapeHtml(countLabel)}</span>`
+            }
+            if ((ev.show_names || ev.show_gender) && gl.guests.length) {
+              const pills = gl.guests.map(g => {
+                const name = escapeHtml(g.name || 'Guest ◆')
+                const gBadge = ev.show_gender ? ` ${renderGenderBadge(g.gender)}` : ''
+                const plus = g.guestCount === 2 ? ` <span class="badge" style="font-size:0.44rem">+1</span>` : ''
+                return `<span class="guest-pill">${name}${gBadge}${plus}</span>`
+              }).join('')
+              inner += `<div class="guest-pills">${pills}</div>`
+            }
+            if (inner) guestListHtml = `<div class="event-guest-list">${inner}</div>`
+          }
+        }
+
+        const row = document.createElement('div')
+        row.className = 'event-row'
+        row.dataset.eventId = ev.id
+        row.dataset.eventType = ev.event_type
+        row.dataset.capacity = ev.capacity
+        row.dataset.used = used
+
+        row.innerHTML = buildEventRowHtml(ev, myRes, used, isCurated, guestListHtml, waitlistByEvent)
+        container.appendChild(row)
+      }
+
+      // Attach all interaction handlers
+      attachEventRowHandlers(container)
+    }
+
+    function buildEventRowHtml(ev, myRes, used, isCurated, guestListHtml, waitlistByEvent) {
+      const dateStr = escapeHtml(formatEventDate(ev.event_date))
+      const titleStr = escapeHtml(ev.title)
+      const curatedBadge = isCurated
+        ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Curated')}</span>`
+        : ''
+
+      // Status / action (right side of header)
+      let statusHtml = ''
+      let metaHtml = ''
+
+      if (!myRes) {
+        // No reservation yet
+        if (isCurated) {
+          statusHtml = `<button class="btn btn-sm interest-btn" data-event-id="${ev.id}" style="border-color:#B89CD8;color:#B89CD8">${t('表达意愿 →', 'Express Interest →')}</button>`
+        } else {
+          const isFull = used >= ev.capacity
+          if (isFull) {
+            statusHtml = `<button class="btn btn-sm reserve-btn" data-event-id="${ev.id}">${t('加入等候 →', 'Join Waitlist →')}</button>`
+          } else {
+            statusHtml = `<button class="btn btn-sm reserve-btn" data-event-id="${ev.id}">${t('预订 →', 'Reserve →')}</button>`
+          }
+        }
+        if (!isCurated) {
+          metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${renderSlotMeter(used, ev.capacity)}</div>`
+        }
+      } else if (myRes.status === 'confirmed') {
+        const guestNote = myRes.guest_count === 2
+          ? `<div style="font-style:italic;color:var(--muted);font-size:0.78rem;margin-top:0.1rem">${t('本人 + 1位宾客', 'Me + 1 guest')}</div>`
+          : ''
+        statusHtml = `<div style="text-align:right;flex-shrink:0"><div class="res-confirmed">✓ ${t('已确认', 'Confirmed')}</div>${guestNote}</div>`
+        const cancelBtn = `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('取消', 'Cancel')}</button>`
+        const slotMeter = isCurated ? '' : renderSlotMeter(used, ev.capacity)
+        const noteHtml = myRes.message ? `<div class="event-note">${t('备注', 'Your note')}: <span>${escapeHtml(myRes.message)}</span></div>` : ''
+        metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${slotMeter}${cancelBtn}</div>${noteHtml}`
+      } else if (myRes.status === 'waitlisted') {
+        const waitQueue = waitlistByEvent[ev.id] || []
+        const waitPos = waitQueue.findIndex(r => r.id === myRes.id) + 1
+        const posLabel = waitPos > 0 ? ` #${waitPos}` : ''
+        statusHtml = `<div style="text-align:right;flex-shrink:0"><div class="res-waitlisted">⏳ ${t('等候中', 'Waitlist')}${posLabel}</div></div>`
+        const cancelBtn = `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('退出等候', 'Leave Waitlist')}</button>`
+        metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${renderSlotMeter(used, ev.capacity)}${cancelBtn}</div>`
+      } else if (myRes.status === 'interested') {
+        statusHtml = `<div style="text-align:right;flex-shrink:0"><div class="res-interested">✦ ${t('已提交意愿', 'Interest Submitted')}</div><div style="font-style:italic;color:var(--muted);font-size:0.78rem;margin-top:0.1rem">${t('等待主持人确认', 'Awaiting host selection')}</div></div>`
+        const cancelBtn = `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('撤回', 'Withdraw')}</button>`
+        const noteHtml = myRes.message ? `<div class="event-note">${t('备注', 'Your note')}: <span>${escapeHtml(myRes.message)}</span></div>` : ''
+        metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${cancelBtn}</div>${noteHtml}`
+      }
+
+      return `
+        <div class="event-row-header">
+          <div>
+            <div class="event-date">${dateStr}</div>
+            <div class="event-title-text">${titleStr}${curatedBadge}</div>
+          </div>
+          ${statusHtml}
+        </div>
+        ${metaHtml}
+        ${guestListHtml}
+        <div class="inline-form" id="form-${ev.id}">
+          ${buildReserveFormHtml(ev, used)}
+        </div>
+      `
+    }
+
+    function buildReserveFormHtml(ev, used) {
+      const isCurated = ev.event_type === 'curated'
+      const available = ev.capacity - used
+      const guestToggle = isCurated ? '' : `
+        <span class="form-sublabel">${t('出席人数', 'GUESTS ATTENDING')}</span>
+        <div class="guest-toggle">
+          <button class="guest-opt active" data-count="1">${t('仅本人', 'Just me')}</button>
+          ${available >= 2 ? `<button class="guest-opt" data-count="2">${t('本人 + 1位宾客', 'Me + 1 guest')}</button>` : ''}
+          <span class="muted" style="font-style:italic;font-size:0.8rem">${available} ${t('位可用', 'seats available')}</span>
+        </div>
+      `
+      const hint = isCurated
+        ? `<p class="form-hint">${t('主持人将审核所有意愿并确认出席名单。', 'The host will review expressions of interest and confirm attendees.')}</p>`
+        : ''
+      const msgLabel = `<span class="form-sublabel">${t('备注', 'NOTE')} <span style="font-style:italic;font-family:'Cormorant Garamond',serif;letter-spacing:0;text-transform:none;font-size:0.9rem;color:var(--muted)"> — ${t('可选', 'optional')}</span></span>`
+      const ctaText = isCurated ? t('提交意愿', 'Submit Interest') : t('确认预订', 'Confirm Reservation')
+      // Curated CTA gets a purple inline style; open CTA gets btn-solid class
+      const ctaExtraAttr = isCurated ? 'style="background:rgba(184,156,216,0.1);border-color:#B89CD8;color:#B89CD8"' : ''
+      const ctaExtraClass = isCurated ? '' : ' btn-solid'
+
+      return `
+        ${guestToggle}
+        ${msgLabel}
+        <textarea class="event-message" placeholder="${t('给主持人留言（可选）', 'Leave a note for the host (optional)')}"></textarea>
+        ${hint}
+        <div style="display:flex;gap:0.5rem">
+          <button ${ctaExtraAttr} class="btn${ctaExtraClass} btn-sm submit-res-btn" data-event-id="${ev.id}" data-event-type="${ev.event_type}">${ctaText}</button>
+          <button class="btn btn-ghost btn-sm cancel-form-btn" data-event-id="${ev.id}">${t('取消', 'Cancel')}</button>
+        </div>
+        <span class="error res-error" style="display:none"></span>
+      `
+    }
+
+    function attachEventRowHandlers(container) {
+      // Show inline reservation/interest form
+      container.querySelectorAll('.reserve-btn, .interest-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const eventId = btn.dataset.eventId
+          document.getElementById('form-' + eventId).style.display = 'block'
+          btn.style.display = 'none'
+        })
+      })
+
+      // Hide form
+      container.querySelectorAll('.cancel-form-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const eventId = btn.dataset.eventId
+          document.getElementById('form-' + eventId).style.display = 'none'
+          const row = btn.closest('.event-row')
+          const showBtn = row.querySelector('.reserve-btn, .interest-btn')
+          if (showBtn) showBtn.style.display = ''
+        })
+      })
+
+      // Guest count toggle (open events)
+      container.querySelectorAll('.guest-toggle').forEach(toggle => {
+        toggle.querySelectorAll('.guest-opt').forEach(opt => {
+          opt.addEventListener('click', () => {
+            toggle.querySelectorAll('.guest-opt').forEach(o => o.classList.remove('active'))
+            opt.classList.add('active')
+          })
+        })
+      })
+
+      // Submit reservation / interest
+      container.querySelectorAll('.submit-res-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const eventId = btn.dataset.eventId
+          const eventType = btn.dataset.eventType
+          const form = document.getElementById('form-' + eventId)
+          const message = form.querySelector('textarea.event-message').value.trim()
+          const errEl = form.querySelector('.res-error')
+          errEl.style.display = 'none'
+          btn.disabled = true
+
+          let guestCount = 1
+          let status = 'interested'
+
+          if (eventType === 'open') {
+            const activeOpt = form.querySelector('.guest-opt.active')
+            guestCount = activeOpt ? parseInt(activeOpt.dataset.count) : 1
+
+            // Determine status: confirmed or waitlisted
+            const row = btn.closest('.event-row')
+            const used = parseInt(row.dataset.used) || 0
+            const capacity = parseInt(row.dataset.capacity) || 6
+            status = (used + guestCount <= capacity) ? 'confirmed' : 'waitlisted'
+          }
+
+          const { error } = await createReservation(
+            eventId, currentAttendee.id, guestCount, message || null, status
+          )
+
+          btn.disabled = false
+          if (error) {
+            errEl.textContent = t('操作失败，请重试', 'Something went wrong. Please try again.')
+            errEl.style.display = 'block'
+            return
+          }
+
+          // Reload dashboard to reflect new reservation
+          await loadDashboardData()
+        })
+      })
+
+      // Cancel / withdraw
+      container.querySelectorAll('.cancel-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true
+          const { error } = await cancelReservation(btn.dataset.resId)
+          btn.disabled = false
+          if (!error) await loadDashboardData()
+        })
+      })
+    }
+
+    function renderHistory(rows) {
+      const container = document.getElementById('history-list')
+      if (!rows.length) {
+        container.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无出席记录', 'No attendance history yet')}</p>`
+        return
+      }
+      container.innerHTML = ''
+      rows.forEach(r => {
+        const ev = r.events
+        const statusMap = {
+          confirmed: { label: t('已出席', 'Attended'), cls: 'badge-green' },
+          removed:   { label: t('缺席', 'No-show'),   cls: 'badge-red'   },
+          declined:  { label: t('未入选', 'Not Selected'), cls: 'badge-muted' }
+        }
+        const { label, cls } = statusMap[r.status] || { label: r.status, cls: 'badge-muted' }
+        const curatedBadge = ev.event_type === 'curated'
+          ? ` <span class="badge badge-curated" style="font-size:0.42rem;vertical-align:middle">Curated</span>`
+          : ''
+        const row = document.createElement('div')
+        row.className = 'history-row'
+        row.innerHTML = `
+          <div>
+            <div class="history-date">${escapeHtml(formatEventDate(ev.event_date))}</div>
+            <div style="color:var(--cream)">${escapeHtml(ev.title)}${curatedBadge}</div>
+          </div>
+          <span class="badge ${cls}">${label}</span>
+        `
+        container.appendChild(row)
+      })
+    }
+
     // Auth tabs
     document.querySelectorAll('.auth-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -530,6 +847,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
     async function showDashboard(attendee) {
       currentAttendee = attendee
+      loadDashboardData()
       document.getElementById('auth-section').style.display = 'none'
       document.getElementById('dashboard-section').style.display = 'block'
       document.getElementById('greeting').textContent = attendee.alias || attendee.username
