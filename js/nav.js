@@ -4,7 +4,6 @@ export function renderNav(activePage = '') {
   const pages = [
     { href: '/home.html', label: '首页', labelEn: 'Home' },
     { href: '/menu.html', label: '酒单', labelEn: 'Menu' },
-    { href: '/gallery.html', label: '相册', labelEn: 'Gallery' },
     { href: '/community.html', label: '社区', labelEn: 'Community' },
     { href: '/openbar.html', label: 'Open Bar', labelEn: 'Open Bar' },
   ]
