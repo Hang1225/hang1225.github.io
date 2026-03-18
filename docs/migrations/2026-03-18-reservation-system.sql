@@ -1,6 +1,7 @@
 -- ============================================================
 -- Migration: Reservation System & Attendance Tracking
 -- Run once in Supabase SQL Editor (Dashboard → SQL Editor)
+-- Prerequisite: attendees table must already exist (created by earlier schema)
 -- ============================================================
 
 -- 1. Events table
