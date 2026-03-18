@@ -51,6 +51,199 @@
     }
     .wishlist-row:last-child { border: none; }
     .wishlist-name { color: var(--text); }
+
+/* ---- EVENTS (pre-login public cards) ---- */
+.event-public-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.35rem;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+.event-public-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.025), transparent 55%);
+  pointer-events: none;
+  border-radius: var(--radius);
+}
+.event-date {
+  font-family: 'Cinzel', serif;
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  margin-bottom: 0.12rem;
+}
+.event-title-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--cream);
+}
+.event-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+  flex-wrap: wrap;
+}
+.slot-meter { display: flex; gap: 3px; align-items: center; }
+.slot-pip {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+}
+.slot-pip.filled { background: var(--gold); border-color: var(--gold); }
+.slot-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-left: 0.3rem;
+}
+.badge-curated {
+  background: rgba(184,156,216,0.12);
+  border: 1px solid rgba(184,156,216,0.3);
+  color: #B89CD8;
+}
+
+/* ---- EVENT ROWS (dashboard Events card) ---- */
+.event-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(201,168,76,0.07);
+}
+.event-row:last-child { border-bottom: none; padding-bottom: 0; }
+.event-row-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.res-confirmed { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.1em; color: var(--green); }
+.res-waitlisted { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.1em; color: #C9A030; }
+.res-interested { font-family: 'Cinzel', serif; font-size: 0.5rem; letter-spacing: 0.1em; color: #B89CD8; }
+.event-note { font-style: italic; color: var(--muted); font-size: 0.83rem; margin-top: 0.45rem; }
+.event-note span { color: var(--text); }
+.btn-ghost { border-color: var(--border); color: var(--muted); background: transparent; }
+.badge-green { background: rgba(106,158,120,0.12); border-color: rgba(106,158,120,0.3); color: var(--green); }
+.badge-red   { background: rgba(192,96,96,0.12);   border-color: rgba(192,96,96,0.3);   color: #c06060; }
+.badge-muted { background: rgba(106,94,74,0.1);    border-color: rgba(106,94,74,0.25);  color: var(--muted); }
+
+/* ---- INLINE RESERVATION FORM ---- */
+.inline-form {
+  display: none;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(201,168,76,0.08);
+}
+.form-sublabel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.guest-toggle { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.65rem; }
+.guest-opt {
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  background: transparent;
+}
+.guest-opt.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.07); }
+textarea.event-message {
+  width: 100%;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(201,168,76,0.14);
+  border-radius: var(--radius);
+  padding: 0.65rem 1rem;
+  color: var(--text);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  resize: vertical;
+  min-height: 68px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+textarea.event-message:focus {
+  border-color: var(--gold-dim);
+  background: rgba(201,168,76,0.04);
+}
+textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
+.form-hint { font-style: italic; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.7rem; }
+
+/* ---- HISTORY ---- */
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(201,168,76,0.07);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.history-row:last-child { border-bottom: none; }
+.history-date {
+  font-family: 'Cinzel', serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 0.1rem;
+}
+
+/* ---- GUEST LIST DISPLAY ---- */
+.event-guest-list {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(201,168,76,0.07);
+}
+.event-guest-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.48rem;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 0.45rem;
+}
+.guest-pills { display: flex; flex-wrap: wrap; gap: 0.2rem; }
+.guest-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.24rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--text);
+}
+.g-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 0.42rem;
+  letter-spacing: 0.06em;
+  padding: 0.08rem 0.32rem;
+  border-radius: 2px;
+  display: inline-block;
+}
+.g-m { background: rgba(100,140,200,0.15); border: 1px solid rgba(100,140,200,0.3); color: #8AABE0; }
+.g-f { background: rgba(200,120,160,0.15); border: 1px solid rgba(200,120,160,0.3); color: #D888B0; }
+.g-nb { background: rgba(140,160,120,0.15); border: 1px solid rgba(140,160,120,0.3); color: #A0BE90; }
+.g-hidden { background: rgba(106,94,74,0.1); border: 1px solid rgba(106,94,74,0.2); color: var(--muted); }
   </style>
 </head>
 <body>
@@ -106,6 +299,15 @@
           </div>
         </div>
       </div>
+
+      <div class="rule fade-in-3"><span>◆</span></div>
+      <div id="events-prelogin" class="fade-in-4">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:0.75rem">
+          <span class="eyebrow" data-zh="即将举办" data-en="Upcoming Events" style="margin-bottom:0">即将举办</span>
+          <span style="font-style:italic;color:var(--muted);font-size:0.88rem" data-zh="登录后预订" data-en="Sign in to reserve">登录后预订</span>
+        </div>
+        <div id="events-prelogin-list"></div>
+      </div>
     </div>
 
     <!-- DASHBOARD (shown after login) -->
@@ -137,6 +339,8 @@
     import { loadWishlist } from './js/openbar.js'
     import { supabase } from './js/supabase-client.js'
     import { t } from './js/i18n.js'
+    import { loadEvents } from './js/events.js'
+    import { createReservation, cancelReservation, loadAttendeeReservations, loadEventGuestList } from './js/reservations.js'
 
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('Open Bar')
@@ -147,6 +351,101 @@
       if (!str) return ''
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')
     }
+
+    // ---- HELPERS ----
+
+    function renderSlotMeter(used, capacity) {
+      const pips = Array.from({ length: capacity }, (_, i) =>
+        `<span class="slot-pip${i < used ? ' filled' : ''}"></span>`
+      ).join('')
+      const available = capacity - used
+      const label = available > 0
+        ? `<span class="slot-label">${available} ${t('位', 'seats left')}</span>`
+        : `<span class="slot-label" style="color:var(--muted)">${t('已满', 'Full')}</span>`
+      return `<span class="slot-meter">${pips}${label}</span>`
+    }
+
+    function renderGenderBadge(gender) {
+      if (!gender) return `<span class="g-badge g-hidden">—</span>`
+      const cls = { male: 'g-m', female: 'g-f', 'non-binary': 'g-nb' }[gender] || 'g-hidden'
+      const label = { male: 'M', female: 'F', 'non-binary': 'NB' }[gender] || '—'
+      return `<span class="g-badge ${cls}">${label}</span>`
+    }
+
+    function formatEventDate(dateStr) {
+      // dateStr is 'YYYY-MM-DD' — append time to avoid timezone shift
+      const d = new Date(dateStr + 'T12:00:00')
+      const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+      return `${days[d.getDay()]} · ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+    }
+
+    // ---- PRE-LOGIN EVENTS ----
+
+    async function renderPreloginEvents() {
+      const today = new Date().toISOString().split('T')[0]
+
+      const [events, slotRes, waitRes] = await Promise.all([
+        loadEvents(),
+        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed'),
+        supabase.from('reservations').select('event_id').eq('status', 'waitlisted')
+      ])
+
+      // Aggregate slot usage and waitlist counts
+      const slotsByEvent = {}
+      ;(slotRes.data || []).forEach(r => {
+        slotsByEvent[r.event_id] = (slotsByEvent[r.event_id] || 0) + r.guest_count
+      })
+      const waitByEvent = {}
+      ;(waitRes.data || []).forEach(r => {
+        waitByEvent[r.event_id] = (waitByEvent[r.event_id] || 0) + 1
+      })
+
+      const upcoming = events.filter(e => e.event_date >= today)
+      const container = document.getElementById('events-prelogin-list')
+
+      if (!upcoming.length) {
+        container.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无即将举办的活动', 'No upcoming events')}</p>`
+        return
+      }
+
+      container.innerHTML = ''
+      upcoming.forEach(ev => {
+        const used = slotsByEvent[ev.id] || 0
+        const waitCount = waitByEvent[ev.id] || 0
+        const isCurated = ev.event_type === 'curated'
+        const isFull = !isCurated && used >= ev.capacity
+
+        let slotHtml = ''
+        let ctaKey = ''
+        if (isCurated) {
+          slotHtml = `<span class="badge badge-curated">${t('策划活动 · 邀请制', 'Curated · By Invitation')}</span>`
+          ctaKey = t('登录后表达意愿', 'Sign In to Express Interest')
+        } else if (isFull) {
+          slotHtml = renderSlotMeter(used, ev.capacity)
+          if (waitCount) slotHtml += ` <span class="badge" style="margin-left:0.3rem">${waitCount} ${t('人等候', 'on waitlist')}</span>`
+          ctaKey = t('登录加入等候', 'Sign In to Join Waitlist')
+        } else {
+          slotHtml = renderSlotMeter(used, ev.capacity)
+          ctaKey = t('登录预订', 'Sign In to Reserve')
+        }
+
+        const card = document.createElement('div')
+        card.className = 'event-public-card'
+        card.innerHTML = `
+          <div>
+            <div class="event-date">${escapeHtml(formatEventDate(ev.event_date))}</div>
+            <div class="event-title-text">${escapeHtml(ev.title)}</div>
+            <div class="event-meta">${slotHtml}</div>
+          </div>
+          <button class="btn btn-sm" style="opacity:0.55;cursor:default;border-color:var(--border);color:var(--muted)">${escapeHtml(ctaKey)}</button>
+        `
+        container.appendChild(card)
+      })
+    }
+
+    renderPreloginEvents()
 
     // Auth tabs
     document.querySelectorAll('.auth-tab').forEach(tab => {
