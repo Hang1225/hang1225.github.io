@@ -22,25 +22,6 @@
     }
     .admin-header h1 { margin: 0; font-size: 1.4rem; }
     .admin-content { max-width: 1000px; margin: 0 auto; padding: 0 2rem 3rem; }
-    .pending-photo-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-    }
-    .pending-photo-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 0.75rem;
-    }
-    .pending-photo-card img {
-      width: 100%;
-      height: 130px;
-      object-fit: cover;
-      border-radius: 2px;
-      display: block;
-      margin-bottom: 0.6rem;
-    }
     .section-title { margin-bottom: 1.5rem; display: flex; align-items: baseline; gap: 1rem; }
     .section-title h2 { margin-bottom: 0; }
     .tab-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
@@ -81,8 +62,6 @@
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="menu">Menu</button>
       <button class="tab-btn" data-tab="comments">Comments</button>
-      <button class="tab-btn" data-tab="gallery">Gallery</button>
-      <button class="tab-btn" data-tab="openbar">OpenBar</button>
       <button class="tab-btn" data-tab="signups">Signups</button>
       <button class="tab-btn" data-tab="wishlist">Wishlist</button>
       <button class="tab-btn" data-tab="settings">Settings</button>
@@ -115,40 +94,23 @@
       <div id="pending-comments"></div>
     </div>
 
-    <!-- GALLERY TAB -->
-    <div class="tab-panel" id="tab-gallery">
-      <h2>Pending Photos</h2>
-      <div id="pending-photos" class="pending-photo-grid"></div>
-    </div>
-
-    <!-- OPENBAR TAB -->
-    <div class="tab-panel" id="tab-openbar">
-      <h2>Add Attendee</h2>
-      <div class="card">
+    <!-- SIGNUPS TAB -->
+    <div class="tab-panel" id="tab-signups">
+      <div class="section-title">
+        <h2>All Attendees</h2>
+      </div>
+      <p class="muted" style="margin-bottom:1.5rem;font-size:0.9rem">Manage attendee accounts. Add new attendees or view existing sign-ups.</p>
+      <div class="card" style="margin-bottom:1.5rem">
         <div class="form-row">
           <div><label>Username</label><input type="text" id="new-username" placeholder="they choose this"></div>
           <div><label>Alias (your nickname)</label><input type="text" id="new-alias" placeholder="e.g. Big Mike"></div>
         </div>
-        <label>Starting Credits</label>
-        <input type="number" id="new-credits" value="0" min="0" style="width:120px">
         <div style="margin-top:0.75rem">
           <button class="btn" id="add-attendee-btn">Add Attendee</button>
         </div>
         <p id="attendee-status" style="margin-top:0.5rem"></p>
         <p class="muted" style="margin-top:0.5rem;font-size:0.82rem">Attendee sets their own PIN on first login.</p>
       </div>
-      <div id="attendees-list" style="margin-top:1.5rem"></div>
-
-      <h2 style="margin-top:2rem">Pending Orders</h2>
-      <div id="pending-orders"></div>
-    </div>
-
-    <!-- SIGNUPS TAB -->
-    <div class="tab-panel" id="tab-signups">
-      <div class="section-title">
-        <h2>All Attendees</h2>
-      </div>
-      <p class="muted" style="margin-bottom:1.5rem;font-size:0.9rem">Guests who signed up directly appear here. You can add credits to any attendee.</p>
       <div id="signups-list"></div>
     </div>
 
