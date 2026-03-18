@@ -42,6 +42,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 function showAdmin() {
   document.getElementById('login-view').style.display = 'none'
   document.getElementById('admin-view').style.display = 'block'
+  loadEventsAdmin()
   loadMenuAdmin()
   loadPendingComments()
   loadWishlistAdmin()
@@ -283,3 +284,222 @@ document.getElementById('save-passcode-btn').addEventListener('click', async () 
   status.className = 'success'
   document.getElementById('new-passcode').value = ''
 })
+
+document.getElementById('create-event-btn').addEventListener('click', async () => {
+  const title    = document.getElementById('event-title').value.trim()
+  const date     = document.getElementById('event-date').value
+  const capacity = parseInt(document.getElementById('event-capacity').value)
+  const type     = document.getElementById('event-type').value
+  const showCount  = document.getElementById('show-count').checked
+  const showNames  = document.getElementById('show-names').checked
+  const showGender = document.getElementById('show-gender').checked
+  const statusEl = document.getElementById('event-create-status')
+
+  if (!title || !date || isNaN(capacity) || capacity < 1) {
+    statusEl.textContent = 'Title, date, and capacity are required.'
+    statusEl.className = 'error'
+    return
+  }
+
+  const { error } = await supabase.from('events').insert({
+    title, event_date: date, capacity, event_type: type,
+    show_count: showCount, show_names: showNames, show_gender: showGender,
+    status: 'open'
+  })
+
+  if (error) {
+    statusEl.textContent = 'Failed to create event.'
+    statusEl.className = 'error'
+    return
+  }
+
+  statusEl.textContent = 'Event created!'
+  statusEl.className = 'success'
+  document.getElementById('event-title').value = ''
+  document.getElementById('event-date').value = ''
+  document.getElementById('event-capacity').value = '6'
+  document.getElementById('event-type').value = 'open'
+  document.getElementById('show-count').checked = false
+  document.getElementById('show-names').checked = false
+  document.getElementById('show-gender').checked = false
+  loadEventsAdmin()
+})
+
+// ============================================================
+// EVENTS TAB
+// ============================================================
+
+async function loadEventsAdmin() {
+  const { data: events } = await supabase
+    .from('events')
+    .select('*, reservations(id, status, guest_count, message, created_at, attendees(username, alias))')
+    .order('event_date', { ascending: false })
+
+  const container = document.getElementById('events-admin-list')
+  if (!events || events.length === 0) {
+    container.innerHTML = '<p class="muted">No events yet.</p>'
+    return
+  }
+
+  container.innerHTML = ''
+  events.forEach(ev => {
+    const block = document.createElement('div')
+    block.className = 'event-block'
+    block.innerHTML = buildEventBlockHtml(ev)
+    container.appendChild(block)
+  })
+
+  attachEventBlockHandlers(container)
+}
+
+function buildEventBlockHtml(ev) {
+  const reservations = ev.reservations || []
+  const confirmed = reservations.filter(r => r.status === 'confirmed')
+  const waitlisted = reservations.filter(r => r.status === 'waitlisted')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  const interested = reservations.filter(r => r.status === 'interested')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+
+  const usedSlots = confirmed.reduce((s, r) => s + r.guest_count, 0)
+  const isCurated = ev.event_type === 'curated'
+  const typeBadge = isCurated
+    ? `<span class="badge" style="border-color:rgba(184,156,216,0.3);color:#B89CD8;font-size:0.7rem">Curated</span>`
+    : `<span class="badge" style="font-size:0.7rem">Open</span>`
+
+  const slotInfo = isCurated
+    ? `${confirmed.length} confirmed`
+    : `${usedSlots} / ${ev.capacity} slots`
+
+  const displayOpts = `
+    <div class="display-opts-inline" style="margin-left:0.5rem">
+      <span style="font-size:0.72rem;color:var(--muted)">Show:</span>
+      <label><input type="checkbox" class="disp-opt" data-event-id="${escapeHtml(ev.id)}" data-field="show_count"${ev.show_count ? ' checked' : ''}> Count</label>
+      <label><input type="checkbox" class="disp-opt" data-event-id="${escapeHtml(ev.id)}" data-field="show_names"${ev.show_names ? ' checked' : ''}> Names</label>
+      <label><input type="checkbox" class="disp-opt" data-event-id="${escapeHtml(ev.id)}" data-field="show_gender"${ev.show_gender ? ' checked' : ''}> Gender</label>
+    </div>`
+
+  const statusBadge = ev.status === 'open'
+    ? `<span class="badge" style="color:var(--green);border-color:rgba(106,158,120,0.3);font-size:0.7rem">Open</span>`
+    : `<span class="badge" style="font-size:0.7rem">${escapeHtml(ev.status)}</span>`
+
+  const toggleLabel = ev.status === 'open' ? 'Close' : 'Reopen'
+
+  // Confirmed section
+  const confirmedRows = confirmed.map(r => {
+    const name = escapeHtml(r.attendees.alias || r.attendees.username)
+    const handle = escapeHtml(r.attendees.username)
+    const plusBadge = r.guest_count === 2 ? `<span class="badge" style="margin-left:0.3rem;font-size:0.65rem">+1</span>` : ''
+    const msg = r.message ? `<div class="attendee-msg">"${escapeHtml(r.message)}"</div>` : `<div class="attendee-msg" style="opacity:0.4">No note</div>`
+    return `
+      <div class="event-attendee-row">
+        <div><strong>${name}</strong> <span class="muted">@${handle}</span>${plusBadge}${msg}</div>
+        <button class="btn btn-sm btn-danger res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="remove">Remove</button>
+      </div>`
+  }).join('')
+
+  // Waitlist section (open events)
+  const waitlistRows = waitlisted.map((r, i) => {
+    const name = escapeHtml(r.attendees.alias || r.attendees.username)
+    const handle = escapeHtml(r.attendees.username)
+    const msg = r.message ? `<div class="attendee-msg">"${escapeHtml(r.message)}"</div>` : `<div class="attendee-msg" style="opacity:0.4">No note</div>`
+    return `
+      <div class="event-attendee-row">
+        <div><strong style="color:var(--muted)">${name}</strong> <span class="muted">@${handle}</span> <span style="font-size:0.75rem;color:#C9A030;margin-left:0.3rem">#${i + 1}</span>${msg}</div>
+        <button class="btn btn-sm btn-danger res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="decline">Decline</button>
+      </div>`
+  }).join('')
+
+  // Interested section (curated events)
+  const interestedRows = interested.map(r => {
+    const name = escapeHtml(r.attendees.alias || r.attendees.username)
+    const handle = escapeHtml(r.attendees.username)
+    const msg = r.message ? `<div class="attendee-msg">"${escapeHtml(r.message)}"</div>` : `<div class="attendee-msg" style="opacity:0.4">No note</div>`
+    return `
+      <div class="event-attendee-row">
+        <div><strong>${name}</strong> <span class="muted">@${handle}</span>${msg}</div>
+        <div style="display:flex;gap:0.4rem;flex-shrink:0">
+          <button class="btn btn-sm btn-approve res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="confirm">Confirm</button>
+          <button class="btn btn-sm btn-danger res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="decline">Decline</button>
+        </div>
+      </div>`
+  }).join('')
+
+  const confirmedSection = confirmedRows
+    ? `<div class="event-section-label">Confirmed${isCurated ? '' : ` — ${usedSlots} slots used`}</div>${confirmedRows}`
+    : `<div class="event-section-label">Confirmed</div><p class="muted" style="font-size:0.85rem;padding:0.3rem 0">None yet.</p>`
+
+  const secondarySection = isCurated
+    ? (interestedRows
+        ? `<div class="event-section-label" style="margin-top:0.5rem">Expressions of Interest</div>${interestedRows}`
+        : `<div class="event-section-label" style="margin-top:0.5rem">Expressions of Interest</div><p class="muted" style="font-size:0.85rem;padding:0.3rem 0">None yet.</p>`)
+    : (waitlistRows
+        ? `<div class="event-section-label" style="margin-top:0.5rem">Waitlist</div>${waitlistRows}`
+        : '')
+
+  return `
+    <div class="event-block-header" data-event-id="${escapeHtml(ev.id)}">
+      <div>
+        <div style="font-size:0.78rem;color:var(--gold);letter-spacing:0.1em;font-family:'Cinzel',serif">${escapeHtml(ev.event_date)}</div>
+        <div style="font-size:1.05rem;color:var(--cream);margin-top:0.1rem">${escapeHtml(ev.title)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+        <span style="font-size:0.78rem;color:var(--muted)">${escapeHtml(slotInfo)}</span>
+        ${typeBadge}
+        ${statusBadge}
+        ${displayOpts}
+        <button class="btn btn-sm toggle-status-btn" data-event-id="${escapeHtml(ev.id)}" data-current="${escapeHtml(ev.status)}">${toggleLabel}</button>
+      </div>
+    </div>
+    <div class="event-block-body" style="display:none">
+      ${confirmedSection}
+      ${secondarySection}
+    </div>
+  `
+}
+
+function attachEventBlockHandlers(container) {
+  // Expand / collapse
+  container.querySelectorAll('.event-block-header').forEach(header => {
+    header.addEventListener('click', e => {
+      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return
+      const body = header.nextElementSibling
+      body.style.display = body.style.display === 'none' ? 'block' : 'none'
+    })
+  })
+
+  // Toggle event status (open ↔ closed)
+  container.querySelectorAll('.toggle-status-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation()
+      const newStatus = btn.dataset.current === 'open' ? 'closed' : 'open'
+      await supabase.from('events').update({ status: newStatus }).eq('id', btn.dataset.eventId)
+      loadEventsAdmin()
+    })
+  })
+
+  // Display option checkboxes (auto-save on change)
+  container.querySelectorAll('.disp-opt').forEach(cb => {
+    cb.addEventListener('change', async e => {
+      e.stopPropagation()
+      const update = { [cb.dataset.field]: cb.checked }
+      await supabase.from('events').update(update).eq('id', cb.dataset.eventId)
+    })
+  })
+
+  // Reservation actions (confirm / decline / remove)
+  container.querySelectorAll('.res-action-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation()
+      const { action, resId } = btn.dataset
+      let newStatus = ''
+      if (action === 'confirm') newStatus = 'confirmed'
+      else if (action === 'decline') newStatus = 'declined'
+      else if (action === 'remove')  newStatus = 'removed'
+
+      if (!newStatus) return
+      btn.disabled = true
+      await supabase.from('reservations').update({ status: newStatus }).eq('id', resId)
+      loadEventsAdmin()
+    })
+  })
+}
