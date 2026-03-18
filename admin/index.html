@@ -37,6 +37,99 @@
     label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.3rem; margin-top: 0.5rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     input[type="number"] { width: auto; }
+    /* ---- EVENTS ADMIN ---- */
+    .event-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    .event-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.1rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+      cursor: pointer;
+    }
+    .event-block-header:hover { background: rgba(201,168,76,0.025); }
+    .event-block-body {
+      border-top: 1px solid var(--border);
+      padding: 0.65rem 1.1rem;
+      background: rgba(0,0,0,0.12);
+    }
+    .event-section-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-style: italic;
+      padding: 0.4rem 0 0.2rem;
+    }
+    .event-attendee-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(201,168,76,0.06);
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .event-attendee-row:last-child { border-bottom: none; }
+    .attendee-msg { font-style: italic; color: var(--muted); font-size: 0.82rem; margin-top: 0.1rem; }
+    .btn-approve { background: rgba(80,160,80,0.15); color: #7ecf7e; border-color: rgba(80,160,80,0.3); }
+    .btn-approve:hover { background: rgba(80,160,80,0.25); }
+    .display-opts-inline {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .display-opts-inline label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0;
+      font-family: inherit;
+      letter-spacing: 0;
+      text-transform: none;
+      cursor: pointer;
+    }
+    /* Gender controls in Signups tab */
+    .gender-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .gender-controls select {
+      font-size: 0.82rem;
+      padding: 0.2rem 0.4rem;
+      width: auto;
+      margin: 0;
+    }
+    .vis-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .vis-opt {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .vis-opt.active {
+      background: rgba(201,168,76,0.1);
+      color: var(--gold);
+    }
   </style>
 </head>
 <body>
@@ -60,11 +153,58 @@
 
   <div class="admin-content">
     <div class="tab-bar">
+      <button class="tab-btn" data-tab="events">Events</button>
       <button class="tab-btn active" data-tab="menu">Menu</button>
       <button class="tab-btn" data-tab="comments">Comments</button>
       <button class="tab-btn" data-tab="signups">Signups</button>
       <button class="tab-btn" data-tab="wishlist">Wishlist</button>
       <button class="tab-btn" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- EVENTS TAB -->
+    <div class="tab-panel" id="tab-events">
+      <h2>Event Management</h2>
+
+      <!-- Create event form -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <h3 style="margin-bottom:0.75rem">Create New Event</h3>
+        <div class="form-row" style="margin-bottom:0.5rem">
+          <div><label>Title</label><input type="text" id="event-title" placeholder="e.g. Spring Opening Night"></div>
+          <div><label>Date</label><input type="date" id="event-date"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:0.5rem">
+          <div>
+            <label>Event Type</label>
+            <select id="event-type">
+              <option value="open">Open — first come, first served</option>
+              <option value="curated">Curated — host selects attendees</option>
+            </select>
+          </div>
+          <div>
+            <label>Capacity</label>
+            <input type="number" id="event-capacity" value="6" min="1" max="99" style="width:100%">
+          </div>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <label>Guest List — show to guests</label>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.25rem">
+            <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.85rem;color:var(--text);margin:0;font-family:inherit;letter-spacing:0;text-transform:none">
+              <input type="checkbox" id="show-count"> Count
+            </label>
+            <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.85rem;color:var(--text);margin:0;font-family:inherit;letter-spacing:0;text-transform:none">
+              <input type="checkbox" id="show-names"> Names
+            </label>
+            <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.85rem;color:var(--text);margin:0;font-family:inherit;letter-spacing:0;text-transform:none">
+              <input type="checkbox" id="show-gender"> Gender
+            </label>
+          </div>
+        </div>
+        <button class="btn" id="create-event-btn">Create Event</button>
+        <p id="event-create-status" style="margin-top:0.5rem"></p>
+      </div>
+
+      <!-- Events list (rendered by JS) -->
+      <div id="events-admin-list"></div>
     </div>
 
     <!-- MENU TAB -->
