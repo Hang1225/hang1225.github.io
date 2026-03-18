@@ -51,30 +51,6 @@
     }
     .wishlist-row:last-child { border: none; }
     .wishlist-name { color: var(--text); }
-    .order-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid rgba(201,168,76,0.08);
-      font-size: 0.95rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .order-row:last-child { border: none; }
-    select {
-      width: 100%;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid rgba(201,168,76,0.14);
-      border-radius: 2px;
-      padding: 0.75rem 1rem;
-      color: var(--text);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      margin-bottom: 0.85rem;
-      outline: none;
-    }
-    select:focus { border-color: var(--gold-dim, rgba(201,168,76,0.35)); }
   </style>
 </head>
 <body>
@@ -83,9 +59,9 @@
     <!-- AUTH SECTION (login or signup) -->
     <div id="auth-section">
       <div class="page-header fade-in">
-        <span class="eyebrow" data-zh="积分系统" data-en="Credits System">积分系统</span>
+        <span class="eyebrow" data-zh="Open Bar" data-en="Open Bar">Open Bar</span>
         <h1>Open Bar</h1>
-        <p data-zh="带瓶酒，赚积分，点饮品" data-en="Bring a bottle, earn credits, order drinks">带瓶酒，赚积分，点饮品</p>
+        <p data-zh="查看愿望单，登录账户" data-en="Browse the wishlist and sign in to your account">查看愿望单，登录账户</p>
       </div>
 
       <div class="auth-container fade-in-2">
@@ -112,9 +88,9 @@
         <div class="auth-panel" id="panel-signup">
           <div class="card">
             <p style="font-style:italic;color:var(--muted);margin-bottom:1.25rem;font-size:0.95rem"
-              data-zh="创建您的Open Bar账户。带一瓶愿望单上的酒来赚取积分。"
-              data-en="Create your Open Bar account. Bring a bottle from the wishlist to earn credits.">
-              创建您的Open Bar账户。带一瓶愿望单上的酒来赚取积分。
+              data-zh="创建账户以查看愿望单。"
+              data-en="Create an account to browse the wishlist.">
+              创建账户以查看愿望单。
             </p>
             <input type="text" id="signup-username"
               data-placeholder-zh="选择用户名" data-placeholder-en="Choose a username"
@@ -139,34 +115,18 @@
           <div>
             <span class="eyebrow" data-zh="欢迎回来" data-en="Welcome Back">欢迎回来</span>
             <h1 class="dashboard-name" id="greeting"></h1>
-            <span class="badge" id="credits-display">0 credits</span>
           </div>
           <button class="btn btn-sm" id="logout-btn" data-zh="退出" data-en="Sign Out">退出</button>
         </div>
 
         <div class="rule"><span>◆</span></div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem">
-          <div class="card fade-in-2">
-            <span class="eyebrow" data-zh="带什么来" data-en="What to Bring">带什么来</span>
-            <h2 style="margin-bottom:1rem" data-zh="愿望单" data-en="Wishlist">愿望单</h2>
-            <div id="wishlist-list"></div>
-          </div>
-
-          <div class="card fade-in-3">
-            <span class="eyebrow" data-zh="兑换积分" data-en="Redeem Credits">兑换积分</span>
-            <h2 style="margin-bottom:1rem" data-zh="点一杯" data-en="Order a Drink">点一杯</h2>
-            <select id="order-drink"></select>
-            <button class="btn btn-solid" id="order-btn" style="width:100%" data-zh="下单" data-en="Place Order">下单</button>
-            <span id="order-status"></span>
-          </div>
+        <div class="card fade-in-2">
+          <span class="eyebrow" data-zh="带什么来" data-en="What to Bring">带什么来</span>
+          <h2 style="margin-bottom:1rem" data-zh="愿望单" data-en="Wishlist">愿望单</h2>
+          <div id="wishlist-list"></div>
         </div>
 
-        <div class="card fade-in-4" style="margin-top:1.25rem">
-          <span class="eyebrow" data-zh="历史" data-en="History">历史</span>
-          <h2 style="margin-bottom:1rem" data-zh="我的订单" data-en="My Orders">我的订单</h2>
-          <div id="order-history"></div>
-        </div>
       </div>
     </div>
   </main>
