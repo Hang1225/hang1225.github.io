@@ -487,7 +487,9 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
       // This attendee's reservations indexed by event_id
       const myResByEvent = {}
-      attendeeReservations.forEach(r => { myResByEvent[r.event_id] = r })
+      attendeeReservations.forEach(r => {
+        if (r.status !== 'cancelled') myResByEvent[r.event_id] = r
+      })
 
       // Split: upcoming events for Events card, past reservations for History card
       const upcomingEvents = events.filter(e => e.event_date >= today)
@@ -747,7 +749,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           removed:   { label: t('缺席', 'No-show'),   cls: 'badge-red'   },
           declined:  { label: t('未入选', 'Not Selected'), cls: 'badge-muted' }
         }
-        const { label, cls } = statusMap[r.status] || { label: r.status, cls: 'badge-muted' }
+        const { label, cls } = statusMap[r.status] || { label: escapeHtml(r.status), cls: 'badge-muted' }
         const curatedBadge = ev.event_type === 'curated'
           ? ` <span class="badge badge-curated" style="font-size:0.42rem;vertical-align:middle">Curated</span>`
           : ''
