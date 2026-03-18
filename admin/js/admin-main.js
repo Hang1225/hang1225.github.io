@@ -251,24 +251,73 @@ document.getElementById('add-wishlist-btn').addEventListener('click', async () =
 
 // --- SIGNUPS ---
 async function loadSignupsAdmin() {
-  const { data } = await supabase.from('attendees').select('*').order('created_at', { ascending: false })
+  const { data } = await supabase
+    .from('attendees')
+    .select('id, username, alias, gender, gender_visibility, created_at')
+    .order('created_at', { ascending: false })
+
   const el = document.getElementById('signups-list')
   if (!data || data.length === 0) {
     el.innerHTML = '<p class="muted">No attendees yet.</p>'
     return
   }
+
   el.innerHTML = ''
   data.forEach(a => {
     const row = document.createElement('div')
-    row.className = 'card item-row'
+    row.className = 'item-row'
+
+    const genderVal = a.gender || ''
+    const visVal    = a.gender_visibility || 'admin_only'
+    // Note: the spec mentions showing a "self-reported vs admin-override" label.
+    // The data model has only one `gender` column — there is no separate self-reported column.
+    // Once the admin changes it, the original value is gone. We show the "(prefers not to say)"
+    // label only when gender is null (the guest's default). This is the maximum precision
+    // the current schema supports.
+    const selfLabel = !a.gender
+      ? `<span class="muted" style="font-size:0.78rem;font-style:italic"> (prefers not to say)</span>`
+      : ''
+
     row.innerHTML = `
       <div>
         <strong>${escapeHtml(a.alias || a.username)}</strong>
-        <span class="muted"> @${escapeHtml(a.username)}</span>
+        <span class="muted"> @${escapeHtml(a.username)}</span>${selfLabel}
         <div class="muted" style="font-size:0.8rem;margin-top:0.2rem">${new Date(a.created_at).toLocaleDateString()}</div>
+      </div>
+      <div class="gender-controls">
+        <select class="gender-select" data-attendee-id="${escapeHtml(a.id)}">
+          <option value=""${genderVal === '' ? ' selected' : ''}>Prefer not to say</option>
+          <option value="male"${genderVal === 'male' ? ' selected' : ''}>Male</option>
+          <option value="female"${genderVal === 'female' ? ' selected' : ''}>Female</option>
+          <option value="non-binary"${genderVal === 'non-binary' ? ' selected' : ''}>Non-binary</option>
+        </select>
+        <div class="vis-toggle">
+          <button class="vis-opt${visVal === 'admin_only' ? ' active' : ''}" data-attendee-id="${escapeHtml(a.id)}" data-vis="admin_only">Admin only</button>
+          <button class="vis-opt${visVal === 'public' ? ' active' : ''}" data-attendee-id="${escapeHtml(a.id)}" data-vis="public">Visible to all</button>
+        </div>
       </div>
     `
     el.appendChild(row)
+  })
+
+  // Gender select: auto-save on change
+  el.querySelectorAll('.gender-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const update = { gender: sel.value || null }
+      await supabase.from('attendees').update(update).eq('id', sel.dataset.attendeeId)
+    })
+  })
+
+  // Visibility toggle: auto-save on click
+  el.querySelectorAll('.vis-opt').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const siblings = btn.closest('.vis-toggle').querySelectorAll('.vis-opt')
+      siblings.forEach(s => s.classList.remove('active'))
+      btn.classList.add('active')
+      await supabase.from('attendees')
+        .update({ gender_visibility: btn.dataset.vis })
+        .eq('id', btn.dataset.attendeeId)
+    })
   })
 }
 
