@@ -28,7 +28,7 @@ export async function loginAttendee(username, pin) {
   const pin_hash = await hashPin(pin)
   const { data, error } = await supabase
     .from('attendees')
-    .select('id, username, alias, credits')
+    .select('id, username, alias, credits, gender, gender_visibility')
     .eq('username', username.toLowerCase())
     .eq('pin_hash', pin_hash)
     .single()
