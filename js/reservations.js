@@ -102,6 +102,7 @@ export async function acceptInvite(reservationId) {
     .from('reservations')
     .update({ status: 'confirmed' })
     .eq('id', reservationId)
+    .eq('status', 'invited')
   return { error }
 }
 
@@ -113,5 +114,5 @@ export async function declineInvite(reservationId, eventId, currentAdminReserved
     supabase.from('reservations').update({ status: 'declined' }).eq('id', reservationId),
     supabase.from('events').update({ admin_reserved: Math.max(0, currentAdminReserved - 1) }).eq('id', eventId)
   ])
-  return { error: resResult.error || eventResult.error }
+  return { error: resResult.error || eventResult.error, eventError: eventResult.error }
 }
