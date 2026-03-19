@@ -351,7 +351,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     import { loadWishlist } from './js/openbar.js'
     import { supabase } from './js/supabase-client.js'
     import { t } from './js/i18n.js'
-    import { loadEvents } from './js/events.js'
+    import { loadEvents, formatTimeRange } from './js/events.js'
     import { createReservation, cancelReservation, loadAttendeeReservations, loadEventGuestList } from './js/reservations.js'
 
     requirePasscode()
@@ -443,11 +443,12 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           ctaKey = t('登录预订', 'Sign In to Reserve')
         }
 
+        const timeRange = formatTimeRange(ev.start_time, ev.end_time)
         const card = document.createElement('div')
         card.className = 'event-public-card'
         card.innerHTML = `
           <div>
-            <div class="event-date">${escapeHtml(formatEventDate(ev.event_date))}</div>
+            <div class="event-date">${escapeHtml(formatEventDate(ev.event_date))}${timeRange ? ' · ' + timeRange : ''}</div>
             <div class="event-title-text">${escapeHtml(ev.title)}</div>
             <div class="event-meta">${slotHtml}</div>
           </div>
@@ -555,7 +556,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     }
 
     function buildEventRowHtml(ev, myRes, used, isCurated, guestListHtml, waitlistByEvent) {
-      const dateStr = escapeHtml(formatEventDate(ev.event_date))
+      const timeRange = formatTimeRange(ev.start_time, ev.end_time)
+      const dateStr = escapeHtml(formatEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
       const titleStr = escapeHtml(ev.title)
       const curatedBadge = isCurated
         ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Curated')}</span>`
