@@ -1,5 +1,6 @@
 import { supabase } from '../../js/supabase-client.js'
 import { adminLogin, adminLogout, getAdminSession } from './admin-auth.js'
+import { formatTimeRange } from '../../js/events.js'
 
 function escapeHtml(str) {
   if (!str) return ''
@@ -10,6 +11,37 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
 }
+
+// Generates <option> elements for a 12-hour hour select.
+// Option values are 24-hour strings ("00"–"23"); labels are "12 AM", "1 AM", … "11 PM"
+function hourOptions(selectedVal = '') {
+  const labels = [
+    '12 AM','1 AM','2 AM','3 AM','4 AM','5 AM',
+    '6 AM','7 AM','8 AM','9 AM','10 AM','11 AM',
+    '12 PM','1 PM','2 PM','3 PM','4 PM','5 PM',
+    '6 PM','7 PM','8 PM','9 PM','10 PM','11 PM'
+  ]
+  return labels.map((label, i) => {
+    const val = String(i).padStart(2, '0')
+    return `<option value="${val}"${val === selectedVal ? ' selected' : ''}>${label}</option>`
+  }).join('')
+}
+
+// Compose "HH:MM:00" from two string values from select elements.
+// Returns null if either is empty (the placeholder option has value "").
+function composeTime(hour, minute) {
+  if (hour === '' || hour == null) return null
+  if (minute === '' || minute == null) return null
+  return `${hour}:${minute}:00`
+}
+
+// Populate hour dropdowns for Create Event form (runs once on page load)
+;['event-start-hour', 'event-end-hour'].forEach(id => {
+  const sel = document.getElementById(id)
+  if (!sel) return
+  const isEnd = id === 'event-end-hour'
+  sel.innerHTML = (isEnd ? '<option value="">Flexible</option>' : '<option value="">Hour</option>') + hourOptions()
+})
 
 // --- Auth ---
 const session = await getAdminSession()
@@ -394,8 +426,17 @@ document.getElementById('create-event-btn').addEventListener('click', async () =
   const showGender = document.getElementById('show-gender').checked
   const statusEl = document.getElementById('event-create-status')
 
-  if (!title || !date || isNaN(capacity) || capacity < 1) {
-    statusEl.textContent = 'Title, date, and capacity are required.'
+  const startHour  = document.getElementById('event-start-hour').value
+  const startMin   = document.getElementById('event-start-min').value
+  const endHour    = document.getElementById('event-end-hour').value
+  const endMin     = document.getElementById('event-end-min').value
+  const start_time = composeTime(startHour, startMin)
+  // end_time: only compose if end hour is selected; if hour is empty, store null.
+  // If hour is selected but minute is blank, composeTime also returns null (silently no end time).
+  const end_time   = endHour ? composeTime(endHour, endMin) : null
+
+  if (!title || !date || isNaN(capacity) || capacity < 1 || !start_time) {
+    statusEl.textContent = 'Title, date, capacity, and start time are required.'
     statusEl.className = 'error'
     return
   }
@@ -403,7 +444,7 @@ document.getElementById('create-event-btn').addEventListener('click', async () =
   const { error } = await supabase.from('events').insert({
     title, event_date: date, capacity, event_type: type,
     show_count: showCount, show_names: showNames, show_gender: showGender,
-    status: 'open'
+    status: 'open', start_time, end_time
   })
 
   if (error) {
@@ -421,6 +462,10 @@ document.getElementById('create-event-btn').addEventListener('click', async () =
   document.getElementById('show-count').checked = false
   document.getElementById('show-names').checked = false
   document.getElementById('show-gender').checked = false
+  document.getElementById('event-start-hour').value = ''
+  document.getElementById('event-start-min').value = ''
+  document.getElementById('event-end-hour').value = ''
+  document.getElementById('event-end-min').value = ''
   loadEventsAdmin()
 })
 
@@ -538,7 +583,9 @@ function buildEventBlockHtml(ev) {
   return `
     <div class="event-block-header" data-event-id="${escapeHtml(ev.id)}">
       <div>
-        <div style="font-size:0.78rem;color:var(--gold);letter-spacing:0.1em;font-family:'Cinzel',serif">${escapeHtml(ev.event_date)}</div>
+        <div style="font-size:0.78rem;color:var(--gold);letter-spacing:0.1em;font-family:'Cinzel',serif">
+          ${escapeHtml(ev.event_date)}${formatTimeRange(ev.start_time, ev.end_time) ? ' · ' + formatTimeRange(ev.start_time, ev.end_time) : ''}
+        </div>
         <div style="font-size:1.05rem;color:var(--cream);margin-top:0.1rem">${escapeHtml(ev.title)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
