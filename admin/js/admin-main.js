@@ -957,6 +957,7 @@ function attachEventBlockHandlers(container) {
       const query = input.value.trim().toLowerCase()
       const allAttendees = window._attendeesCache || []
       const results = allAttendees
+        .filter(a => !a.removed_at)
         .filter(a => !blockedIds.has(a.id))
         .filter(a =>
           !query ||
@@ -1037,15 +1038,21 @@ function attachEventBlockHandlers(container) {
       const resId = btn.dataset.resId
       const resStatus = btn.dataset.resStatus
       const eventId = btn.dataset.eventId
-      const adminReserved = parseInt(btn.dataset.adminReserved) || 0
+      const cachedEv = (window._eventsAdminCache || []).find(e => e.id === eventId)
+      const adminReserved = cachedEv ? (cachedEv.admin_reserved || 0) : (parseInt(btn.dataset.adminReserved) || 0)
       btn.disabled = true
 
       const newStatus = resStatus === 'invited' ? 'declined' : 'removed'
 
-      await Promise.all([
+      const [resResult, eventResult] = await Promise.all([
         supabase.from('reservations').update({ status: newStatus }).eq('id', resId),
         supabase.from('events').update({ admin_reserved: Math.max(0, adminReserved - 1) }).eq('id', eventId)
       ])
+
+      if (resResult.error || eventResult.error) {
+        btn.disabled = false
+        return
+      }
 
       loadEventsAdmin()
     })
