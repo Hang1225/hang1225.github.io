@@ -197,7 +197,7 @@ main {
 .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
 /* ---- INPUTS ---- */
-input:not([type="file"]):not([type="hidden"]),
+input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
 textarea, select {
   width: 100%;
   background: rgba(255,255,255,0.025);
@@ -212,7 +212,7 @@ textarea, select {
   outline: none;
   -webkit-appearance: none;
 }
-input:not([type="file"]):not([type="hidden"]):focus,
+input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):focus,
 textarea:focus, select:focus {
   border-color: var(--gold-dim);
   background: rgba(201,168,76,0.04);
