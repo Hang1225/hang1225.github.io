@@ -492,6 +492,14 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         if (r.status !== 'cancelled') myResByEvent[r.event_id] = r
       })
 
+      // Collect upcoming closed events where this guest has an active reservation
+      const cancelledEvents = attendeeReservations.filter(r =>
+        r.events &&
+        r.events.status === 'closed' &&
+        r.events.event_date >= today &&
+        ['confirmed', 'waitlisted', 'interested'].includes(r.status)
+      )
+
       // Split: upcoming events for Events card, past reservations for History card
       const upcomingEvents = events.filter(e => e.event_date >= today)
       const historyRows = attendeeReservations
@@ -500,6 +508,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         .sort((a, b) => b.events.event_date.localeCompare(a.events.event_date))
 
       await renderDashboardEvents(upcomingEvents, myResByEvent, slotsByEvent, waitlistByEvent)
+      renderCancelledEvents(cancelledEvents)
       renderHistory(historyRows)
     }
 
@@ -734,6 +743,55 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           btn.disabled = false
           if (!error) await loadDashboardData()
         })
+      })
+    }
+
+    function renderCancelledEvents(reservations) {
+      let container = document.getElementById('events-cancelled-list')
+      if (!container) {
+        const card = document.getElementById('events-dashboard-card')
+        const wrapper = document.createElement('div')
+        wrapper.id = 'events-cancelled-wrapper'
+        wrapper.style.marginTop = '1.5rem'
+        wrapper.innerHTML = `
+          <div style="font-family:'Cinzel',serif;font-size:0.52rem;letter-spacing:0.14em;color:var(--muted);margin-bottom:0.75rem">CANCELLED</div>
+          <div id="events-cancelled-list"></div>
+        `
+        card.appendChild(wrapper)
+        container = document.getElementById('events-cancelled-list')
+      }
+
+      const wrapper = document.getElementById('events-cancelled-wrapper')
+
+      if (!reservations.length) {
+        if (wrapper) wrapper.style.display = 'none'
+        return
+      }
+
+      wrapper.style.display = 'block'
+      container.innerHTML = ''
+
+      reservations.forEach(r => {
+        const ev = r.events
+        const timeRange = formatTimeRange(ev.start_time, ev.end_time)
+        const dateStr = escapeHtml(formatEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
+        const isCurated = ev.event_type === 'curated'
+        const typeBadge = isCurated
+          ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Home Bar')}</span>`
+          : ''
+
+        const row = document.createElement('div')
+        row.className = 'event-row'
+        row.innerHTML = `
+          <div class="event-row-header">
+            <div>
+              <div class="event-date">${dateStr}</div>
+              <div class="event-title-text">${escapeHtml(ev.title)}${typeBadge}</div>
+            </div>
+            <span class="badge badge-red" style="font-size:0.5rem;align-self:flex-start">${t('已取消', 'Cancelled')}</span>
+          </div>
+        `
+        container.appendChild(row)
       })
     }
 
