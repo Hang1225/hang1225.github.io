@@ -30,19 +30,27 @@ Nullable, no default. Not included in any guest-facing query.
 
 ### Attendees Tab
 
-- Each attendee row gets an inline editable nickname field rendered below the name/username line
-- Input: `<input type="text" class="nickname-input">`, placeholder `"Add nickname…"`
+- Each attendee row gets an always-visible inline text field rendered below the name/username line
+- Input: `<input type="text" class="nickname-input" data-attendee-id="${a.id}">`, placeholder `"Add nickname…"`
 - Pre-populated from `a.nickname` (empty string if null)
-- Auto-saves on `blur`: fires `supabase.from('attendees').update({ nickname: value.trim() || null }).eq('id', attendeeId)` — no full re-render (same pattern as event notes)
+- Auto-saves on `blur` via direct DB update — no full re-render (same pattern as event notes field, not the click-to-edit alias field):
+  ```js
+  supabase.from('attendees').update({ nickname: input.value.trim() || null }).eq('id', input.dataset.attendeeId)
+  ```
 - Field is rendered but `disabled` for removed attendees (consistent with gender select)
-- No save button, no explicit error state (silent save, same as notes)
+- No save button, no explicit error state (silent save)
 
 ### Event Attendee Lists
 
 - In each event block's confirmed, waitlisted, and interested attendee rows, the admin sees a guest's name as: `DisplayName @username`
-- If the guest has a non-empty nickname, append it in muted parentheses: `DisplayName @username (nickname)`
-- Rendered inline in the existing attendee row HTML — no separate line, no new container
-- Only shown when nickname is non-empty (no empty parentheses)
+- If the guest has a non-empty nickname, append a muted span immediately after: `DisplayName @username (nickname)`
+- Concrete HTML (nickname must go through `escapeHtml()`):
+  ```js
+  const nickname = r.attendees.nickname
+  const nickSpan = nickname ? ` <span class="muted">(${escapeHtml(nickname)})</span>` : ''
+  ```
+- Appended inline in the existing attendee row HTML — no separate line, no new container
+- Only shown when nickname is non-empty (no empty parentheses rendered)
 
 ---
 
