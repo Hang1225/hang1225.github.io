@@ -50,7 +50,7 @@ export async function loadEventGuestList(eventId, showCount, showNames, showGend
 export async function loadAttendeeReservations(attendeeId) {
   const { data, error } = await supabase
     .from('reservations')
-    .select('*, events(id, title, event_date, event_type, status, capacity, show_count, show_names, show_gender)')
+    .select('*, events(id, title, event_date, event_type, status, capacity, show_count, show_names, show_gender, start_time, end_time)')
     .eq('attendee_id', attendeeId)
   return error ? [] : data
 }
@@ -81,4 +81,17 @@ export async function cancelReservation(reservationId) {
     .update({ status: 'cancelled' })
     .eq('id', reservationId)
   return { error }
+}
+
+// Updates a previously-removed reservation back to an active status.
+// Use instead of createReservation when the attendee already has a removed row
+// for this event, to avoid duplicate rows.
+export async function reapplyReservation(reservationId, guestCount, message, status) {
+  const { data, error } = await supabase
+    .from('reservations')
+    .update({ guest_count: guestCount, message: message || null, status })
+    .eq('id', reservationId)
+    .select()
+    .single()
+  return { data, error }
 }
