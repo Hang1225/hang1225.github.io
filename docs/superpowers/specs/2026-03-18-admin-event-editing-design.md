@@ -21,7 +21,8 @@ Allow admins to edit event title, date, type, capacity, and start/end times dire
 ### Edit button
 - A small "Edit" button is added to the event block header, beside the existing Close/Reopen toggle button
 - Clicking "Edit" expands the event block (if collapsed) and reveals the edit form at the top of the block body, above the attendee sections
-- While the form is open, the "Edit" button is replaced by nothing (or disabled) to prevent double-open
+- While the form is open, the "Edit" button is hidden to prevent double-open
+- Clicking "Cancel" hides the form and re-shows the "Edit" button without triggering a full re-render
 
 ### Edit form fields
 | Field | Input type | Notes |
@@ -32,8 +33,8 @@ Allow admins to edit event title, date, type, capacity, and start/end times dire
 | Start minute | `<select>` (same minute options as create form) | Required |
 | End hour | `<select>` (same hour options, with "Flexible" empty option) | Optional |
 | End minute | `<select>` | Optional, only relevant if end hour is set |
-| Event type | `<select>` with options "Open Bar" and "Home Bar" | Disabled + labelled "(locked — reservations exist)" if the event has any reservations of any status |
-| Capacity | `<input type="number">` | Only shown when event type is "Open Bar" (`event_type: 'open'`). Hidden for Home Bar events. |
+| Event type | `<select>` with options "Open Bar" (`value="open"`) and "Home Bar" (`value="curated"`) | Disabled + labelled "(locked — active reservations exist)" if the event has any reservations with status `confirmed`, `waitlisted`, or `interested`. Declined and removed reservations do not trigger the lock. |
+| Capacity | `<input type="number">` | Only shown when event type is "Open Bar" (`event_type: 'open'`). Hidden for Home Bar (`event_type: 'curated'`) events. |
 
 ### Display options (show count / names / gender)
 Already present as inline auto-saving checkboxes in the event block header. Not duplicated in the edit form.
@@ -43,8 +44,9 @@ Already present as inline auto-saving checkboxes in the event block header. Not 
 - **"Cancel"** button: hides the form, no Supabase call, no re-render
 
 ### Event type lock logic
-- Before rendering the edit form, check `ev.reservations` (already available in the `loadEventsAdmin` join) for any entries — if `ev.reservations.length > 0`, the event type `<select>` is rendered with `disabled` attribute and a note: `(locked — reservations exist)`
-- If no reservations: type select is enabled and all options are available
+- Before rendering the edit form, check `ev.reservations` (already available in the `loadEventsAdmin` join) for active entries — if any reservation has `status` in `['confirmed', 'waitlisted', 'interested']`, the type `<select>` is rendered with `disabled` attribute and a note: `(locked — active reservations exist)`
+- Declined and removed reservations do not count toward the lock
+- If no active reservations: type select is enabled and all options are available
 - Capacity field visibility is driven by the currently-selected event type value in the form (re-evaluated on type change via a `change` listener)
 
 ---
@@ -55,7 +57,10 @@ Already present as inline auto-saving checkboxes in the event block header. Not 
 2. Edit form is rendered/shown inside the block body with current event values pre-populated
 3. Admin makes changes and clicks "Save Changes"
 4. Client validates: title non-empty, date non-empty, start time non-empty
-5. Compose `start_time` and `end_time` from selects (same `composeTime()` helper already in `admin-main.js`)
+5. Compose times using the `composeTime()` helper already defined in `admin-main.js`:
+   - `start_time = composeTime(startHour, startMin)`
+   - `end_time = endHour ? composeTime(endHour, endMin) : null` — stores `null` if no end hour is selected
+   - For Home Bar events (type `curated`), omit `capacity` from the update payload entirely — the existing value in the DB is preserved unchanged
 6. Call `supabase.from('events').update({...}).eq('id', eventId)`
 7. On success: call `loadEventsAdmin()` to re-render the full events list (same pattern as create event)
 8. On error: show inline error message below the Save button
