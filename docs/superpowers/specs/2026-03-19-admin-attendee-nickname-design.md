@@ -49,7 +49,10 @@ Nullable, no default. Not included in any guest-facing query.
   const nickname = r.attendees.nickname
   const nickSpan = nickname ? ` <span class="muted">(${escapeHtml(nickname)})</span>` : ''
   ```
-- Appended inline in the existing attendee row HTML — no separate line, no new container
+- `nickSpan` is inserted immediately after `@handle` and before any other badge (e.g. `plusBadge` in confirmed rows, position `#N` in waitlisted rows):
+  - Confirmed: `<strong>${name}</strong> <span class="muted">@${handle}</span>${nickSpan}${plusBadge}${msg}`
+  - Waitlisted: `<strong ...>${name}</strong> <span class="muted">@${handle}</span>${nickSpan} <span ...>#${i+1}</span>${msg}`
+  - Interested: `<strong>${name}</strong> <span class="muted">@${handle}</span>${nickSpan}${msg}`
 - Only shown when nickname is non-empty (no empty parentheses rendered)
 
 ---
