@@ -5,8 +5,9 @@ import { supabase } from './supabase-client.js'
 export async function loadEvents() {
   const { data, error } = await supabase
     .from('events')
-    .select('*')
+    .select('id, title, event_date, event_type, status, capacity, show_count, show_names, show_gender, start_time, end_time')
     .neq('status', 'cancelled')
+    .neq('status', 'closed')
     .order('event_date', { ascending: true })
   return error ? [] : data
 }
