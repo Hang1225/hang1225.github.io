@@ -1,6 +1,6 @@
 import { supabase } from './supabase-client.js'
 
-// Returns all non-cancelled events ordered by event_date ASC.
+// Returns all non-cancelled, non-closed events ordered by event_date ASC.
 // Includes all events (past + future) — callers filter by date as needed.
 export async function loadEvents() {
   const { data, error } = await supabase
