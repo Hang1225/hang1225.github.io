@@ -352,7 +352,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     import { supabase } from './js/supabase-client.js'
     import { t } from './js/i18n.js'
     import { loadEvents, formatTimeRange } from './js/events.js'
-    import { createReservation, cancelReservation, loadAttendeeReservations, loadEventGuestList, reapplyReservation } from './js/reservations.js'
+    import { createReservation, cancelReservation, loadAttendeeReservations, loadEventGuestList, reapplyReservation, acceptInvite, declineInvite } from './js/reservations.js'
 
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('Open Bar')
@@ -400,7 +400,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
       const [events, slotRes, waitRes] = await Promise.all([
         loadEvents(),
-        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed'),
+        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed').eq('admin_added', false),
         supabase.from('reservations').select('event_id').eq('status', 'waitlisted')
       ])
 
@@ -427,7 +427,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         const used = slotsByEvent[ev.id] || 0
         const waitCount = waitByEvent[ev.id] || 0
         const isCurated = ev.event_type === 'curated'
-        const isFull = !isCurated && used >= ev.capacity
+        const isFull = !isCurated && used >= (ev.capacity - (ev.admin_reserved || 0))
 
         let slotHtml = ''
         let ctaKey = ''
@@ -435,11 +435,11 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           slotHtml = `<span class="badge badge-curated">${t('策划活动 · 邀请制', 'Curated · By Invitation')}</span>`
           ctaKey = t('登录后表达意愿', 'Sign In to Express Interest')
         } else if (isFull) {
-          slotHtml = renderSlotMeter(used, ev.capacity)
+          slotHtml = renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
           if (waitCount) slotHtml += ` <span class="badge" style="margin-left:0.3rem">${waitCount} ${t('人等候', 'on waitlist')}</span>`
           ctaKey = t('登录加入等候', 'Sign In to Join Waitlist')
         } else {
-          slotHtml = renderSlotMeter(used, ev.capacity)
+          slotHtml = renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
           ctaKey = t('登录预订', 'Sign In to Reserve')
         }
 
@@ -468,7 +468,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       const [events, res, slotRes, waitRes] = await Promise.all([
         loadEvents(),
         loadAttendeeReservations(currentAttendee.id),
-        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed'),
+        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed').eq('admin_added', false),
         supabase.from('reservations').select('id, event_id, created_at').eq('status', 'waitlisted')
       ])
       attendeeReservations = res
@@ -490,7 +490,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       // This attendee's reservations indexed by event_id
       const myResByEvent = {}
       attendeeReservations.forEach(r => {
-        if (r.status !== 'cancelled' && r.status !== 'removed') myResByEvent[r.event_id] = r
+        if (!['cancelled', 'removed', 'invited'].includes(r.status)) myResByEvent[r.event_id] = r
       })
 
       // Collect upcoming closed events where this guest has an active reservation
@@ -501,13 +501,21 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         ['confirmed', 'waitlisted', 'interested'].includes(r.status)
       )
 
+      const invitedReservations = attendeeReservations.filter(r =>
+        r.events && r.status === 'invited'
+      )
+      // Exclude invited events from the upcoming list — they appear in the Invitations card instead.
+      // Without this, an invited guest would see a spurious "Reserve" button for their invited event.
+      const invitedEventIds = new Set(invitedReservations.map(r => r.event_id))
+
       // Split: upcoming events for Events card, past reservations for History card
-      const upcomingEvents = events.filter(e => e.event_date >= today)
+      const upcomingEvents = events.filter(e => e.event_date >= today && !invitedEventIds.has(e.id))
       const historyRows = attendeeReservations
         .filter(r => r.events && r.events.event_date < today &&
           ['confirmed', 'removed', 'declined'].includes(r.status))
         .sort((a, b) => b.events.event_date.localeCompare(a.events.event_date))
 
+      renderInvitations(invitedReservations)
       await renderDashboardEvents(upcomingEvents, myResByEvent, slotsByEvent, waitlistByEvent)
       renderCancelledEvents(cancelledEvents)
       renderHistory(historyRows)
@@ -554,7 +562,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         row.className = 'event-row'
         row.dataset.eventId = ev.id
         row.dataset.eventType = ev.event_type
-        row.dataset.capacity = ev.capacity
+        row.dataset.capacity = ev.capacity - (ev.admin_reserved || 0)
         row.dataset.used = used
 
         row.innerHTML = buildEventRowHtml(ev, myRes, used, isCurated, guestListHtml, waitlistByEvent)
@@ -582,7 +590,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         if (isCurated) {
           statusHtml = `<button class="btn btn-sm interest-btn" data-event-id="${ev.id}" style="border-color:#B89CD8;color:#B89CD8">${t('表达意愿 →', 'Express Interest →')}</button>`
         } else {
-          const isFull = used >= ev.capacity
+          const isFull = used >= (ev.capacity - (ev.admin_reserved || 0))
           if (isFull) {
             statusHtml = `<button class="btn btn-sm reserve-btn" data-event-id="${ev.id}">${t('加入等候 →', 'Join Waitlist →')}</button>`
           } else {
@@ -590,15 +598,17 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           }
         }
         if (!isCurated) {
-          metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${renderSlotMeter(used, ev.capacity)}</div>`
+          metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))}</div>`
         }
       } else if (myRes.status === 'confirmed') {
         const guestNote = myRes.guest_count === 2
           ? `<div style="font-style:italic;color:var(--muted);font-size:0.78rem;margin-top:0.1rem">${t('本人 + 1位宾客', 'Me + 1 guest')}</div>`
           : ''
         statusHtml = `<div style="text-align:right;flex-shrink:0"><div class="res-confirmed">✓ ${t('已确认', 'Confirmed')}</div>${guestNote}</div>`
-        const cancelBtn = `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('取消', 'Cancel')}</button>`
-        const slotMeter = isCurated ? '' : renderSlotMeter(used, ev.capacity)
+        const cancelBtn = myRes.admin_added
+          ? ''
+          : `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('取消', 'Cancel')}</button>`
+        const slotMeter = isCurated ? '' : renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
         const noteHtml = myRes.message ? `<div class="event-note">${t('备注', 'Your note')}: <span>${escapeHtml(myRes.message)}</span></div>` : ''
         metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${slotMeter}${cancelBtn}</div>${noteHtml}`
       } else if (myRes.status === 'waitlisted') {
@@ -607,7 +617,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         const posLabel = waitPos > 0 ? ` #${waitPos}` : ''
         statusHtml = `<div style="text-align:right;flex-shrink:0"><div class="res-waitlisted">⏳ ${t('等候中', 'Waitlist')}${posLabel}</div></div>`
         const cancelBtn = `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('退出等候', 'Leave Waitlist')}</button>`
-        metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${renderSlotMeter(used, ev.capacity)}${cancelBtn}</div>`
+        metaHtml = `<div class="event-meta" style="margin-top:0.45rem">${renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))}${cancelBtn}</div>`
       } else if (myRes.status === 'interested') {
         statusHtml = `<div style="text-align:right;flex-shrink:0"><div class="res-interested">✦ ${t('已提交意愿', 'Interest Submitted')}</div><div style="font-style:italic;color:var(--muted);font-size:0.78rem;margin-top:0.1rem">${t('等待主持人确认', 'Awaiting host selection')}</div></div>`
         const cancelBtn = `<button class="btn btn-danger btn-sm cancel-btn" data-res-id="${myRes.id}">${t('撤回', 'Withdraw')}</button>`
@@ -633,7 +643,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
     function buildReserveFormHtml(ev, used) {
       const isCurated = ev.event_type === 'curated'
-      const available = ev.capacity - used
+      const available = ev.capacity - (ev.admin_reserved || 0) - used
       const guestToggle = isCurated ? '' : `
         <span class="form-sublabel">${t('出席人数', 'GUESTS ATTENDING')}</span>
         <div class="guest-toggle">
@@ -798,6 +808,82 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           </div>
         `
         container.appendChild(row)
+      })
+    }
+
+    function renderInvitations(reservations) {
+      let card = document.getElementById('invitations-card')
+
+      if (!reservations.length) {
+        if (card) card.style.display = 'none'
+        return
+      }
+
+      if (!card) {
+        card = document.createElement('div')
+        card.id = 'invitations-card'
+        card.className = 'card fade-in-2'
+        const evCard = document.getElementById('events-dashboard-card')
+        evCard.parentNode.insertBefore(card, evCard)
+      }
+
+      card.style.display = 'block'
+      card.innerHTML = `
+        <span class="eyebrow" data-zh="邀请" data-en="Invitations">邀请</span>
+        <h2 style="margin-bottom:1.25rem" data-zh="您的邀请" data-en="Your Invitations">您的邀请</h2>
+        <div id="invitations-list"></div>
+      `
+
+      const list = document.getElementById('invitations-list')
+
+      reservations.forEach(r => {
+        const ev = r.events
+        const timeRange = formatTimeRange(ev.start_time, ev.end_time)
+        const dateStr = escapeHtml(formatEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
+        const isCurated = ev.event_type === 'curated'
+        const typeBadge = isCurated
+          ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Home Bar')}</span>`
+          : ''
+
+        const row = document.createElement('div')
+        row.className = 'event-row'
+        row.innerHTML = `
+          <div class="event-row-header">
+            <div>
+              <div class="event-date">${dateStr}</div>
+              <div class="event-title-text">${escapeHtml(ev.title)}${typeBadge}</div>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-shrink:0">
+              <button class="btn btn-sm btn-solid invite-accept-btn"
+                data-res-id="${escapeHtml(r.id)}">${t('接受', 'Accept')}</button>
+              <button class="btn btn-sm btn-danger invite-decline-btn"
+                data-res-id="${escapeHtml(r.id)}"
+                data-event-id="${escapeHtml(ev.id)}"
+                data-admin-reserved="${ev.admin_reserved || 0}">${t('拒绝', 'Decline')}</button>
+            </div>
+          </div>
+        `
+        list.appendChild(row)
+      })
+
+      list.querySelectorAll('.invite-accept-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true
+          const { error } = await acceptInvite(btn.dataset.resId)
+          if (!error) await loadDashboardData()
+        })
+      })
+
+      list.querySelectorAll('.invite-decline-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true
+          const { error } = await declineInvite(
+            btn.dataset.resId,
+            btn.dataset.eventId,
+            parseInt(btn.dataset.adminReserved) || 0
+          )
+          if (!error) await loadDashboardData()
+        })
       })
     }
 
