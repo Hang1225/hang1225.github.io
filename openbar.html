@@ -490,7 +490,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       // This attendee's reservations indexed by event_id
       const myResByEvent = {}
       attendeeReservations.forEach(r => {
-        if (!['cancelled', 'removed', 'invited'].includes(r.status)) myResByEvent[r.event_id] = r
+        if (!['cancelled', 'removed', 'invited', 'declined'].includes(r.status)) myResByEvent[r.event_id] = r
       })
 
       // Collect upcoming closed events where this guest has an active reservation
@@ -873,7 +873,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         btn.addEventListener('click', async () => {
           btn.disabled = true
           const { error } = await acceptInvite(btn.dataset.resId)
-          if (!error) await loadDashboardData()
+          if (error) { btn.disabled = false; return }
+          await loadDashboardData()
         })
       })
 
@@ -885,7 +886,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
             btn.dataset.eventId,
             parseInt(btn.dataset.adminReserved) || 0
           )
-          if (!error) await loadDashboardData()
+          if (error) { btn.disabled = false; return }
+          await loadDashboardData()
         })
       })
     }

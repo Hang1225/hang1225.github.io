@@ -742,7 +742,7 @@ function buildAdminSlotsHtml(ev) {
   )
   const used = adminRows.length
   const adminReserved = ev.admin_reserved || 0
-  const available = adminReserved - used
+  const available = Math.max(0, adminReserved - used)
 
   const guestListHtml = adminRows.map(r => {
     const name = escapeHtml(r.attendees ? (r.attendees.alias || r.attendees.username) : '—')
