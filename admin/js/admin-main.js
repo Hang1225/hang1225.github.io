@@ -580,11 +580,13 @@ function buildEventBlockHtml(ev) {
         ? `<div class="event-section-label" style="margin-top:0.5rem">Waitlist</div>${waitlistRows}`
         : '')
 
+  const timeStr = formatTimeRange(ev.start_time, ev.end_time)
+
   return `
     <div class="event-block-header" data-event-id="${escapeHtml(ev.id)}">
       <div>
         <div style="font-size:0.78rem;color:var(--gold);letter-spacing:0.1em;font-family:'Cinzel',serif">
-          ${escapeHtml(ev.event_date)}${formatTimeRange(ev.start_time, ev.end_time) ? ' · ' + formatTimeRange(ev.start_time, ev.end_time) : ''}
+          ${escapeHtml(ev.event_date)}${timeStr ? ' · ' + timeStr : ''}
         </div>
         <div style="font-size:1.05rem;color:var(--cream);margin-top:0.1rem">${escapeHtml(ev.title)}</div>
       </div>
