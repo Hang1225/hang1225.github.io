@@ -224,6 +224,50 @@ select option { background: #0D0D1A; color: var(--text); }
 input[type="file"] { color: var(--muted); font-style: italic; font-size: 0.9rem; padding: 0.5rem 0; border: none; background: none; margin-bottom: 0.5rem; }
 input[type="number"] { width: 120px !important; }
 
+/* Custom checkbox & radio — Art Deco gold */
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s, background 0.2s;
+  margin: 0;
+  vertical-align: middle;
+}
+input[type="radio"] { border-radius: 50%; }
+input[type="checkbox"]:hover,
+input[type="radio"]:hover { border-color: var(--gold-dim); }
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  background: var(--gold-glow);
+  border-color: var(--gold);
+}
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border-right: 1.5px solid var(--gold);
+  border-bottom: 1.5px solid var(--gold);
+  transform: rotate(45deg);
+}
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
 label {
   font-family: 'Cinzel', serif;
   font-size: 0.58rem;
