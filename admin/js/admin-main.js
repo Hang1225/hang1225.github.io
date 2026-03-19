@@ -579,6 +579,18 @@ function buildEventBlockHtml(ev) {
 
   const timeStr = formatTimeRange(ev.start_time, ev.end_time)
 
+  const notesHtml = `
+    <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid rgba(201,168,76,0.08)">
+      <div style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.12em;color:var(--muted);margin-bottom:0.4rem">NOTES</div>
+      <textarea
+        class="event-notes-input"
+        data-event-id="${escapeHtml(ev.id)}"
+        placeholder="Private admin notes…"
+        style="width:100%;min-height:60px;background:rgba(255,255,255,0.02);border:1px solid rgba(201,168,76,0.1);border-radius:var(--radius);padding:0.5rem 0.75rem;color:var(--text);font-family:'Cormorant Garamond',serif;font-size:0.95rem;resize:vertical;outline:none"
+      >${escapeHtml(ev.notes || '')}</textarea>
+    </div>
+  `
+
   return `
     <div class="event-block-header" data-event-id="${escapeHtml(ev.id)}">
       <div>
@@ -598,6 +610,7 @@ function buildEventBlockHtml(ev) {
     <div class="event-block-body" style="display:none">
       ${confirmedSection}
       ${secondarySection}
+      ${notesHtml}
     </div>
   `
 }
@@ -673,6 +686,16 @@ function attachEventBlockHandlers(container) {
       btn.disabled = true
       await supabase.from('reservations').update({ status: newStatus }).eq('id', resId)
       loadEventsAdmin()
+    })
+  })
+
+  // Notes: silent auto-save on blur (no full reload)
+  container.querySelectorAll('.event-notes-input').forEach(textarea => {
+    textarea.addEventListener('blur', async () => {
+      await supabase
+        .from('events')
+        .update({ notes: textarea.value.trim() || null })
+        .eq('id', textarea.dataset.eventId)
     })
   })
 }
