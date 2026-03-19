@@ -55,13 +55,32 @@ ALTER TABLE reservations ADD COLUMN admin_added boolean NOT NULL DEFAULT false;
 
 **Invariant:** admin cannot invite or add guests when `admin slots used >= admin_reserved`. The Invite/Add buttons are disabled in that state.
 
-**`promote_waitlist` trigger** must be updated to subtract `admin_reserved` from available slots:
+**`promote_waitlist` trigger** must be updated in two ways:
+
+1. Fetch `admin_reserved` alongside `capacity` and `event_type`
+2. Filter `used_slots` to `admin_added = false` only (admin-confirmed slots are already absorbed by `admin_reserved`; counting them in both places would double-subtract)
+
 ```sql
 -- Before:
+select capacity, event_type into event_cap, ev_type
+  from events where id = new.event_id;
+
+select coalesce(sum(guest_count), 0) into used_slots
+  from reservations
+ where event_id = new.event_id and status = 'confirmed';
+
 avail := event_cap - used_slots;
+
 -- After:
 select capacity, event_type, admin_reserved into event_cap, ev_type, admin_res
   from events where id = new.event_id;
+
+select coalesce(sum(guest_count), 0) into used_slots
+  from reservations
+ where event_id = new.event_id
+   and status = 'confirmed'
+   and admin_added = false;
+
 avail := event_cap - admin_res - used_slots;
 ```
 
@@ -95,7 +114,7 @@ Admin Slots    Reserved: 3 | Used: 2 | Available: 1
 Shared structure for both actions:
 - Text input: admin types username or alias
 - Live-filtered against the attendees list (already loaded in admin context via `loadEventsAdmin` join)
-- Excludes attendees with an existing non-cancelled, non-declined reservation on this event
+- Excludes attendees with an existing non-cancelled, non-declined reservation on this event. Note: attendees with a `removed` reservation are not filtered out (consistent with the reapply spec's known duplicate-row stance — selecting a `removed` guest inserts a second row rather than reusing the existing one)
 - Confirm button: **"Send Invite"** (invite action) or **"Add Guest"** (direct-add action)
 - Cancel link: dismisses form, no Supabase call
 
@@ -128,10 +147,31 @@ A new **"Invitations"** section appears at the top of the guest dashboard (above
 - `update({ admin_reserved: admin_reserved - 1 })` on the event row (releases slot to general capacity)
 - Card removed from Invitations section
 
+### No Cancel button for admin-added guests
+Guests whose reservation has `admin_added = true` (whether `invited` → `confirmed` or direct-add) do not receive a Cancel button in the dashboard. Only admin can remove them via the Admin Slots subsection. This avoids a capacity leak where a self-cancelled `admin_added` confirmed row would leave `admin_reserved` permanently inflated.
+
+`loadAttendeeReservations()` must be updated to include `admin_added` in its select so the guest dashboard can read this flag per row.
+
 ### Data loading
-- `loadAttendeeReservations()` already returns all reservation rows including `invited` — no query change needed
+- `loadAttendeeReservations()` select updated to include `admin_added`
 - Guest dashboard filters `invited` rows into a separate `invitedEvents` array
-- `invited` rows excluded from `myResByEvent` so the Reserve button does not appear for events the guest is already invited to
+- `myResByEvent` population excludes `cancelled`, `removed`, and `invited` rows using a combined condition:
+  ```js
+  if (!['cancelled', 'removed', 'invited'].includes(r.status)) myResByEvent[r.event_id] = r
+  ```
+  This is order-independent — even if a guest has two rows for the same event, neither `cancelled` nor `invited` lands in `myResByEvent`. The `removed` exclusion follows the reapply spec (2026-03-18-event-visibility-reapply-homepage-design.md) which already established that removed guests can re-apply; this spec carries that same condition forward.
+
+### Slot meter and availability
+`loadEvents()` returns `admin_reserved` (added to explicit column select). The `slotsByEvent` query in `loadDashboardData()` — which aggregates confirmed `guest_count` per event — must add `.eq('admin_added', false)` so it only counts regular confirmed slots. The availability formula then becomes:
+```js
+const available = ev.capacity - ev.admin_reserved - (slotsByEvent[ev.id] || 0)
+```
+This feeds both the slot meter pips (`renderSlotMeter`) and the "+1 guest" toggle in `buildReserveFormHtml`, ensuring both reflect true remaining capacity.
+
+The pre-login event list (`renderPreloginEvents`) uses the same `slotsByEvent` object and `ev.capacity`/`ev.admin_reserved` from `loadEvents()`, so it is corrected by the same `slotsByEvent` query fix — no separate change needed.
+
+### Public guest list (`loadEventGuestList`)
+Admin-added confirmed guests (`admin_added = true`) are included in the public-facing confirmed count and name list. They are legitimately confirmed attendees and their presence is intentional.
 
 ---
 
@@ -167,8 +207,8 @@ A new **"Invitations"** section appears at the top of the guest dashboard (above
 |---|---|
 | `admin/js/admin-main.js` | Add `buildAdminSlotsHtml(ev)` helper; wire reserved-count auto-save, invite/add inline forms, remove handlers in `attachEventBlockHandlers()`; include `admin_reserved` in `loadEventsAdmin()` query |
 | `js/events.js` | Add `admin_reserved` to explicit column select in `loadEvents()` |
-| `js/reservations.js` | Add `acceptInvite(reservationId)` and `declineInvite(reservationId, eventId, currentAdminReserved)` exports |
-| `openbar.html` | Filter `invited` into `invitedEvents`; exclude `invited` from `myResByEvent`; add `renderInvitations(invitedEvents)`; wire Accept/Decline handlers |
+| `js/reservations.js` | Add `acceptInvite(reservationId)` and `declineInvite(reservationId, eventId, currentAdminReserved)` exports; add `admin_added` to `loadAttendeeReservations()` select |
+| `openbar.html` | Filter `invited` into `invitedEvents`; exclude `invited`/`removed`/`cancelled` from `myResByEvent` (combined condition); add `renderInvitations(invitedEvents)`; wire Accept/Decline handlers; add `.eq('admin_added', false)` to `slotsByEvent` query; update slot availability formula to subtract `admin_reserved`; suppress Cancel button for `admin_added` confirmed rows |
 | Supabase DB | Migration: `admin_reserved` on events, `invited` status + `admin_added` on reservations, updated `promote_waitlist` trigger |
 
 ---
