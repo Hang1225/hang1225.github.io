@@ -605,9 +605,11 @@ function buildEventBlockHtml(ev) {
         ${statusBadge}
         ${displayOpts}
         <button class="btn btn-sm toggle-status-btn" data-event-id="${escapeHtml(ev.id)}" data-current="${escapeHtml(ev.status)}">${toggleLabel}</button>
+        <button class="btn btn-sm edit-event-btn" data-event-id="${escapeHtml(ev.id)}">Edit</button>
       </div>
     </div>
     <div class="event-block-body" style="display:none">
+      <div class="event-edit-form" id="edit-form-${escapeHtml(ev.id)}" style="display:none"></div>
       ${confirmedSection}
       ${secondarySection}
       ${notesHtml}
