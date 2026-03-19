@@ -32,14 +32,19 @@ No schema changes. The existing `status` field on `events` already supports `'op
 - After populating `myResByEvent` from `attendeeReservations`, scan for reservations where:
   - `r.events.status === 'closed'`
   - `r.status` is one of `['confirmed', 'waitlisted', 'interested']`
+  - `r.events.event_date >= today` (past closed events fall into history, not cancelled display)
 - Collect these as a separate `cancelledEvents` array
 - Pass to a new `renderCancelledEvents(cancelledEvents)` function
 
 **`openbar.html` — `renderCancelledEvents()`**
-- Renders a read-only list below the upcoming events section (or within the same card)
+- Owns its own section heading ("Cancelled") — no heading is hardcoded in surrounding HTML
+- If the array is empty, renders nothing at all (no heading, no container)
+- If non-empty, renders a labelled read-only list below the upcoming events section within the same dashboard card
 - Each row shows: date, title, event type badge, and a "Cancelled" badge
 - No action buttons — no cancel, no reapply
-- If the array is empty, renders nothing
+
+**Past closed events and history:**
+- Reservations on closed events where `event_date < today` are eligible for the existing `historyRows` filter (`status` in `['confirmed', 'removed', 'declined']`). These appear in the History card as normal, not in the Cancelled section. The Cancelled section only shows upcoming closed events.
 
 ### Reopening
 When admin sets status back to `'open'`, the event re-enters `loadEvents()` results and the guest's dashboard naturally shows it as an upcoming event again on next load. No special handling needed.
@@ -69,12 +74,13 @@ export async function reapplyReservation(reservationId, guestCount, message, sta
   return { data, error }
 }
 ```
-- Updates the existing removed row instead of inserting, avoiding duplicate rows per `(event_id, attendee_id)`
+- Updates the existing removed row instead of inserting, avoiding duplicate rows
 
 **`openbar.html` — submit reservation handler**
-- Before calling `createReservation`, check `attendeeReservations` for a `removed` reservation on that event
-- If found: call `reapplyReservation(existingRes.id, guestCount, message, status)` instead
+- The in-memory `attendeeReservations` array (fetched at `loadDashboardData` time) is checked for a `removed` reservation on that event
+- If found: call `reapplyReservation(existingRes.id, guestCount, message, status)` instead of `createReservation`
 - If not found: call `createReservation(...)` as before
+- Note: there is no DB-level unique constraint on `(event_id, attendee_id)`. The in-memory check is the guard against duplicates. The stale-data race window (admin removes guest after page load but before guest submits) is acceptable — in that scenario `createReservation` would insert a second row. This is a known edge case, handled in a future iteration if it becomes a real problem. Audit fields (`removed_by`, `updated_at`) are out of scope.
 
 ---
 
@@ -88,23 +94,32 @@ Add a `notes` column to the `events` table:
 ```sql
 ALTER TABLE events ADD COLUMN notes text;
 ```
-Nullable, no default. Never included in guest-facing queries.
+Nullable, no default. Not returned by guest-facing queries (see `loadEvents()` change below).
+
+### `js/events.js` — `loadEvents()` column selection
+- Change `select('*')` to an explicit column list that excludes `notes`:
+  ```js
+  .select('id, title, event_date, event_type, status, capacity, show_count, show_names, show_gender, start_time, end_time')
+  ```
+- Keeps notes out of all guest-facing data (pre-login list, dashboard, home page)
+- The admin panel uses its own `supabase.from('events').select('*')` query in `loadEventsAdmin()`, which will include `notes` automatically after the migration
 
 ### `home.html` — new Upcoming Events section
 - Inserted between the hero block and the about/stats section
-- Fetches upcoming events via `loadEvents()` (already excludes cancelled + closed after Feature 1 change), filtered to `event_date >= today`
-- If no upcoming events: section is hidden entirely (no empty state rendered)
-- **Open Bar events** (`event_type: 'open'`): card is an `<a>` linking to `/openbar.html`
-- **Home Bar events** (`event_type: 'curated'`): card is a `<div>`, non-clickable, with a subtle "Home Bar" label
-- Card content: gold Cinzel date line + Playfair Display title — no slot meter, no CTA text
-- Styling follows existing `.card` patterns; Open Bar cards get a pointer cursor, Home Bar cards get `cursor: default`
+- Fetches upcoming events via `loadEvents()`, filtered client-side to `event_date >= today` (the date filter is applied in `home.html`, not inside `loadEvents()`, consistent with how `openbar.html` and the dashboard apply it)
+- If no upcoming events remain after the date filter: the entire section is hidden (no empty state rendered)
+- **Open Bar events** (`event_type: 'open'`): card is an `<a>` tag linking to `/openbar.html`
+- **Home Bar events** (`event_type: 'curated'`): card is a non-interactive `<div>` with a subtle "Home Bar" label; `cursor: default`
+- Card content: gold Cinzel date line + Playfair Display title only — no slot meter, no CTA text
+- Styling follows existing `.card` patterns
 
 ### Admin panel — Notes field
-- Each event block in `loadEventsAdmin()` gets a `<textarea>` for notes (rendered inside the expanded body, below attendee lists)
-- Auto-saves on `blur` (same pattern as alias click-to-edit)
-- Populated from `ev.notes` when the block renders
-- The `notes` field is included in the admin `loadEventsAdmin()` select (`*` already covers it after the column is added)
-- Notes are **not** included in `loadEvents()` (guest-facing) or any guest query
+- Each event block in `buildEventBlockHtml()` gets a `<textarea>` for notes rendered inside the expanded body, below all attendee sections
+- Populated from `ev.notes` (empty string if null) when the block renders
+- Saves silently on `blur`: fires a Supabase `update({ notes: value })` on the event row, **no full `loadEventsAdmin()` re-render** (avoids collapsing all open event blocks)
+- `Enter` key inserts a newline (normal textarea behaviour — no save-on-Enter)
+- `Escape` does nothing (notes field loses focus naturally)
+- The save handler is attached inside `attachEventBlockHandlers()`
 
 ---
 
@@ -112,11 +127,11 @@ Nullable, no default. Never included in guest-facing queries.
 
 | File | Change |
 |---|---|
-| `js/events.js` | Add `.neq('status', 'closed')` to `loadEvents()` |
+| `js/events.js` | Add `.neq('status', 'closed')`; switch to explicit column select (excluding `notes`) |
 | `js/reservations.js` | Add `reapplyReservation()` export |
 | `openbar.html` | `myResByEvent` excludes `removed`; reapply logic in submit handler; `renderCancelledEvents()` in dashboard |
 | `home.html` | New upcoming events section with teaser cards |
-| `admin/js/admin-main.js` | Notes textarea per event block, auto-save on blur |
+| `admin/js/admin-main.js` | Notes textarea per event block, silent auto-save on blur |
 | Supabase DB | `ALTER TABLE events ADD COLUMN notes text` |
 
 ---
@@ -126,3 +141,5 @@ Nullable, no default. Never included in guest-facing queries.
 - No email/notification on close or reopen
 - Notes are not versioned or timestamped
 - Home page event cards show no slot data, no guest count
+- No audit fields (`removed_by`, `updated_at`) on reapply
+- Race condition on reapply (admin removes after page load) deferred to future iteration
