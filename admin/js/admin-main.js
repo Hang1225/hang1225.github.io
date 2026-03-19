@@ -489,7 +489,7 @@ document.getElementById('create-event-btn').addEventListener('click', async () =
 async function loadEventsAdmin() {
   const { data: events } = await supabase
     .from('events')
-    .select('*, reservations(id, attendee_id, status, guest_count, message, created_at, admin_added, attendees(username, alias))')
+    .select('*, reservations(id, attendee_id, status, guest_count, message, created_at, admin_added, attendees(username, alias, nickname))')
     .order('event_date', { ascending: false })
 
   const container = document.getElementById('events-admin-list')
@@ -548,9 +548,10 @@ function buildEventBlockHtml(ev) {
     const handle = escapeHtml(r.attendees.username)
     const plusBadge = r.guest_count === 2 ? `<span class="badge" style="margin-left:0.3rem;font-size:0.65rem">+1</span>` : ''
     const msg = r.message ? `<div class="attendee-msg">"${escapeHtml(r.message)}"</div>` : `<div class="attendee-msg" style="opacity:0.4">No note</div>`
+    const nickSpan = r.attendees.nickname ? ` <span class="muted">(${escapeHtml(r.attendees.nickname)})</span>` : ''
     return `
       <div class="event-attendee-row">
-        <div><strong>${name}</strong> <span class="muted">@${handle}</span>${plusBadge}${msg}</div>
+        <div><strong>${name}</strong> <span class="muted">@${handle}</span>${nickSpan}${plusBadge}${msg}</div>
         <button class="btn btn-sm btn-danger res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="remove">Remove</button>
       </div>`
   }).join('')
@@ -560,9 +561,10 @@ function buildEventBlockHtml(ev) {
     const name = escapeHtml(r.attendees.alias || r.attendees.username)
     const handle = escapeHtml(r.attendees.username)
     const msg = r.message ? `<div class="attendee-msg">"${escapeHtml(r.message)}"</div>` : `<div class="attendee-msg" style="opacity:0.4">No note</div>`
+    const nickSpan = r.attendees.nickname ? ` <span class="muted">(${escapeHtml(r.attendees.nickname)})</span>` : ''
     return `
       <div class="event-attendee-row">
-        <div><strong style="color:var(--muted)">${name}</strong> <span class="muted">@${handle}</span> <span style="font-size:0.75rem;color:#C9A030;margin-left:0.3rem">#${i + 1}</span>${msg}</div>
+        <div><strong style="color:var(--muted)">${name}</strong> <span class="muted">@${handle}</span>${nickSpan} <span style="font-size:0.75rem;color:#C9A030;margin-left:0.3rem">#${i + 1}</span>${msg}</div>
         <button class="btn btn-sm btn-danger res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="decline">Decline</button>
       </div>`
   }).join('')
@@ -572,9 +574,10 @@ function buildEventBlockHtml(ev) {
     const name = escapeHtml(r.attendees.alias || r.attendees.username)
     const handle = escapeHtml(r.attendees.username)
     const msg = r.message ? `<div class="attendee-msg">"${escapeHtml(r.message)}"</div>` : `<div class="attendee-msg" style="opacity:0.4">No note</div>`
+    const nickSpan = r.attendees.nickname ? ` <span class="muted">(${escapeHtml(r.attendees.nickname)})</span>` : ''
     return `
       <div class="event-attendee-row">
-        <div><strong>${name}</strong> <span class="muted">@${handle}</span>${msg}</div>
+        <div><strong>${name}</strong> <span class="muted">@${handle}</span>${nickSpan}${msg}</div>
         <div style="display:flex;gap:0.4rem;flex-shrink:0">
           <button class="btn btn-sm btn-approve res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="confirm">Confirm</button>
           <button class="btn btn-sm btn-danger res-action-btn" data-res-id="${escapeHtml(r.id)}" data-action="decline">Decline</button>
