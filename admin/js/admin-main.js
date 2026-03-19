@@ -285,6 +285,7 @@ async function loadSignupsAdmin() {
     .select('id, username, alias, gender, gender_visibility, created_at, removed_at')
     .order('created_at', { ascending: false })
 
+  window._attendeesCache = data || []
   const el = document.getElementById('signups-list')
   if (!data || data.length === 0) {
     el.innerHTML = '<p class="muted">No attendees yet.</p>'
@@ -473,7 +474,7 @@ document.getElementById('create-event-btn').addEventListener('click', async () =
 async function loadEventsAdmin() {
   const { data: events } = await supabase
     .from('events')
-    .select('*, reservations(id, status, guest_count, message, created_at, attendees(username, alias))')
+    .select('*, reservations(id, attendee_id, status, guest_count, message, created_at, admin_added, attendees(username, alias))')
     .order('event_date', { ascending: false })
 
   const container = document.getElementById('events-admin-list')
@@ -611,6 +612,7 @@ function buildEventBlockHtml(ev) {
     </div>
     <div class="event-block-body" style="display:none">
       <div class="event-edit-form" id="edit-form-${escapeHtml(ev.id)}" style="display:none"></div>
+      ${buildAdminSlotsHtml(ev)}
       ${confirmedSection}
       ${secondarySection}
       ${notesHtml}
@@ -718,6 +720,81 @@ function buildEditFormHtml(ev) {
   `
 }
 
+function buildAdminSlotsHtml(ev) {
+  const reservations = ev.reservations || []
+  const adminRows = reservations.filter(r =>
+    r.status === 'invited' || (r.status === 'confirmed' && r.admin_added)
+  )
+  const used = adminRows.length
+  const adminReserved = ev.admin_reserved || 0
+  const available = adminReserved - used
+
+  const guestListHtml = adminRows.map(r => {
+    const name = escapeHtml(r.attendees ? (r.attendees.alias || r.attendees.username) : '—')
+    const statusLabel = r.status === 'invited' ? 'Invited' : 'Added'
+    return `
+      <div class="event-attendee-row" style="font-size:0.88rem">
+        <div><strong>${name}</strong> · <span class="muted">${statusLabel}</span></div>
+        <button class="btn btn-sm btn-danger admin-slot-remove-btn"
+          data-res-id="${escapeHtml(r.id)}"
+          data-res-status="${escapeHtml(r.status)}"
+          data-event-id="${escapeHtml(ev.id)}"
+          data-admin-reserved="${adminReserved}">Remove</button>
+      </div>`
+  }).join('')
+
+  const buttonsDisabled = available <= 0 ? ' disabled style="opacity:0.45;cursor:not-allowed"' : ''
+
+  return `
+    <div class="admin-slots-section" data-event-id="${escapeHtml(ev.id)}"
+      style="padding:0.75rem 0;border-bottom:1px solid rgba(201,168,76,0.12);margin-bottom:0.75rem">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.5rem">
+        <div style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.12em;color:var(--muted)">ADMIN SLOTS</div>
+        <div style="font-size:0.78rem;color:var(--muted)">
+          Reserved: <strong style="color:var(--text)">${adminReserved}</strong>
+          &nbsp;·&nbsp; Used: <strong style="color:var(--text)">${used}</strong>
+          &nbsp;·&nbsp; Available: <strong style="color:${available > 0 ? 'var(--gold)' : 'var(--muted)'}">${available}</strong>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;flex-wrap:wrap">
+        <label style="font-size:0.75rem;color:var(--muted)">Reserved count</label>
+        <input type="number" class="admin-reserved-input" min="0"
+          value="${adminReserved}"
+          data-event-id="${escapeHtml(ev.id)}"
+          data-used="${used}"
+          style="width:60px;padding:0.2rem 0.4rem;font-size:0.9rem">
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
+        <button class="btn btn-sm admin-invite-btn" data-event-id="${escapeHtml(ev.id)}"${buttonsDisabled}>Invite Guest</button>
+        <button class="btn btn-sm admin-add-btn" data-event-id="${escapeHtml(ev.id)}"${buttonsDisabled}>Add Directly</button>
+      </div>
+
+      <div class="admin-slot-form" id="admin-slot-form-${escapeHtml(ev.id)}" style="display:none;margin-bottom:0.6rem">
+        <input type="text" class="admin-guest-search"
+          placeholder="Username or alias…"
+          style="width:100%;margin-bottom:0.4rem">
+        <div class="admin-guest-results"
+          style="max-height:120px;overflow-y:auto;border:1px solid rgba(201,168,76,0.1);border-radius:var(--radius);margin-bottom:0.4rem"></div>
+        <div style="display:flex;gap:0.4rem;align-items:center">
+          <button class="btn btn-sm btn-solid admin-slot-confirm-btn"
+            data-event-id="${escapeHtml(ev.id)}"
+            disabled>Send Invite</button>
+          <button class="btn btn-sm admin-slot-cancel-btn"
+            data-event-id="${escapeHtml(ev.id)}">Cancel</button>
+          <span class="admin-slot-err error" style="display:none;font-size:0.8rem"></span>
+        </div>
+      </div>
+
+      ${guestListHtml
+        ? `<div class="admin-slot-guest-list" style="margin-top:0.4rem">${guestListHtml}</div>`
+        : ''}
+    </div>
+  `
+}
+
 // --- ACCOUNT REMOVAL MODAL ---
 let _removeTargetId = null
 
@@ -799,6 +876,178 @@ function attachEventBlockHandlers(container) {
         .from('events')
         .update({ notes: textarea.value.trim() || null })
         .eq('id', textarea.dataset.eventId)
+    })
+  })
+
+  // Admin reserved count: auto-save on blur, reject if below current used count
+  container.querySelectorAll('.admin-reserved-input').forEach(input => {
+    let prevValue = parseInt(input.value) || 0
+
+    input.addEventListener('focus', () => {
+      prevValue = parseInt(input.value) || 0
+    })
+
+    input.addEventListener('blur', async e => {
+      e.stopPropagation()
+      const eventId = input.dataset.eventId
+      const used = parseInt(input.dataset.used) || 0
+      let newValue = parseInt(input.value)
+      if (isNaN(newValue) || newValue < 0) newValue = 0
+
+      if (newValue < used) {
+        input.value = prevValue  // reset — cannot go below current used count
+        return
+      }
+      if (newValue === prevValue) return
+
+      await supabase.from('events').update({ admin_reserved: newValue }).eq('id', eventId)
+      prevValue = newValue
+    })
+  })
+
+  // Open inline admin slot form (invite or direct-add mode)
+  function openAdminSlotForm(eventId, mode) {
+    const form = document.getElementById('admin-slot-form-' + eventId)
+    if (!form) return
+    form.dataset.mode = mode
+    form.style.display = 'block'
+    const confirmBtn = form.querySelector('.admin-slot-confirm-btn')
+    confirmBtn.textContent = mode === 'invite' ? 'Send Invite' : 'Add Guest'
+    confirmBtn.disabled = true
+    delete confirmBtn.dataset.selectedAttendeeId
+    const search = form.querySelector('.admin-guest-search')
+    search.value = ''
+    form.querySelector('.admin-guest-results').innerHTML = ''
+    const errEl = form.querySelector('.admin-slot-err')
+    errEl.style.display = 'none'
+    search.focus()
+  }
+
+  container.querySelectorAll('.admin-invite-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      openAdminSlotForm(btn.dataset.eventId, 'invite')
+    })
+  })
+
+  container.querySelectorAll('.admin-add-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      openAdminSlotForm(btn.dataset.eventId, 'add')
+    })
+  })
+
+  // Attendee live search inside the inline form
+  container.querySelectorAll('.admin-guest-search').forEach(input => {
+    input.addEventListener('input', e => {
+      e.stopPropagation()
+      const section = input.closest('.admin-slots-section')
+      const eventId = section.dataset.eventId
+      const ev = (window._eventsAdminCache || []).find(ev => ev.id === eventId)
+      const reservations = ev ? (ev.reservations || []) : []
+
+      // Block attendees who already have an active reservation on this event
+      const blockedIds = new Set(
+        reservations
+          .filter(r => ['confirmed', 'waitlisted', 'interested', 'invited'].includes(r.status))
+          .map(r => r.attendee_id)
+          .filter(Boolean)
+      )
+
+      const query = input.value.trim().toLowerCase()
+      const allAttendees = window._attendeesCache || []
+      const results = allAttendees
+        .filter(a => !blockedIds.has(a.id))
+        .filter(a =>
+          !query ||
+          a.username.toLowerCase().includes(query) ||
+          (a.alias && a.alias.toLowerCase().includes(query))
+        )
+        .slice(0, 8)
+
+      const resultsEl = input.closest('.admin-slot-form').querySelector('.admin-guest-results')
+      resultsEl.innerHTML = results.map(a => `
+        <div class="admin-guest-result"
+          data-attendee-id="${escapeHtml(a.id)}"
+          data-display="${escapeHtml(a.alias || a.username)}"
+          style="padding:0.35rem 0.6rem;cursor:pointer;font-size:0.88rem;border-bottom:1px solid rgba(201,168,76,0.07)">
+          <strong>${escapeHtml(a.alias || a.username)}</strong>
+          <span class="muted"> @${escapeHtml(a.username)}</span>
+        </div>
+      `).join('')
+
+      resultsEl.querySelectorAll('.admin-guest-result').forEach(row => {
+        row.addEventListener('click', () => {
+          const form = input.closest('.admin-slot-form')
+          const confirmBtn = form.querySelector('.admin-slot-confirm-btn')
+          confirmBtn.dataset.selectedAttendeeId = row.dataset.attendeeId
+          confirmBtn.disabled = false
+          input.value = row.dataset.display
+          resultsEl.innerHTML = ''
+        })
+      })
+    })
+  })
+
+  // Confirm: insert reservation as invited or confirmed+admin_added
+  container.querySelectorAll('.admin-slot-confirm-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation()
+      const attendeeId = btn.dataset.selectedAttendeeId
+      if (!attendeeId) return
+      const form = btn.closest('.admin-slot-form')
+      const mode = form.dataset.mode
+      const eventId = btn.dataset.eventId
+      const errEl = form.querySelector('.admin-slot-err')
+      errEl.style.display = 'none'
+      btn.disabled = true
+
+      const { error } = await supabase.from('reservations').insert({
+        event_id: eventId,
+        attendee_id: attendeeId,
+        guest_count: 1,
+        status: mode === 'invite' ? 'invited' : 'confirmed',
+        admin_added: true
+      })
+
+      if (error) {
+        errEl.textContent = 'Failed. Please try again.'
+        errEl.style.display = 'inline'
+        btn.disabled = false
+        return
+      }
+
+      loadEventsAdmin()
+    })
+  })
+
+  // Cancel inline form
+  container.querySelectorAll('.admin-slot-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      const form = document.getElementById('admin-slot-form-' + btn.dataset.eventId)
+      if (form) form.style.display = 'none'
+    })
+  })
+
+  // Remove an invited or admin-added confirmed guest
+  container.querySelectorAll('.admin-slot-remove-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation()
+      const resId = btn.dataset.resId
+      const resStatus = btn.dataset.resStatus
+      const eventId = btn.dataset.eventId
+      const adminReserved = parseInt(btn.dataset.adminReserved) || 0
+      btn.disabled = true
+
+      const newStatus = resStatus === 'invited' ? 'declined' : 'removed'
+
+      await Promise.all([
+        supabase.from('reservations').update({ status: newStatus }).eq('id', resId),
+        supabase.from('events').update({ admin_reserved: Math.max(0, adminReserved - 1) }).eq('id', eventId)
+      ])
+
+      loadEventsAdmin()
     })
   })
 
