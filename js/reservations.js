@@ -50,7 +50,7 @@ export async function loadEventGuestList(eventId, showCount, showNames, showGend
 export async function loadAttendeeReservations(attendeeId) {
   const { data, error } = await supabase
     .from('reservations')
-    .select('*, events(id, title, event_date, event_type, status, capacity, show_count, show_names, show_gender, start_time, end_time)')
+    .select('*, events(id, title, event_date, event_type, status, capacity, admin_reserved, show_count, show_names, show_gender, start_time, end_time)')
     .eq('attendee_id', attendeeId)
   return error ? [] : data
 }
@@ -94,4 +94,24 @@ export async function reapplyReservation(reservationId, guestCount, message, sta
     .select()
     .single()
   return { data, error }
+}
+
+// Updates an invited reservation to confirmed (guest accepts invite).
+export async function acceptInvite(reservationId) {
+  const { error } = await supabase
+    .from('reservations')
+    .update({ status: 'confirmed' })
+    .eq('id', reservationId)
+  return { error }
+}
+
+// Sets an invited reservation to declined and decrements admin_reserved by 1.
+// currentAdminReserved is the event's current admin_reserved value (read from
+// the reservation's joined event data before calling this function).
+export async function declineInvite(reservationId, eventId, currentAdminReserved) {
+  const [resResult, eventResult] = await Promise.all([
+    supabase.from('reservations').update({ status: 'declined' }).eq('id', reservationId),
+    supabase.from('events').update({ admin_reserved: Math.max(0, currentAdminReserved - 1) }).eq('id', eventId)
+  ])
+  return { error: resResult.error || eventResult.error }
 }
