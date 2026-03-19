@@ -221,7 +221,7 @@ document.getElementById('add-attendee-btn').addEventListener('click', async () =
 
 // --- WISHLIST ---
 async function loadWishlistAdmin() {
-  const { data } = await supabase.from('wishlist').select('*').order('credit_value', { ascending: false })
+  const { data } = await supabase.from('wishlist').select('*').order('item_name', { ascending: true })
   const el = document.getElementById('wishlist-list')
   if (!data || data.length === 0) {
     el.innerHTML = '<p class="muted">No wishlist items yet.</p>'
@@ -234,7 +234,6 @@ async function loadWishlistAdmin() {
     row.innerHTML = `
       <div>
         <strong>${escapeHtml(w.item_name)}</strong>
-        <span class="badge" style="margin-left:0.5rem">${escapeHtml(String(w.credit_value))} credits</span>
         ${!w.active ? '<span class="muted" style="margin-left:0.5rem">(inactive)</span>' : ''}
       </div>
       <div style="display:flex;gap:0.5rem">
@@ -266,18 +265,16 @@ document.getElementById('wishlist-list').addEventListener('click', async (e) => 
 
 document.getElementById('add-wishlist-btn').addEventListener('click', async () => {
   const item_name = document.getElementById('wishlist-name').value.trim()
-  const credit_value = parseInt(document.getElementById('wishlist-credits').value)
   const status = document.getElementById('wishlist-status')
-  if (!item_name || isNaN(credit_value) || credit_value < 1) {
-    status.textContent = 'Both fields are required (credit value must be at least 1)'
+  if (!item_name) {
+    status.textContent = 'Item name is required'
     status.className = 'error'
     return
   }
-  await supabase.from('wishlist').insert({ item_name, credit_value, active: true })
+  await supabase.from('wishlist').insert({ item_name, active: true })
   status.textContent = 'Added!'
   status.className = 'success'
   document.getElementById('wishlist-name').value = ''
-  document.getElementById('wishlist-credits').value = ''
   loadWishlistAdmin()
 })
 
