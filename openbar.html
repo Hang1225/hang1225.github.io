@@ -506,7 +506,10 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       )
       // Exclude invited events from the upcoming list — they appear in the Invitations card instead.
       // Without this, an invited guest would see a spurious "Reserve" button for their invited event.
-      const invitedEventIds = new Set(invitedReservations.map(r => r.event_id))
+      // Build from all invited rows (not just those with a joined event) to cover orphaned-FK edge cases.
+      const invitedEventIds = new Set(
+        attendeeReservations.filter(r => r.status === 'invited').map(r => r.event_id)
+      )
 
       // Split: upcoming events for Events card, past reservations for History card
       const upcomingEvents = events.filter(e => e.event_date >= today && !invitedEventIds.has(e.id))
