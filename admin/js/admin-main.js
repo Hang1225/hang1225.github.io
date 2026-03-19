@@ -339,7 +339,10 @@ async function loadSignupsAdmin() {
       span.replaceWith(input)
       input.focus()
 
+      let saved = false
       async function save() {
+        if (saved) return
+        saved = true
         const newAlias = input.value.trim() || null
         await supabase.from('attendees').update({ alias: newAlias }).eq('id', id)
         loadSignupsAdmin()
