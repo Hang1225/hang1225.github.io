@@ -34,6 +34,43 @@
       display: block;
     }
     .stat-label { font-size: 0.75rem; color: var(--muted); font-style: italic; }
+    .home-event-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      text-decoration: none;
+      color: inherit;
+    }
+    a.home-event-card { cursor: pointer; }
+    a.home-event-card:hover { border-color: var(--gold-dim); }
+    .home-event-card-date {
+      font-family: 'Cinzel', serif;
+      font-size: 0.54rem;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      margin-bottom: 0.15rem;
+    }
+    .home-event-card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--cream);
+    }
+    .home-event-card-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.2rem 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -47,6 +84,11 @@
         <a href="/menu.html" class="btn btn-solid" data-zh="今晚酒单" data-en="Tonight's Menu">今晚酒单</a>
         <a href="/openbar.html" class="btn" data-zh="OpenBar" data-en="OpenBar">OpenBar</a>
       </div>
+    </div>
+
+    <div id="home-events-section" class="fade-in-2" style="display:none;margin-bottom:2.5rem">
+      <span class="eyebrow" data-zh="即将举办" data-en="Upcoming">即将举办</span>
+      <div id="home-events-list" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.75rem"></div>
     </div>
 
     <div class="fade-in-2">
@@ -96,10 +138,58 @@
   <script type="module">
     import { requirePasscode } from './js/auth.js'
     import { renderNav, renderFooter, initLang } from './js/nav.js'
+    import { loadEvents, formatTimeRange } from './js/events.js'
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('首页')
     document.getElementById('footer').innerHTML = renderFooter()
     initLang()
+
+    function escapeHtml(str) {
+      if (!str) return ''
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')
+    }
+
+    function formatHomeEventDate(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00')
+      const days = ['SUN','MON','TUE','WED','THU','FRI','SAT']
+      const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
+      return `${days[d.getDay()]} · ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+    }
+
+    async function renderHomeEvents() {
+      const today = new Date().toISOString().split('T')[0]
+      const allEvents = await loadEvents()
+      const upcoming = allEvents.filter(e => e.event_date >= today)
+
+      const section = document.getElementById('home-events-section')
+      const list = document.getElementById('home-events-list')
+
+      if (!upcoming.length) return // section stays hidden
+
+      list.innerHTML = ''
+      upcoming.forEach(ev => {
+        const isOpenBar = ev.event_type === 'open'
+        const timeRange = formatTimeRange(ev.start_time, ev.end_time)
+        const dateStr = escapeHtml(formatHomeEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
+        const badgeText = isOpenBar ? 'Open Bar' : 'Home Bar'
+
+        const card = document.createElement(isOpenBar ? 'a' : 'div')
+        card.className = 'home-event-card'
+        if (isOpenBar) card.href = '/openbar.html'
+        card.innerHTML = `
+          <div>
+            <div class="home-event-card-date">${dateStr}</div>
+            <div class="home-event-card-title">${escapeHtml(ev.title)}</div>
+          </div>
+          <span class="home-event-card-badge">${badgeText}</span>
+        `
+        list.appendChild(card)
+      })
+
+      section.style.display = 'block'
+    }
+
+    renderHomeEvents()
   </script>
 </body>
 </html>
