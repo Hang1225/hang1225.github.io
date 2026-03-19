@@ -617,6 +617,106 @@ function buildEventBlockHtml(ev) {
   `
 }
 
+function buildEditFormHtml(ev) {
+  // Determine if event type is locked (has active reservations)
+  const activeStatuses = ['confirmed', 'waitlisted', 'interested']
+  const hasActiveRes = (ev.reservations || []).some(r => activeStatuses.includes(r.status))
+  const typeLocked = hasActiveRes
+
+  // Pre-populate time selects from stored values e.g. "19:00:00" → hour "19", min "00"
+  function splitTime(timeStr) {
+    if (!timeStr) return { hour: '', min: '' }
+    const [h, m] = timeStr.split(':')
+    return { hour: h, min: m }
+  }
+  const start = splitTime(ev.start_time)
+  const end   = splitTime(ev.end_time)
+
+  const typeSelect = typeLocked
+    ? `<select disabled style="opacity:0.5;cursor:not-allowed">
+         <option value="open"${ev.event_type === 'open' ? ' selected' : ''}>Open Bar</option>
+         <option value="curated"${ev.event_type === 'curated' ? ' selected' : ''}>Home Bar</option>
+       </select>
+       <span style="font-size:0.75rem;color:var(--muted);font-style:italic">(locked — active reservations exist)</span>`
+    : `<select class="edit-type-select" data-event-id="${escapeHtml(ev.id)}">
+         <option value="open"${ev.event_type === 'open' ? ' selected' : ''}>Open Bar</option>
+         <option value="curated"${ev.event_type === 'curated' ? ' selected' : ''}>Home Bar</option>
+       </select>`
+
+  const capacityHtml = `
+    <div class="edit-capacity-row" style="${ev.event_type === 'curated' ? 'display:none' : ''}">
+      <label style="font-size:0.75rem;color:var(--muted)">Capacity</label>
+      <input type="number" class="edit-capacity" min="1" value="${escapeHtml(String(ev.capacity || 6))}"
+        style="width:80px">
+    </div>`
+
+  // Minute options: 00, 15, 30, 45
+  const minuteOpts = (selected) => ['00','15','30','45'].map(m =>
+    `<option value="${m}"${m === selected ? ' selected' : ''}>${m}</option>`
+  ).join('')
+
+  return `
+    <div style="padding:0.75rem 0 1rem;border-bottom:1px solid rgba(201,168,76,0.12);margin-bottom:0.75rem">
+      <div style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.12em;color:var(--muted);margin-bottom:0.75rem">EDIT EVENT</div>
+
+      <div style="display:flex;flex-direction:column;gap:0.6rem">
+
+        <div>
+          <label style="font-size:0.75rem;color:var(--muted)">Title</label>
+          <input type="text" class="edit-title" value="${escapeHtml(ev.title)}" style="width:100%">
+        </div>
+
+        <div>
+          <label style="font-size:0.75rem;color:var(--muted)">Date</label>
+          <input type="date" class="edit-date" value="${escapeHtml(ev.event_date)}">
+        </div>
+
+        <div>
+          <label style="font-size:0.75rem;color:var(--muted)">Start Time</label>
+          <div style="display:flex;gap:0.4rem;align-items:center">
+            <select class="edit-start-hour">
+              <option value="">Hour</option>
+              ${hourOptions(start.hour)}
+            </select>
+            <select class="edit-start-min">
+              <option value="">Min</option>
+              ${minuteOpts(start.min)}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.75rem;color:var(--muted)">End Time <span style="font-style:italic;font-size:0.7rem">(optional)</span></label>
+          <div style="display:flex;gap:0.4rem;align-items:center">
+            <select class="edit-end-hour">
+              <option value="">Flexible</option>
+              ${hourOptions(end.hour)}
+            </select>
+            <select class="edit-end-min">
+              <option value="">Min</option>
+              ${minuteOpts(end.min)}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.75rem;color:var(--muted)">Event Type</label>
+          <div style="display:flex;align-items:center;gap:0.5rem">${typeSelect}</div>
+        </div>
+
+        ${capacityHtml}
+
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:0.85rem;align-items:center">
+        <button class="btn btn-sm btn-solid save-edit-btn" data-event-id="${escapeHtml(ev.id)}">Save Changes</button>
+        <button class="btn btn-sm cancel-edit-btn" data-event-id="${escapeHtml(ev.id)}">Cancel</button>
+        <span class="edit-status" style="font-size:0.8rem"></span>
+      </div>
+    </div>
+  `
+}
+
 // --- ACCOUNT REMOVAL MODAL ---
 let _removeTargetId = null
 
