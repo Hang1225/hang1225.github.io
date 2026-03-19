@@ -733,13 +733,13 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
             status = (used + guestCount <= capacity) ? 'confirmed' : 'waitlisted'
           }
 
-          // Check if this attendee has a previously-removed reservation for this event
-          const removedRes = attendeeReservations.find(
-            r => r.event_id === eventId && r.status === 'removed'
+          // Check if this attendee has a previously-removed or declined reservation for this event
+          const reusableRes = attendeeReservations.find(
+            r => r.event_id === eventId && (r.status === 'removed' || r.status === 'declined')
           )
 
-          const { error } = removedRes
-            ? await reapplyReservation(removedRes.id, guestCount, message || null, status)
+          const { error } = reusableRes
+            ? await reapplyReservation(reusableRes.id, guestCount, message || null, status)
             : await createReservation(eventId, currentAttendee.id, guestCount, message || null, status)
 
           btn.disabled = false
