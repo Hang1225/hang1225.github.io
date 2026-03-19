@@ -482,6 +482,7 @@ async function loadEventsAdmin() {
     return
   }
 
+  window._eventsAdminCache = events  // cache for edit form lookups
   container.innerHTML = ''
   events.forEach(ev => {
     const block = document.createElement('div')
@@ -798,6 +799,95 @@ function attachEventBlockHandlers(container) {
         .from('events')
         .update({ notes: textarea.value.trim() || null })
         .eq('id', textarea.dataset.eventId)
+    })
+  })
+
+  // Edit button — show inline edit form
+  container.querySelectorAll('.edit-event-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation()
+      const eventId = btn.dataset.eventId
+
+      // Expand the block body if collapsed
+      const header = btn.closest('.event-block-header')
+      const body = header.nextElementSibling
+      body.style.display = 'block'
+
+      const formContainer = document.getElementById('edit-form-' + eventId)
+      if (formContainer.style.display === 'block') return // already open
+
+      const ev = (window._eventsAdminCache || []).find(ev => ev.id === eventId)
+      if (!ev) return
+
+      formContainer.innerHTML = buildEditFormHtml(ev)
+      formContainer.style.display = 'block'
+      btn.style.display = 'none'
+
+      // Type select → toggle capacity row visibility
+      const typeSelect = formContainer.querySelector('.edit-type-select')
+      const capacityRow = formContainer.querySelector('.edit-capacity-row')
+      if (typeSelect && capacityRow) {
+        typeSelect.addEventListener('change', () => {
+          capacityRow.style.display = typeSelect.value === 'curated' ? 'none' : ''
+        })
+      }
+
+      // Cancel — attach directly on the now-existing button
+      formContainer.querySelector('.cancel-edit-btn').addEventListener('click', e => {
+        e.stopPropagation()
+        formContainer.style.display = 'none'
+        formContainer.innerHTML = ''
+        btn.style.display = '' // re-show Edit button
+      })
+
+      // Save — attach directly on the now-existing button
+      formContainer.querySelector('.save-edit-btn').addEventListener('click', async e => {
+        e.stopPropagation()
+        const statusEl = formContainer.querySelector('.edit-status')
+
+        const title  = formContainer.querySelector('.edit-title').value.trim()
+        const date   = formContainer.querySelector('.edit-date').value
+        const startH = formContainer.querySelector('.edit-start-hour').value
+        const startM = formContainer.querySelector('.edit-start-min').value
+        const endH   = formContainer.querySelector('.edit-end-hour').value
+        const endM   = formContainer.querySelector('.edit-end-min').value
+
+        const start_time = composeTime(startH, startM)
+        const end_time   = endH ? composeTime(endH, endM) : null
+
+        if (!title || !date || !start_time) {
+          statusEl.textContent = 'Title, date, and start time are required.'
+          statusEl.className = 'error'
+          return
+        }
+
+        // Build update payload
+        const typeSelectEl = formContainer.querySelector('.edit-type-select')
+        const event_type = typeSelectEl ? typeSelectEl.value : null // null if locked — don't overwrite
+        const capacityEl = formContainer.querySelector('.edit-capacity')
+        const capacity = capacityEl && capacityEl.closest('.edit-capacity-row').style.display !== 'none'
+          ? parseInt(capacityEl.value)
+          : null // omit capacity for Home Bar events
+
+        const payload = { title, event_date: date, start_time, end_time }
+        if (event_type) payload.event_type = event_type
+        if (capacity !== null && !isNaN(capacity) && capacity >= 1) payload.capacity = capacity
+
+        const saveBtn = formContainer.querySelector('.save-edit-btn')
+        saveBtn.disabled = true
+        statusEl.textContent = ''
+
+        const { error } = await supabase.from('events').update(payload).eq('id', eventId)
+
+        saveBtn.disabled = false
+        if (error) {
+          statusEl.textContent = 'Save failed. Please try again.'
+          statusEl.className = 'error'
+          return
+        }
+
+        loadEventsAdmin() // full re-render to reflect changes
+      })
     })
   })
 }
