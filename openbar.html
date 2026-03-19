@@ -465,12 +465,13 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     async function loadDashboardData() {
       const today = new Date().toISOString().split('T')[0]
 
-      const [events, attendeeReservations, slotRes, waitRes] = await Promise.all([
+      const [events, res, slotRes, waitRes] = await Promise.all([
         loadEvents(),
         loadAttendeeReservations(currentAttendee.id),
         supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed'),
         supabase.from('reservations').select('id, event_id, created_at').eq('status', 'waitlisted')
       ])
+      attendeeReservations = res
 
       // Slot usage by event (all attendees)
       const slotsByEvent = {}
@@ -843,6 +844,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
     // Restore session
     let currentAttendee = null
+    let attendeeReservations = []
     const session = getAttendeeSession()
     if (session) showDashboard(session)
 
