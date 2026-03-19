@@ -253,7 +253,7 @@ document.getElementById('add-wishlist-btn').addEventListener('click', async () =
 async function loadSignupsAdmin() {
   const { data } = await supabase
     .from('attendees')
-    .select('id, username, alias, gender, gender_visibility, created_at')
+    .select('id, username, alias, gender, gender_visibility, created_at, removed_at')
     .order('created_at', { ascending: false })
 
   const el = document.getElementById('signups-list')
@@ -265,36 +265,44 @@ async function loadSignupsAdmin() {
   el.innerHTML = ''
   data.forEach(a => {
     const row = document.createElement('div')
-    row.className = 'item-row'
+    const isDisabled = !!a.removed_at
+    row.className = 'item-row' + (isDisabled ? ' attendee-row-disabled' : '')
 
     const genderVal = a.gender || ''
     const visVal    = a.gender_visibility || 'admin_only'
-    // Note: the spec mentions showing a "self-reported vs admin-override" label.
-    // The data model has only one `gender` column — there is no separate self-reported column.
-    // Once the admin changes it, the original value is gone. We show the "(prefers not to say)"
-    // label only when gender is null (the guest's default). This is the maximum precision
-    // the current schema supports.
     const selfLabel = !a.gender
       ? `<span class="muted" style="font-size:0.78rem;font-style:italic"> (prefers not to say)</span>`
       : ''
 
+    // data-alias uses escapeHtml() for HTML attribute safety (e.g. quotes in alias names).
+    // dataset.alias in JS automatically un-decodes HTML entities, so input.value receives the literal string.
+    const aliasDisplay = isDisabled
+      ? `<strong>${escapeHtml(a.alias || a.username)}</strong>`
+      : `<strong class="alias-text" data-attendee-id="${a.id}" data-alias="${escapeHtml(a.alias || '')}">${escapeHtml(a.alias || a.username)}</strong>`
+
+    // data-alias in the remove button stores the display name for the modal message
+    const actionBtn = isDisabled
+      ? `<button class="btn btn-sm btn-outline restore-btn" data-attendee-id="${a.id}">Restore</button>`
+      : `<button class="btn btn-sm btn-danger remove-btn" data-attendee-id="${a.id}" data-alias="${escapeHtml(a.alias || a.username)}">Remove Account</button>`
+
     row.innerHTML = `
       <div>
-        <strong>${escapeHtml(a.alias || a.username)}</strong>
+        ${aliasDisplay}
         <span class="muted"> @${escapeHtml(a.username)}</span>${selfLabel}
         <div class="muted" style="font-size:0.8rem;margin-top:0.2rem">${new Date(a.created_at).toLocaleDateString()}</div>
       </div>
       <div class="gender-controls">
-        <select class="gender-select" data-attendee-id="${escapeHtml(a.id)}">
+        <select class="gender-select" data-attendee-id="${a.id}"${isDisabled ? ' disabled' : ''}>
           <option value=""${genderVal === '' ? ' selected' : ''}>Prefer not to say</option>
           <option value="male"${genderVal === 'male' ? ' selected' : ''}>Male</option>
           <option value="female"${genderVal === 'female' ? ' selected' : ''}>Female</option>
           <option value="non-binary"${genderVal === 'non-binary' ? ' selected' : ''}>Non-binary</option>
         </select>
         <div class="vis-toggle">
-          <button class="vis-opt${visVal === 'admin_only' ? ' active' : ''}" data-attendee-id="${escapeHtml(a.id)}" data-vis="admin_only">Admin only</button>
-          <button class="vis-opt${visVal === 'public' ? ' active' : ''}" data-attendee-id="${escapeHtml(a.id)}" data-vis="public">Visible to all</button>
+          <button class="vis-opt${visVal === 'admin_only' ? ' active' : ''}" data-attendee-id="${a.id}" data-vis="admin_only"${isDisabled ? ' disabled' : ''}>Admin only</button>
+          <button class="vis-opt${visVal === 'public' ? ' active' : ''}" data-attendee-id="${a.id}" data-vis="public"${isDisabled ? ' disabled' : ''}>Visible to all</button>
         </div>
+        ${actionBtn}
       </div>
     `
     el.appendChild(row)
@@ -317,6 +325,45 @@ async function loadSignupsAdmin() {
       await supabase.from('attendees')
         .update({ gender_visibility: btn.dataset.vis })
         .eq('id', btn.dataset.attendeeId)
+    })
+  })
+
+  // Alias click-to-edit
+  el.querySelectorAll('.alias-text').forEach(span => {
+    span.addEventListener('click', () => {
+      const id = span.dataset.attendeeId
+      const current = span.dataset.alias  // raw alias value, safe to use as input.value
+      const input = document.createElement('input')
+      input.value = current
+      input.style.cssText = 'width:auto;padding:0.1rem 0.3rem;font-size:inherit;font-family:inherit'
+      span.replaceWith(input)
+      input.focus()
+
+      async function save() {
+        const newAlias = input.value.trim() || null
+        await supabase.from('attendees').update({ alias: newAlias }).eq('id', id)
+        loadSignupsAdmin()
+      }
+      input.addEventListener('blur', save)
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); save() }
+        if (e.key === 'Escape') { loadSignupsAdmin() }
+      })
+    })
+  })
+
+  // Remove Account button → open modal
+  el.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openRemoveModal(btn.dataset.attendeeId, btn.dataset.alias)
+    })
+  })
+
+  // Restore button
+  el.querySelectorAll('.restore-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await supabase.from('attendees').update({ removed_at: null }).eq('id', btn.dataset.attendeeId)
+      loadSignupsAdmin()
     })
   })
 }
@@ -505,6 +552,34 @@ function buildEventBlockHtml(ev) {
     </div>
   `
 }
+
+// --- ACCOUNT REMOVAL MODAL ---
+let _removeTargetId = null
+
+function openRemoveModal(attendeeId, alias) {
+  _removeTargetId = attendeeId
+  document.getElementById('remove-modal-msg').textContent =
+    `Remove ${alias}'s account? They will no longer be able to log in. This cannot be easily undone.`
+  document.getElementById('remove-attendee-modal').style.display = 'flex'
+}
+
+function closeRemoveModal() {
+  document.getElementById('remove-attendee-modal').style.display = 'none'
+  _removeTargetId = null
+}
+
+document.getElementById('remove-modal-cancel').addEventListener('click', closeRemoveModal)
+document.getElementById('remove-modal-confirm').addEventListener('click', async () => {
+  if (!_removeTargetId) return
+  await supabase.from('attendees').update({ removed_at: new Date().toISOString() }).eq('id', _removeTargetId)
+  closeRemoveModal()
+  loadSignupsAdmin()
+})
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('remove-attendee-modal').style.display !== 'none') {
+    closeRemoveModal()
+  }
+})
 
 function attachEventBlockHandlers(container) {
   // Expand / collapse
