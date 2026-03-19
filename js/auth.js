@@ -28,11 +28,12 @@ export async function loginAttendee(username, pin) {
   const pin_hash = await hashPin(pin)
   const { data, error } = await supabase
     .from('attendees')
-    .select('id, username, alias, credits, gender, gender_visibility')
+    .select('id, username, alias, credits, gender, gender_visibility, removed_at')
     .eq('username', username.toLowerCase())
     .eq('pin_hash', pin_hash)
     .single()
   if (error || !data) return null
+  if (data.removed_at) return { error: 'disabled' }
   sessionStorage.setItem(ATTENDEE_KEY, JSON.stringify(data))
   return data
 }

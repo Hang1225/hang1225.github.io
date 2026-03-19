@@ -799,8 +799,13 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
       if (!pin) return
       const attendee = await loginAttendee(username, pin)
-      if (attendee) { showDashboard(attendee) }
-      else {
+      if (attendee?.error === 'disabled') {
+        const errEl = document.getElementById('login-error')
+        errEl.textContent = t('账户已被禁用，请联系主人', 'Account disabled. Please contact the host.')
+        errEl.style.display = 'block'
+      } else if (attendee) {
+        showDashboard(attendee)
+      } else {
         const errEl = document.getElementById('login-error')
         errEl.textContent = t('用户名或密码错误', 'Incorrect username or password')
         errEl.style.display = 'block'
@@ -835,7 +840,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       status.className = 'success'
 
       const attendee = await loginAttendee(username, pin)
-      if (attendee) showDashboard(attendee)
+      if (attendee && !attendee.error) showDashboard(attendee)
     })
 
     // Logout
