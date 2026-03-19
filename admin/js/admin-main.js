@@ -282,7 +282,7 @@ document.getElementById('add-wishlist-btn').addEventListener('click', async () =
 async function loadSignupsAdmin() {
   const { data } = await supabase
     .from('attendees')
-    .select('id, username, alias, gender, gender_visibility, created_at, removed_at')
+    .select('id, username, alias, nickname, gender, gender_visibility, created_at, removed_at')
     .order('created_at', { ascending: false })
 
   window._attendeesCache = data || []
@@ -320,6 +320,11 @@ async function loadSignupsAdmin() {
         ${aliasDisplay}
         <span class="muted"> @${escapeHtml(a.username)}</span>${selfLabel}
         <div class="muted" style="font-size:0.8rem;margin-top:0.2rem">${new Date(a.created_at).toLocaleDateString()}</div>
+        <input type="text" class="nickname-input" data-attendee-id="${a.id}"
+          value="${escapeHtml(a.nickname || '')}"
+          placeholder="Add nickname…"
+          style="margin-top:0.3rem;font-size:0.8rem;width:100%;max-width:220px"
+          ${isDisabled ? 'disabled' : ''}>
       </div>
       <div class="gender-controls">
         <select class="gender-select" data-attendee-id="${a.id}"${isDisabled ? ' disabled' : ''}>
@@ -397,6 +402,16 @@ async function loadSignupsAdmin() {
     btn.addEventListener('click', async () => {
       await supabase.from('attendees').update({ removed_at: null }).eq('id', btn.dataset.attendeeId)
       loadSignupsAdmin()
+    })
+  })
+
+  // Nickname input — auto-save on blur, no re-render
+  el.querySelectorAll('.nickname-input').forEach(input => {
+    input.addEventListener('blur', async () => {
+      const value = input.value.trim()
+      await supabase.from('attendees')
+        .update({ nickname: value || null })
+        .eq('id', input.dataset.attendeeId)
     })
   })
 }
