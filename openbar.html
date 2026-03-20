@@ -1653,6 +1653,41 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       }
     }
     window.toggleProfilePanel = toggleProfilePanel
+
+    // ── Profile panel: Save ───────────────────────────────────────────────────
+    async function saveProfile() {
+      const alias  = document.getElementById('profile-alias').value.trim()
+      const gender = document.getElementById('profile-gender-val').value || null
+      const mbti   = document.getElementById('profile-mbti-val').value   || null
+      const status = document.getElementById('profile-save-status')
+
+      if (!alias) {
+        status.textContent = t('请输入显示名称', 'Please enter a display name')
+        status.className   = 'error'
+        return
+      }
+
+      const gender_visibility = (gender && gender !== 'prefer-not') ? 'public' : 'admin_only'
+
+      const { error } = await supabase
+        .from('attendees')
+        .update({ alias, gender, mbti, gender_visibility })
+        .eq('id', currentAttendee.id)
+
+      if (error) {
+        status.textContent = t('保存失败，请重试', 'Save failed, please try again')
+        status.className   = 'error'
+        return
+      }
+
+      // Update in-memory attendee + refresh header
+      currentAttendee = { ...currentAttendee, alias, gender, mbti, gender_visibility }
+      refreshProfileHeader()
+      status.textContent = t('已保存', 'Saved')
+      status.className   = 'success'
+      setTimeout(closeProfilePanel, 900)
+    }
+    window.saveProfile = saveProfile
   </script>
 </body>
 </html>
