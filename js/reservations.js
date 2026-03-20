@@ -21,9 +21,12 @@ export async function loadEventReservations(eventId) {
 export async function loadEventGuestList(eventId, showCount, showNames, showGender) {
   if (!showCount && !showNames && !showGender) return null
 
+  const attendeeFields = showGender
+    ? 'alias, username, gender, gender_visibility, mbti'
+    : 'alias, username, gender, gender_visibility'
   const { data, error } = await supabase
     .from('reservations')
-    .select('id, guest_count, attendees(alias, username, gender, gender_visibility, mbti)')
+    .select(`id, guest_count, attendees(${attendeeFields})`)
     .eq('event_id', eventId)
     .eq('status', 'confirmed')
     .order('created_at', { ascending: true })
