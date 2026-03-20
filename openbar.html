@@ -245,6 +245,172 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 .g-nb { background: rgba(140,160,120,0.15); border: 1px solid rgba(140,160,120,0.3); color: #A0BE90; }
 .g-hidden { background: rgba(106,94,74,0.1); border: 1px solid rgba(106,94,74,0.2); color: var(--muted); }
 .g-mbti { background: rgba(160,140,100,0.12); border: 1px solid rgba(160,140,100,0.25); color: var(--muted); }
+
+/* ── SIGNUP: Gender pills ── */
+.signup-field-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.46rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 0.6rem;
+  margin-top: 0.1rem;
+}
+.gender-pills {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+.gender-pill {
+  font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+  font-size: 0.72rem;
+  padding: 0.4rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.gender-pill:hover { border-color: var(--gold-dim); color: var(--text); }
+.gender-pill.active {
+  border-color: var(--gold);
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.08);
+}
+.gender-pill.active::after {
+  content: ' ◆';
+  font-size: 0.28rem;
+  color: var(--gold-dim);
+  vertical-align: middle;
+}
+
+/* ── SIGNUP: MBTI cocktail carousel ── */
+.mbti-signup-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.22rem;
+  margin-bottom: 0.6rem;
+}
+.mbti-signup-tab {
+  font-family: 'Cinzel', serif;
+  font-size: 0.34rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.28rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+}
+.mbti-signup-tab.ta.active { border-color:#7AA0D8; color:#7AA0D8; background:rgba(122,160,216,0.07); }
+.mbti-signup-tab.td.active { border-color:#A888D0; color:#A888D0; background:rgba(168,136,208,0.07); }
+.mbti-signup-tab.ts.active { border-color:#5A9068; color:#5A9068; background:rgba(90,144,104,0.07); }
+.mbti-signup-tab.te.active { border-color:#C9A84C; color:#C9A84C; background:rgba(201,168,76,0.07); }
+.mbti-carousel-wrap {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(0,0,0,0.18);
+  margin-bottom: 0;
+}
+.mbti-carousel-track {
+  display: flex;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  cursor: grab;
+}
+.mbti-carousel-track.dragging { cursor: grabbing; transition: none; }
+.mbti-carousel-slide {
+  min-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.mbti-char-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.15rem 0.6rem;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: background 0.18s;
+  position: relative;
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+.mbti-char-card:last-child { border-right: none; }
+.mbti-char-card:hover { background: rgba(255,255,255,0.025); }
+.mbti-char-card.sel { background: rgba(var(--mbti-gr), 0.07); }
+.mbti-char-card.sel::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgb(var(--mbti-gr));
+}
+.mbti-char-card svg {
+  transition: transform 0.22s cubic-bezier(0.34,1.4,0.64,1);
+}
+.mbti-char-card:hover svg { transform: translateY(-2px) scale(1.04); }
+.mbti-char-card.sel svg {
+  transform: translateY(-3px) scale(1.06);
+  filter: drop-shadow(0 5px 12px rgba(var(--mbti-gr), 0.35));
+}
+.mbti-char-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.44rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.18s;
+  margin-top: 0.3rem;
+}
+.mbti-char-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.5rem;
+  color: var(--muted);
+  opacity: 0.5;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.mbti-char-card.sel .mbti-char-name { color: rgb(var(--mbti-gr)); }
+.mbti-char-card.sel .mbti-char-sub  { opacity: 0.8; color: rgb(var(--mbti-gr)); }
+.mbti-carousel-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+.mbti-nav-arrow {
+  font-family: 'Cinzel', serif;
+  font-size: 0.36rem;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  transition: color 0.18s;
+}
+.mbti-nav-arrow:hover { color: var(--gold); }
+.mbti-nav-arrow:disabled { opacity: 0.2; cursor: default; }
+.mbti-nav-dots { display: flex; gap: 0.28rem; align-items: center; }
+.mbti-nav-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.35;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.mbti-nav-dot.active { opacity: 1; width: 12px; border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -289,31 +455,120 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
             <input type="text" id="signup-username"
               data-placeholder-zh="选择用户名" data-placeholder-en="Choose a username"
               placeholder="选择用户名" autocomplete="username">
-            <select id="signup-gender" style="width:100%">
-              <option value="">性别（可选）/ Gender (optional)</option>
-              <option value="male">男 / Male</option>
-              <option value="female">女 / Female</option>
-              <option value="non-binary">非二元 / Non-binary</option>
-            </select>
-            <select id="signup-mbti" style="width:100%">
-              <option value="">MBTI（可选）/ MBTI (optional)</option>
-              <option value="INTJ">INTJ</option>
-              <option value="INTP">INTP</option>
-              <option value="ENTJ">ENTJ</option>
-              <option value="ENTP">ENTP</option>
-              <option value="INFJ">INFJ</option>
-              <option value="INFP">INFP</option>
-              <option value="ENFJ">ENFJ</option>
-              <option value="ENFP">ENFP</option>
-              <option value="ISTJ">ISTJ</option>
-              <option value="ISFJ">ISFJ</option>
-              <option value="ESTJ">ESTJ</option>
-              <option value="ESFJ">ESFJ</option>
-              <option value="ISTP">ISTP</option>
-              <option value="ISFP">ISFP</option>
-              <option value="ESTP">ESTP</option>
-              <option value="ESFP">ESFP</option>
-            </select>
+            <!-- Gender pills -->
+            <input type="hidden" id="signup-gender">
+            <span class="signup-field-label" data-zh="性别（可选）" data-en="Gender (optional)">性别（可选）</span>
+            <div class="gender-pills">
+              <button type="button" class="gender-pill" data-value="male" data-zh="男" data-en="Male" onclick="signupSelectGender(this)">男</button>
+              <button type="button" class="gender-pill" data-value="female" data-zh="女" data-en="Female" onclick="signupSelectGender(this)">女</button>
+              <button type="button" class="gender-pill" data-value="non-binary" data-zh="非二元" data-en="Non-binary" onclick="signupSelectGender(this)">非二元</button>
+              <button type="button" class="gender-pill" data-value="prefer-not" data-zh="不透露" data-en="Private" onclick="signupSelectGender(this)">不透露</button>
+            </div>
+
+            <!-- MBTI cocktail carousel -->
+            <input type="hidden" id="signup-mbti">
+            <span class="signup-field-label" data-zh="MBTI（可选）" data-en="MBTI (optional)">MBTI（可选）</span>
+            <div class="mbti-signup-tabs">
+              <button type="button" class="mbti-signup-tab ta active" data-zh="分析家" data-en="Analysts" onclick="mbtiGoSlide(0,this)">分析家</button>
+              <button type="button" class="mbti-signup-tab td" data-zh="外交家" data-en="Diplomats" onclick="mbtiGoSlide(1,this)">外交家</button>
+              <button type="button" class="mbti-signup-tab ts" data-zh="守卫者" data-en="Sentinels" onclick="mbtiGoSlide(2,this)">守卫者</button>
+              <button type="button" class="mbti-signup-tab te" data-zh="探险家" data-en="Explorers" onclick="mbtiGoSlide(3,this)">探险家</button>
+            </div>
+            <div class="mbti-carousel-wrap" id="mbti-carousel">
+              <div class="mbti-carousel-track" id="mbti-track">
+
+                <!-- Analysts (blue) -->
+                <div class="mbti-carousel-slide" style="--mbti-gr:122,160,216">
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'INTJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="25" cy="11" r="9" fill="#7AA0D8" opacity="0.92"/><rect x="17" y="9" width="6" height="4" rx="1" fill="none" stroke="#0D0D1A" stroke-width="1.2" opacity="0.55"/><rect x="27" y="9" width="6" height="4" rx="1" fill="none" stroke="#0D0D1A" stroke-width="1.2" opacity="0.55"/><line x1="23" y1="11" x2="27" y2="11" stroke="#0D0D1A" stroke-width="1" opacity="0.5"/><line x1="21" y1="16" x2="29" y2="16" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/><path d="M11 22 L39 22 L35 56 L15 56 Z" fill="#7AA0D8" opacity="0.78"/><path d="M13 34 L37 34 L35 56 L15 56 Z" fill="#7AA0D8" opacity="0.3"/><rect x="19" y="36" width="10" height="10" rx="2" fill="rgba(200,230,255,0.25)" stroke="rgba(200,230,255,0.6)" stroke-width="0.9" transform="rotate(8 24 41)"/><line x1="14" y1="24" x2="17" y2="52" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.1"/><rect x="3" y="24" width="8" height="20" rx="4" fill="#7AA0D8" opacity="0.65" transform="rotate(-6 7 34)"/><rect x="39" y="24" width="8" height="20" rx="4" fill="#7AA0D8" opacity="0.65" transform="rotate(6 43 34)"/><rect x="15" y="56" width="8" height="13" rx="4" fill="#7AA0D8" opacity="0.6"/><rect x="27" y="56" width="8" height="13" rx="4" fill="#7AA0D8" opacity="0.6"/><path d="M16 22 Q12 18 10 14 Q14 12 18 16 Q20 19 16 22Z" fill="#E2C870" opacity="0.7"/></svg>
+                    <div class="mbti-char-name">INTJ</div><div class="mbti-char-sub">Negroni</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'INTP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="25" cy="11" r="9" fill="#7AA0D8" opacity="0.88"/><circle cx="21" cy="10" r="2.2" fill="#0D0D1A" opacity="0.5"/><circle cx="29" cy="10" r="2.2" fill="#0D0D1A" opacity="0.5"/><circle cx="21.6" cy="9.4" r="0.8" fill="white" opacity="0.5"/><circle cx="29.6" cy="9.4" r="0.8" fill="white" opacity="0.5"/><path d="M21 16 Q25 19 29 16" stroke="#0D0D1A" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.3"/><path d="M12 22 L38 22 L34 56 L16 56 Z" fill="#7AA0D8" opacity="0.72"/><path d="M14 33 L36 33 L34 56 L16 56 Z" fill="#7AA0D8" opacity="0.28"/><rect x="16" y="35" width="13" height="13" rx="2.5" fill="rgba(200,230,255,0.2)" stroke="rgba(200,230,255,0.55)" stroke-width="0.9" transform="rotate(-6 22 41)"/><circle cx="32" cy="30" r="3" fill="rgba(192,96,96,0.6)" stroke="#C06060" stroke-width="0.8"/><path d="M32 27 Q35 22 33 19" stroke="#5A9068" stroke-width="1" stroke-linecap="round" fill="none"/><rect x="2" y="12" width="8" height="20" rx="4" fill="#7AA0D8" opacity="0.62" transform="rotate(25 6 22)"/><rect x="40" y="26" width="8" height="18" rx="4" fill="#7AA0D8" opacity="0.58" transform="rotate(5 44 35)"/><rect x="16" y="56" width="8" height="13" rx="4" fill="#7AA0D8" opacity="0.58"/><rect x="28" y="56" width="8" height="13" rx="4" fill="#7AA0D8" opacity="0.58"/></svg>
+                    <div class="mbti-char-name">INTP</div><div class="mbti-char-sub">Old Fashioned</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ENTJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><path d="M18 4 L20 9 L25 6 L30 9 L32 4 L34 9 L16 9 Z" fill="#E2C870" opacity="0.75"/><circle cx="25" cy="16" r="10" fill="#7AA0D8" opacity="0.95"/><line x1="18" y1="13" x2="23" y2="14.5" stroke="#0D0D1A" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="32" y1="13" x2="27" y2="14.5" stroke="#0D0D1A" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M19 20 Q25 24 31 20" stroke="#0D0D1A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M4 28 L46 28 L25 56 Z" fill="#7AA0D8" opacity="0.8"/><path d="M8 34 L42 34 L25 56 Z" fill="#7AA0D8" opacity="0.3"/><line x1="15" y1="28" x2="35" y2="28" stroke="rgba(200,230,255,0.4)" stroke-width="0.8"/><ellipse cx="25" cy="28" rx="4" ry="2.5" fill="rgba(90,144,104,0.55)" stroke="#5A9068" stroke-width="0.9"/><circle cx="25" cy="28" r="1.3" fill="rgba(192,96,96,0.7)"/><line x1="25" y1="56" x2="25" y2="64" stroke="#7AA0D8" stroke-width="2" opacity="0.65"/><ellipse cx="25" cy="64" rx="10" ry="2.5" fill="#7AA0D8" opacity="0.35"/><rect x="-4" y="30" width="14" height="7" rx="3.5" fill="#7AA0D8" opacity="0.68" transform="rotate(-8 3 33)"/><rect x="40" y="30" width="14" height="7" rx="3.5" fill="#7AA0D8" opacity="0.68" transform="rotate(8 47 33)"/></svg>
+                    <div class="mbti-char-name">ENTJ</div><div class="mbti-char-sub">Martini</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ENTP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><path d="M15 6 Q25 1 35 6 Q33 12 25 13 Q17 12 15 6Z" fill="rgba(90,144,104,0.55)" stroke="#5A9068" stroke-width="0.9"/><line x1="15" y1="6" x2="35" y2="6" stroke="#5A9068" stroke-width="0.7" opacity="0.5"/><line x1="25" y1="3" x2="25" y2="13" stroke="#5A9068" stroke-width="0.5" opacity="0.4"/><line x1="19" y1="4" x2="22" y2="12" stroke="#5A9068" stroke-width="0.5" opacity="0.4"/><line x1="31" y1="4" x2="28" y2="12" stroke="#5A9068" stroke-width="0.5" opacity="0.4"/><circle cx="25" cy="19" r="9" fill="#7AA0D8" opacity="0.88"/><path d="M19 21 Q25 26 31 21" stroke="#0D0D1A" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M19 16 Q21 14 23 16" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.45"/><path d="M27 16 Q29 14 31 16" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.45"/><path d="M14 30 L36 30 L37 60 L13 60 Z" fill="#7AA0D8" opacity="0.72"/><path d="M14 40 L36 40 L37 60 L13 60 Z" fill="#7AA0D8" opacity="0.28"/><circle cx="20" cy="52" r="1.5" fill="rgba(200,230,255,0.35)" stroke="rgba(200,230,255,0.6)" stroke-width="0.6"/><circle cx="26" cy="45" r="1.2" fill="rgba(200,230,255,0.3)" stroke="rgba(200,230,255,0.55)" stroke-width="0.5"/><circle cx="30" cy="54" r="1" fill="rgba(200,230,255,0.25)" stroke="rgba(200,230,255,0.5)" stroke-width="0.5"/><rect x="37" y="32" width="14" height="7" rx="3.5" fill="#7AA0D8" opacity="0.65" transform="rotate(-15 44 35)"/><rect x="1" y="34" width="13" height="7" rx="3.5" fill="#7AA0D8" opacity="0.55" transform="rotate(10 7 37)"/><rect x="15" y="60" width="8" height="9" rx="4" fill="#7AA0D8" opacity="0.58"/><rect x="27" y="60" width="8" height="9" rx="4" fill="#7AA0D8" opacity="0.58"/></svg>
+                    <div class="mbti-char-name">ENTP</div><div class="mbti-char-sub">Gin &amp; Tonic</div>
+                  </button>
+                </div>
+
+                <!-- Diplomats (purple) -->
+                <div class="mbti-carousel-slide" style="--mbti-gr:168,136,208">
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'INFJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="34" cy="6" r="3.5" fill="rgba(168,136,208,0.5)" stroke="#A888D0" stroke-width="0.9"/><circle cx="34" cy="6" r="1.5" fill="rgba(168,136,208,0.8)"/><line x1="34" y1="9" x2="33" y2="14" stroke="rgba(90,144,104,0.6)" stroke-width="0.9"/><circle cx="25" cy="14" r="9" fill="#A888D0" opacity="0.9"/><path d="M19 13 Q21 11 23 13" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M27 13 Q29 11 31 13" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M21 18 Q25 21 29 18" stroke="#0D0D1A" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.28"/><path d="M19 24 L31 24 L28 58 L22 58 Z" fill="#A888D0" opacity="0.75"/><path d="M19.5 32 L30.5 32 L28 58 L22 58 Z" fill="#A888D0" opacity="0.28"/><circle cx="25" cy="50" r="1" fill="rgba(230,200,255,0.4)" stroke="rgba(230,200,255,0.6)" stroke-width="0.5"/><circle cx="24" cy="42" r="0.8" fill="rgba(230,200,255,0.35)" stroke="rgba(230,200,255,0.55)" stroke-width="0.5"/><ellipse cx="25" cy="58" rx="10" ry="2.5" fill="#A888D0" opacity="0.3"/><line x1="25" y1="58" x2="25" y2="64" stroke="#A888D0" stroke-width="1.5" opacity="0.5"/><ellipse cx="25" cy="64" rx="7" ry="2" fill="#A888D0" opacity="0.25"/><path d="M19 28 Q10 24 5 28 Q8 34 13 32 Q16 30 19 32" fill="#A888D0" opacity="0.52"/><path d="M31 28 Q40 24 45 28 Q42 34 37 32 Q34 30 31 32" fill="#A888D0" opacity="0.52"/></svg>
+                    <div class="mbti-char-name">INFJ</div><div class="mbti-char-sub">Lavender Fizz</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'INFP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><path d="M34 4 L35.2 7.6 L39 7.6 L36 9.8 L37.2 13.4 L34 11.2 L30.8 13.4 L32 9.8 L29 7.6 L32.8 7.6 Z" fill="#E2C870" opacity="0.6" transform="scale(0.7) translate(14,2)"/><circle cx="24" cy="14" r="9" fill="#A888D0" opacity="0.87"/><path d="M18 13 Q20 11.5 22 13 Q20 14.5 18 13Z" fill="#0D0D1A" opacity="0.35"/><path d="M26 13 Q28 11.5 30 13 Q28 14.5 26 13Z" fill="#0D0D1A" opacity="0.35"/><path d="M20 18 Q24 21 28 18" stroke="#0D0D1A" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.28"/><path d="M11 24 L39 24 L34 46 L16 46 Z" fill="#A888D0" opacity="0.72"/><path d="M13 31 L37 31 L34 46 L16 46 Z" fill="#A888D0" opacity="0.28"/><line x1="25" y1="46" x2="25" y2="58" stroke="#A888D0" stroke-width="2" opacity="0.55"/><ellipse cx="25" cy="58" rx="10" ry="2.5" fill="#A888D0" opacity="0.28"/><circle cx="36" cy="24" r="3" fill="rgba(168,136,208,0.4)" stroke="#A888D0" stroke-width="0.9"/><circle cx="36" cy="24" r="1.2" fill="rgba(226,200,112,0.7)"/><path d="M11 26 Q5 30 4 36 Q8 38 12 34 Q12 31 11 26Z" fill="#A888D0" opacity="0.55"/><path d="M39 26 Q43 22 45 24 Q46 30 42 34 Q40 32 39 26Z" fill="#A888D0" opacity="0.5"/></svg>
+                    <div class="mbti-char-name">INFP</div><div class="mbti-char-sub">Violet Lemonade</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ENFJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="25" cy="13" r="10" fill="#A888D0" opacity="0.95"/><path d="M18 18 Q25 24 32 18" stroke="#0D0D1A" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.38"/><path d="M18 11 Q20 9 22 11" stroke="#0D0D1A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M28 11 Q30 9 32 11" stroke="#0D0D1A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M17 24 L33 24 L30 56 L20 56 Z" fill="#A888D0" opacity="0.78"/><path d="M17.5 33 L32.5 33 L30 56 L20 56 Z" fill="#A888D0" opacity="0.28"/><circle cx="24" cy="48" r="1.2" fill="rgba(230,200,255,0.4)" stroke="rgba(230,200,255,0.6)" stroke-width="0.6"/><circle cx="26" cy="40" r="1" fill="rgba(230,200,255,0.35)" stroke="rgba(230,200,255,0.55)" stroke-width="0.5"/><line x1="25" y1="56" x2="25" y2="62" stroke="#A888D0" stroke-width="1.5" opacity="0.5"/><ellipse cx="25" cy="62" rx="8" ry="2" fill="#A888D0" opacity="0.25"/><rect x="-3" y="27" width="20" height="7" rx="3.5" fill="#A888D0" opacity="0.65" transform="rotate(-15 7 30)"/><rect x="33" y="27" width="20" height="7" rx="3.5" fill="#A888D0" opacity="0.65" transform="rotate(15 43 30)"/><path d="M30 24 Q36 18 38 20 Q36 26 30 26Z" fill="rgba(226,200,76,0.45)" stroke="#E2C870" stroke-width="0.8"/></svg>
+                    <div class="mbti-char-name">ENFJ</div><div class="mbti-char-sub">French 75</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ENFP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><line x1="34" y1="3" x2="34" y2="9" stroke="#E2C870" stroke-width="0.9" opacity="0.6"/><line x1="31" y1="6" x2="37" y2="6" stroke="#E2C870" stroke-width="0.9" opacity="0.6"/><circle cx="24" cy="15" r="9.5" fill="#A888D0" opacity="0.9"/><path d="M17 19 Q24 26 31 19" stroke="#0D0D1A" stroke-width="1.7" stroke-linecap="round" fill="none" opacity="0.4"/><circle cx="20" cy="13" r="2.5" fill="#0D0D1A" opacity="0.45"/><circle cx="28" cy="13" r="2.5" fill="#0D0D1A" opacity="0.45"/><path d="M8 26 L42 26 L36 50 L14 50 Z" fill="#A888D0" opacity="0.74"/><path d="M10 33 L40 33 L36 50 L14 50 Z" fill="#A888D0" opacity="0.26"/><path d="M36 26 Q44 20 46 26 Q44 32 36 32 Z" fill="rgba(226,168,76,0.4)" stroke="#E2C870" stroke-width="0.9"/><line x1="25" y1="50" x2="25" y2="60" stroke="#A888D0" stroke-width="2" opacity="0.52"/><ellipse cx="25" cy="60" rx="10" ry="2.5" fill="#A888D0" opacity="0.26"/><rect x="-5" y="18" width="18" height="7" rx="3.5" fill="#A888D0" opacity="0.62" transform="rotate(-35 4 21)"/><rect x="37" y="18" width="18" height="7" rx="3.5" fill="#A888D0" opacity="0.62" transform="rotate(35 46 21)"/></svg>
+                    <div class="mbti-char-name">ENFP</div><div class="mbti-char-sub">Aperol Spritz</div>
+                  </button>
+                </div>
+
+                <!-- Sentinels (green) -->
+                <div class="mbti-carousel-slide" style="--mbti-gr:90,144,104">
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ISTJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="25" cy="12" r="9" fill="#5A9068" opacity="0.92"/><line x1="20" y1="11" x2="22" y2="11" stroke="#0D0D1A" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="28" y1="11" x2="30" y2="11" stroke="#0D0D1A" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="20" y1="16" x2="30" y2="16" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/><path d="M9 22 L41 22 L39 54 L11 54 Z" fill="#5A9068" opacity="0.8"/><path d="M11 36 L39 36 L38 54 L12 54 Z" fill="#5A9068" opacity="0.32"/><rect x="1" y="24" width="8" height="22" rx="4" fill="#5A9068" opacity="0.62"/><rect x="41" y="24" width="8" height="22" rx="4" fill="#5A9068" opacity="0.62"/><rect x="15" y="54" width="8" height="14" rx="4" fill="#5A9068" opacity="0.58"/><rect x="27" y="54" width="8" height="14" rx="4" fill="#5A9068" opacity="0.58"/></svg>
+                    <div class="mbti-char-name">ISTJ</div><div class="mbti-char-sub">Whiskey Neat</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ISFJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><path d="M20 4 Q19 1 21 2 Q23 3 22 6" stroke="rgba(90,144,104,0.5)" stroke-width="1" stroke-linecap="round" fill="none"/><path d="M25 3 Q24 0 26 1 Q28 2 27 5" stroke="rgba(90,144,104,0.4)" stroke-width="1" stroke-linecap="round" fill="none"/><circle cx="25" cy="14" r="9" fill="#5A9068" opacity="0.88"/><path d="M20 18 Q25 22 30 18" stroke="#0D0D1A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.35"/><path d="M19 12 Q21 10 23 12" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M27 12 Q29 10 31 12" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.4"/><rect x="13" y="24" width="24" height="30" rx="3" fill="#5A9068" opacity="0.76"/><rect x="14" y="36" width="22" height="17" rx="2" fill="#5A9068" opacity="0.28"/><path d="M37 28 Q46 28 46 38 Q46 48 37 48" stroke="#5A9068" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.65"/><line x1="16" y1="24" x2="22" y2="18" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/><rect x="2" y="26" width="11" height="18" rx="4" fill="#5A9068" opacity="0.58" transform="rotate(10 7 35)"/><rect x="16" y="54" width="8" height="14" rx="4" fill="#5A9068" opacity="0.56"/><rect x="27" y="54" width="8" height="14" rx="4" fill="#5A9068" opacity="0.56"/></svg>
+                    <div class="mbti-char-name">ISFJ</div><div class="mbti-char-sub">Hot Toddy</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ESTJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="25" cy="13" r="9.5" fill="#5A9068" opacity="0.95"/><line x1="17" y1="10" x2="22" y2="11.5" stroke="#0D0D1A" stroke-width="2" stroke-linecap="round" opacity="0.55"/><line x1="33" y1="10" x2="28" y2="11.5" stroke="#0D0D1A" stroke-width="2" stroke-linecap="round" opacity="0.55"/><line x1="20" y1="18" x2="30" y2="18" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" opacity="0.32"/><path d="M6 26 L44 26 L36 50 L14 50 Z" fill="#5A9068" opacity="0.8"/><path d="M9 32 L41 32 L36 50 L14 50 Z" fill="#5A9068" opacity="0.3"/><circle cx="30" cy="26" r="2.5" fill="rgba(192,96,96,0.5)" stroke="#C06060" stroke-width="0.8"/><path d="M30 23 Q32 19 30 16" stroke="rgba(90,144,104,0.7)" stroke-width="0.9" stroke-linecap="round" fill="none"/><line x1="25" y1="50" x2="25" y2="60" stroke="#5A9068" stroke-width="2" opacity="0.58"/><ellipse cx="25" cy="60" rx="9" ry="2" fill="#5A9068" opacity="0.28"/><rect x="3" y="28" width="20" height="7" rx="3.5" fill="#5A9068" opacity="0.65" transform="rotate(-5 13 31)"/><rect x="27" y="28" width="20" height="7" rx="3.5" fill="#5A9068" opacity="0.65" transform="rotate(5 37 31)"/></svg>
+                    <div class="mbti-char-name">ESTJ</div><div class="mbti-char-sub">Manhattan</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ESFJ')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><ellipse cx="18" cy="7" rx="5" ry="3" fill="rgba(90,144,104,0.55)" stroke="#5A9068" stroke-width="0.8" transform="rotate(-20 18 7)"/><ellipse cx="25" cy="5" rx="5" ry="3" fill="rgba(90,144,104,0.6)" stroke="#5A9068" stroke-width="0.8"/><ellipse cx="32" cy="7" rx="5" ry="3" fill="rgba(90,144,104,0.55)" stroke="#5A9068" stroke-width="0.8" transform="rotate(20 32 7)"/><circle cx="25" cy="16" r="9" fill="#5A9068" opacity="0.9"/><path d="M19 20 Q25 25 31 20" stroke="#0D0D1A" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.38"/><circle cx="19" cy="19" r="2.5" fill="rgba(200,96,96,0.15)"/><circle cx="31" cy="19" r="2.5" fill="rgba(200,96,96,0.15)"/><circle cx="21" cy="14" r="2" fill="#0D0D1A" opacity="0.45"/><circle cx="29" cy="14" r="2" fill="#0D0D1A" opacity="0.45"/><path d="M13 26 L37 26 L38 58 L12 58 Z" fill="#5A9068" opacity="0.74"/><path d="M13 38 L37 38 L38 58 L12 58 Z" fill="#5A9068" opacity="0.27"/><path d="M33 26 Q40 20 42 26 Q40 32 33 32 Z" fill="rgba(90,144,104,0.4)" stroke="#5A9068" stroke-width="0.9"/><rect x="-2" y="28" width="15" height="7" rx="3.5" fill="#5A9068" opacity="0.64" transform="rotate(-12 5 31)"/><rect x="37" y="28" width="15" height="7" rx="3.5" fill="#5A9068" opacity="0.64" transform="rotate(12 45 31)"/><rect x="14" y="58" width="8" height="11" rx="4" fill="#5A9068" opacity="0.56"/><rect x="28" y="58" width="8" height="11" rx="4" fill="#5A9068" opacity="0.56"/></svg>
+                    <div class="mbti-char-name">ESFJ</div><div class="mbti-char-sub">Mojito</div>
+                  </button>
+                </div>
+
+                <!-- Explorers (gold) -->
+                <div class="mbti-carousel-slide" style="--mbti-gr:201,168,76">
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ISTP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><path d="M30 5 Q29 2 31 3 Q33 4 31 7" stroke="rgba(201,168,76,0.4)" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M34 7 Q33 3 35 4 Q37 5 35 9" stroke="rgba(201,168,76,0.3)" stroke-width="1" stroke-linecap="round" fill="none"/><circle cx="24" cy="13" r="9" fill="#C9A84C" opacity="0.88"/><line x1="18" y1="11" x2="23" y2="12" stroke="#0D0D1A" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/><line x1="30" y1="11" x2="25" y2="12" stroke="#0D0D1A" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/><path d="M21 17 Q24 20 28 17" stroke="#0D0D1A" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.3"/><path d="M10 22 L38 22 L35 54 L13 54 Z" fill="#C9A84C" opacity="0.78" transform="rotate(-3 24 38)"/><path d="M12 34 L36 34 L35 54 L13 54 Z" fill="#C9A84C" opacity="0.28" transform="rotate(-3 24 44)"/><line x1="10" y1="22" x2="38" y2="22" stroke="rgba(230,220,180,0.4)" stroke-width="1.5" stroke-dasharray="1 2"/><rect x="38" y="22" width="12" height="6" rx="3" fill="#C9A84C" opacity="0.62" transform="rotate(-20 44 25)"/><rect x="2" y="28" width="9" height="16" rx="4" fill="#C9A84C" opacity="0.52" transform="rotate(15 6 36)"/><rect x="14" y="54" width="8" height="14" rx="4" fill="#C9A84C" opacity="0.58"/><rect x="26" y="54" width="8" height="14" rx="4" fill="#C9A84C" opacity="0.58" transform="rotate(6 30 61)"/></svg>
+                    <div class="mbti-char-name">ISTP</div><div class="mbti-char-sub">Mezcal Sour</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ISFP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><circle cx="34" cy="7" r="5" fill="rgba(192,96,96,0.35)" stroke="rgba(192,96,96,0.6)" stroke-width="0.9"/><circle cx="34" cy="7" r="2.2" fill="rgba(201,168,76,0.6)"/><circle cx="24" cy="15" r="9" fill="#C9A84C" opacity="0.87"/><path d="M19 19 Q24 23 29 19" stroke="#0D0D1A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.32"/><path d="M18 13 Q20 11 22 13" stroke="#0D0D1A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M26 13 Q28 11 30 13" stroke="#0D0D1A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity="0.4"/><path d="M8 25 L40 25 L36 54 L12 54 Z" fill="#C9A84C" opacity="0.72"/><path d="M10 32 L38 32 L36 54 L12 54 Z" fill="#C9A84C" opacity="0.2"/><path d="M11 41 L37 41 L36 54 L12 54 Z" fill="rgba(192,96,96,0.2)"/><line x1="30" y1="25" x2="26" y2="36" stroke="#E2C870" stroke-width="0.9"/><path d="M26 36 Q30 28 36 30 Q32 36 26 36Z" fill="rgba(201,168,76,0.4)" stroke="#E2C870" stroke-width="0.7"/><path d="M8 28 Q2 25 0 30 Q2 36 8 34 Q9 31 8 28Z" fill="#C9A84C" opacity="0.55"/><path d="M40 28 Q46 24 48 28 Q47 34 42 35 Q40 32 40 28Z" fill="#C9A84C" opacity="0.52"/><rect x="14" y="54" width="8" height="14" rx="4" fill="#C9A84C" opacity="0.55"/><rect x="27" y="54" width="8" height="14" rx="4" fill="#C9A84C" opacity="0.55"/></svg>
+                    <div class="mbti-char-name">ISFP</div><div class="mbti-char-sub">Rum Punch</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ESTP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><line x1="38" y1="3" x2="42" y2="0" stroke="#E2C870" stroke-width="1" opacity="0.5"/><line x1="40" y1="6" x2="46" y2="5" stroke="#E2C870" stroke-width="1" opacity="0.45"/><circle cx="25" cy="13" r="9.5" fill="#C9A84C" opacity="0.93"/><path d="M17 18 Q25 26 33 18" stroke="#0D0D1A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.42"/><circle cx="20" cy="11" r="2.8" fill="#0D0D1A" opacity="0.48"/><circle cx="30" cy="11" r="2.8" fill="#0D0D1A" opacity="0.48"/><circle cx="21" cy="10.2" r="1" fill="white" opacity="0.55"/><circle cx="31" cy="10.2" r="1" fill="white" opacity="0.55"/><path d="M13 24 L37 24 L35 46 L15 46 Z" fill="#C9A84C" opacity="0.8"/><path d="M15 35 L35 35 L35 46 L15 46 Z" fill="#C9A84C" opacity="0.3"/><line x1="13" y1="24" x2="37" y2="24" stroke="rgba(230,220,180,0.5)" stroke-width="2" stroke-dasharray="1 1.5"/><path d="M33 24 Q40 18 42 24 Q40 30 33 30Z" fill="rgba(90,144,104,0.4)" stroke="#5A9068" stroke-width="0.8"/><rect x="-6" y="24" width="19" height="7" rx="3.5" fill="#C9A84C" opacity="0.68" transform="rotate(-20 3 27)"/><rect x="37" y="24" width="19" height="7" rx="3.5" fill="#C9A84C" opacity="0.68" transform="rotate(20 47 27)"/><rect x="12" y="46" width="8" height="22" rx="4" fill="#C9A84C" opacity="0.62" transform="rotate(-8 16 57)"/><rect x="30" y="46" width="8" height="22" rx="4" fill="#C9A84C" opacity="0.62" transform="rotate(8 34 57)"/></svg>
+                    <div class="mbti-char-name">ESTP</div><div class="mbti-char-sub">Tequila Shot</div>
+                  </button>
+                  <button type="button" class="mbti-char-card" onclick="mbtiPick(this,'ESFP')">
+                    <svg width="46" height="64" viewBox="0 0 50 70" fill="none"><rect x="30" y="1" width="3" height="3" rx="0.5" fill="rgba(192,96,96,0.6)" transform="rotate(20 31 2)"/><rect x="36" y="4" width="3" height="3" rx="0.5" fill="rgba(90,144,104,0.6)" transform="rotate(-15 37 5)"/><rect x="10" y="3" width="3" height="3" rx="0.5" fill="rgba(201,168,76,0.6)" transform="rotate(30 11 4)"/><rect x="14" y="1" width="2" height="4" rx="0.5" fill="rgba(168,136,208,0.6)" transform="rotate(-25 15 3)"/><circle cx="25" cy="15" r="9.5" fill="#C9A84C" opacity="0.92"/><path d="M17 19 Q25 27 33 19" stroke="#0D0D1A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/><circle cx="20" cy="12" r="2.5" fill="#0D0D1A" opacity="0.48"/><circle cx="30" cy="12" r="2.5" fill="#0D0D1A" opacity="0.48"/><circle cx="20.8" cy="11.2" r="1" fill="white" opacity="0.55"/><circle cx="30.8" cy="11.2" r="1" fill="white" opacity="0.55"/><path d="M17 26 L33 26 L30 58 L20 58 Z" fill="#C9A84C" opacity="0.76"/><path d="M17.5 35 L32.5 35 L30 58 L20 58 Z" fill="#C9A84C" opacity="0.28"/><circle cx="24" cy="50" r="1.2" fill="rgba(255,240,180,0.4)" stroke="rgba(255,240,180,0.6)" stroke-width="0.5"/><circle cx="26" cy="42" r="1" fill="rgba(255,240,180,0.35)" stroke="rgba(255,240,180,0.55)" stroke-width="0.5"/><line x1="25" y1="58" x2="25" y2="65" stroke="#C9A84C" stroke-width="1.5" opacity="0.52"/><ellipse cx="25" cy="65" rx="8" ry="2" fill="#C9A84C" opacity="0.24"/><rect x="0" y="14" width="17" height="7" rx="3.5" fill="#C9A84C" opacity="0.65" transform="rotate(-45 8 17)"/><rect x="33" y="14" width="17" height="7" rx="3.5" fill="#C9A84C" opacity="0.65" transform="rotate(45 42 17)"/></svg>
+                    <div class="mbti-char-name">ESFP</div><div class="mbti-char-sub">Champagne</div>
+                  </button>
+                </div>
+
+              </div><!-- /track -->
+            </div><!-- /carousel -->
+            <div class="mbti-carousel-nav">
+              <button type="button" class="mbti-nav-arrow" id="mbti-prev" onclick="mbtiPrev()" disabled data-zh="← 上一组" data-en="← Prev">← 上一组</button>
+              <div class="mbti-nav-dots">
+                <div class="mbti-nav-dot active" onclick="mbtiGoSlide(0)"></div>
+                <div class="mbti-nav-dot" onclick="mbtiGoSlide(1)"></div>
+                <div class="mbti-nav-dot" onclick="mbtiGoSlide(2)"></div>
+                <div class="mbti-nav-dot" onclick="mbtiGoSlide(3)"></div>
+              </div>
+              <button type="button" class="mbti-nav-arrow" id="mbti-next" onclick="mbtiNext()" data-zh="下一组 →" data-en="Next →">下一组 →</button>
+            </div>
             <input type="password" id="signup-pin" maxlength="4" pattern="\d{4}" inputmode="numeric"
               data-placeholder-zh="设置密码（4位数字）" data-placeholder-en="Set PIN (4 digits)"
               placeholder="设置密码（4位数字）" autocomplete="new-password">
@@ -1072,6 +1327,56 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       const { applyLang } = await import('./js/i18n.js')
       applyLang()
     }
+
+    // ── Gender pills ──────────────────────────────────────────────────────────
+    function signupSelectGender(el) {
+      document.querySelectorAll('.gender-pill').forEach(b => b.classList.remove('active'))
+      el.classList.add('active')
+      document.getElementById('signup-gender').value = el.dataset.value
+    }
+
+    // ── MBTI carousel ─────────────────────────────────────────────────────────
+    let mbtiCur = 0
+    const mbtiColors = ['#7AA0D8','#A888D0','#5A9068','#C9A84C']
+
+    function mbtiGoSlide(idx, tabEl) {
+      mbtiCur = idx
+      const track = document.getElementById('mbti-track')
+      const wrap  = document.getElementById('mbti-carousel')
+      if (track) track.style.transform = `translateX(${-idx * 100}%)`
+      if (wrap)  wrap.style.setProperty('--mbti-gr', mbtiColors[idx])
+      document.querySelectorAll('.mbti-signup-tab').forEach((t,i) => t.classList.toggle('active', i === idx))
+      document.querySelectorAll('.mbti-nav-dot').forEach((d,i) => d.classList.toggle('active', i === idx))
+    }
+
+    function mbtiPick(el, type) {
+      document.querySelectorAll('.mbti-char-card').forEach(c => c.classList.remove('active'))
+      el.classList.add('active')
+      document.getElementById('signup-mbti').value = type
+    }
+
+    function mbtiPrev() { mbtiGoSlide((mbtiCur + 3) % 4) }
+    function mbtiNext() { mbtiGoSlide((mbtiCur + 1) % 4) }
+
+    // Swipe/drag on carousel
+    ;(function() {
+      let startX = 0, dragging = false
+      document.addEventListener('pointerdown', e => {
+        if (!e.target.closest('.mbti-carousel-wrap')) return
+        startX = e.clientX
+        dragging = true
+      })
+      document.addEventListener('pointermove', e => {
+        if (!dragging) return
+        e.preventDefault()
+      }, { passive: false })
+      document.addEventListener('pointerup', e => {
+        if (!dragging) return
+        dragging = false
+        const dx = e.clientX - startX
+        if (Math.abs(dx) > 40) dx < 0 ? mbtiNext() : mbtiPrev()
+      })
+    })()
   </script>
 </body>
 </html>
