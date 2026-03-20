@@ -766,7 +766,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
             </div><!-- /profile-mbti-track -->
           </div><!-- /profile-mbti-carousel -->
           <div class="mbti-carousel-nav">
-            <button type="button" class="mbti-nav-arrow" id="profile-mbti-prev" onclick="profileMbtiPrev()" disabled>← 上一组</button>
+            <button type="button" class="mbti-nav-arrow" id="profile-mbti-prev" onclick="profileMbtiPrev()">← 上一组</button>
             <div class="mbti-nav-dots" id="profile-mbti-dots">
               <div class="mbti-nav-dot active" id="profile-dot-0" onclick="profileMbtiGoSlide(0)"></div>
               <div class="mbti-nav-dot" id="profile-dot-1" onclick="profileMbtiGoSlide(1)"></div>
@@ -1589,8 +1589,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       document.querySelectorAll('#profile-mbti-dots .mbti-nav-dot').forEach((d,i) => d.classList.toggle('active', i === idx))
       const prev = document.getElementById('profile-mbti-prev')
       const next = document.getElementById('profile-mbti-next')
-      if (prev) prev.disabled = idx === 0
-      if (next) next.disabled = idx === 3
+      if (prev) prev.disabled = false
+      if (next) next.disabled = false
     }
 
     function profileMbtiPick(el, type) {
@@ -1626,7 +1626,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     function openProfilePanel() {
       const panel = document.getElementById('profile-edit-panel')
       const st    = document.getElementById('profile-save-status')
-      if (st) st.textContent = ''
+      if (st) { st.textContent = ''; st.className = '' }
 
       // Pre-fill alias
       document.getElementById('profile-alias').value = currentAttendee.alias || currentAttendee.username || ''
