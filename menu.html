@@ -6,78 +6,165 @@
   <title>酒单 — 二十五</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .drinks-grid {
+    .menu-list {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .drink-entry {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 3rem;
+      grid-template-columns: 36px 1fr auto;
+      gap: 0 1.6rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid rgba(201,168,76,0.06);
+      align-items: center;
     }
-    .drink-card {
+    .drink-entry:last-child { border-bottom: none; }
+
+    .gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      align-self: stretch;
+      justify-content: center;
+    }
+    .gauge-track {
+      width: 2px;
+      flex: 1;
+      min-height: 80px;
+      max-height: 120px;
+      background: rgba(201,168,76,0.08);
+      border-radius: 2px;
       position: relative;
-      cursor: default;
     }
-    .drink-card img {
-      width: 100%;
-      height: 170px;
-      object-fit: cover;
-      border-radius: 2px;
-      margin-bottom: 1rem;
-      display: block;
-      filter: brightness(0.85) saturate(0.9);
-      transition: filter 0.3s;
-    }
-    .drink-card:hover img { filter: brightness(1) saturate(1); }
-    .drink-card h3 { color: var(--cream); margin-bottom: 0.35rem; }
-    .drink-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.55; font-style: italic; }
-    .comments-trigger {
-      display: inline-block;
-      font-family: 'Cinzel', serif;
-      font-size: 0.55rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-top: 0.75rem;
-      cursor: pointer;
-      border-bottom: 1px solid var(--gold-dim, rgba(201,168,76,0.35));
-      padding-bottom: 1px;
-      background: none;
-      border-left: none;
-      border-right: none;
-      border-top: none;
-    }
-    .comments-tooltip {
-      display: none;
+    .gauge-fill {
       position: absolute;
-      bottom: calc(100% + 10px);
-      left: 0; right: 0;
-      background: var(--surface-2, #131322);
-      border: 1px solid var(--border);
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, var(--gold), rgba(201,168,76,0.3));
       border-radius: 2px;
-      padding: 1rem;
-      z-index: 20;
-      font-size: 0.9rem;
-      max-height: 220px;
-      overflow-y: auto;
-      box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
     }
-    .drink-card:hover .comments-tooltip { display: block; animation: fadeUp 0.2s ease both; }
-    .comment-entry { padding: 0.6rem 0; border-bottom: 1px solid rgba(201,168,76,0.08); }
-    .comment-entry:last-child { border: none; padding-bottom: 0; }
-    .comment-author { color: var(--gold); font-size: 0.8rem; font-family: 'Cinzel', serif; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
-    .comment-body { color: var(--text); font-style: italic; line-height: 1.5; }
-    select {
-      width: 100%;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid rgba(201,168,76,0.14);
+    .gauge-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.1em;
+      color: rgba(201,168,76,0.4);
+      white-space: nowrap;
+    }
+
+    .drink-name {
+      font-family: 'Playfair Display', 'Noto Serif SC', serif;
+      color: var(--cream);
+      font-size: 1.15rem;
+      font-weight: 400;
+      margin-bottom: 0.3rem;
+    }
+    .drink-desc {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      margin-bottom: 0.55rem;
+    }
+    .drink-tags {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .abv-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.14em;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      padding: 1px 6px;
       border-radius: 2px;
-      padding: 0.75rem 1rem;
+    }
+    .flavor-tag {
+      font-size: 0.58rem;
+      color: var(--muted);
+      background: rgba(201,168,76,0.04);
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: 2px;
+      padding: 1px 5px;
+    }
+
+    .vote-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 32px;
+    }
+    .heart-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: rgba(106,94,74,0.4);
+      line-height: 1;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .heart-btn.voted { color: var(--gold); }
+    .vote-count {
+      font-family: 'Cinzel', serif;
+      font-size: 0.46rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .vote-count.voted { color: var(--gold); }
+
+    .vote-confirm {
+      display: none;
+      margin-top: 0.4rem;
+      text-align: center;
+      animation: fadeIn 0.15s ease both;
+    }
+    .vote-confirm.open { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+    .confirm-text {
+      font-size: 0.62rem;
       color: var(--text);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      margin-bottom: 0.85rem;
-      outline: none;
+      font-style: italic;
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
     }
-    select:focus { border-color: var(--gold-dim, rgba(201,168,76,0.35)); }
+    .confirm-btns { display: flex; gap: 0.4rem; justify-content: center; }
+    .confirm-yes, .confirm-no {
+      font-family: 'Cinzel', serif;
+      font-size: 0.46rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border: 1px solid rgba(201,168,76,0.25);
+      background: none;
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .confirm-yes:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .confirm-no:hover { color: var(--cream); }
+    .vote-msg {
+      font-size: 0.6rem;
+      font-style: italic;
+      margin-top: 0.3rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .vote-msg.show { opacity: 1; }
+    .vote-msg.error { color: var(--red); }
+    .vote-msg.info { color: var(--muted); }
+
+    .no-event-note {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.82rem;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
@@ -86,28 +173,16 @@
     <div class="page-header fade-in">
       <span class="eyebrow" data-zh="今晚精选" data-en="Tonight's Selection">今晚精选</span>
       <h1 data-zh="酒单" data-en="The Menu">酒单</h1>
-      <p data-zh="悬停查看宾客评论" data-en="Hover a drink to read what guests have said">悬停查看宾客评论</p>
     </div>
 
-    <div id="drinks-grid" class="drinks-grid fade-in-2"></div>
-
-    <div class="rule fade-in-3"><span>◆</span></div>
-
-    <div class="card fade-in-3">
-      <span class="eyebrow" data-zh="留下您的评论" data-en="Share Your Thoughts">留下您的评论</span>
-      <h2 style="margin-bottom:1.25rem" data-zh="评论" data-en="Leave a Comment">评论</h2>
-      <input type="text" id="comment-author" placeholder="您的名字（可选）" data-placeholder-zh="您的名字（可选）" data-placeholder-en="Your name (optional)">
-      <label data-zh="评论哪款酒？" data-en="Which drink?">评论哪款酒？</label>
-      <select id="comment-drink"></select>
-      <textarea id="comment-body" rows="3" placeholder="您觉得这款酒怎么样？" data-placeholder-zh="您觉得这款酒怎么样？" data-placeholder-en="What did you think of this drink?"></textarea>
-      <button class="btn btn-solid" id="submit-comment" data-zh="提交" data-en="Submit">提交</button>
-      <span id="comment-status"></span>
-    </div>
+    <div id="menu-list" class="menu-list fade-in-2"></div>
   </main>
   <div id="footer"></div>
+
   <script type="module">
-    import { requirePasscode } from './js/auth.js'
+    import { requirePasscode, getAttendeeSession } from './js/auth.js'
     import { renderNav, renderFooter, initLang } from './js/nav.js'
+    import { loadEvents } from './js/events.js'
     import { loadDrinks, loadAllVotes, getMyVote, submitVote } from './js/menu.js'
     import { t } from './js/i18n.js'
 
@@ -118,59 +193,169 @@
 
     function escapeHtml(str) {
       if (!str) return ''
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
     }
 
-    const drinks = await loadDrinks()
-    const grid = document.getElementById('drinks-grid')
-    const select = document.getElementById('comment-drink')
+    function resolveCurrentEvent(events) {
+      const now = Date.now()
+      const WINDOW_MS = 36 * 60 * 60 * 1000
+      return events
+        .filter(e => {
+          if (e.status === 'cancelled' || e.status === 'closed') return false
+          if (!e.start_time) return false
+          const dt = new Date(`${e.event_date}T${e.start_time}`)
+          return dt.getTime() <= now && now < dt.getTime() + WINDOW_MS
+        })
+        .sort((a, b) => new Date(b.event_date) - new Date(a.event_date))[0] ?? null
+    }
+
+    function buildEntry(drink, voteCount, isMyVote, showVoting) {
+      const entry = document.createElement('div')
+      entry.className = 'drink-entry'
+      entry.dataset.drinkId = drink.id
+      entry.dataset.drinkName = drink.name
+
+      const fillPct = drink.abv != null ? Math.min(drink.abv / 40, 1) * 100 : 0
+      const gaugeHtml = `
+        <div class="gauge-wrap">
+          <div class="gauge-track">
+            <div class="gauge-fill" style="height:${fillPct}%"></div>
+          </div>
+          ${drink.abv != null ? `<span class="gauge-label">${drink.abv}%</span>` : ''}
+        </div>`
+
+      const abvBadge = drink.abv != null ? `<span class="abv-badge">ABV ${drink.abv}%</span>` : ''
+      const flavorTags = (drink.flavors || []).map(f => `<span class="flavor-tag">${escapeHtml(f)}</span>`).join('')
+
+      const infoHtml = `
+        <div class="drink-info">
+          <div class="drink-name">${escapeHtml(drink.name)}</div>
+          ${drink.description ? `<div class="drink-desc">${escapeHtml(drink.description)}</div>` : ''}
+          <div class="drink-tags">${abvBadge}${flavorTags}</div>
+        </div>`
+
+      let voteHtml = ''
+      if (showVoting) {
+        voteHtml = `
+          <div class="vote-col">
+            <button class="heart-btn ${isMyVote ? 'voted' : ''}">${isMyVote ? '♥' : '♡'}</button>
+            <span class="vote-count ${isMyVote ? 'voted' : ''}">${voteCount}</span>
+            <div class="vote-confirm">
+              <div class="confirm-text">${t('确认投给', 'Vote for')} 「${escapeHtml(drink.name)}」？</div>
+              <div class="confirm-btns">
+                <button class="confirm-yes">${t('确认', 'Yes')}</button>
+                <button class="confirm-no">${t('取消', 'Cancel')}</button>
+              </div>
+              <div class="vote-msg error">${t('出现错误，请重试', 'Something went wrong')}</div>
+            </div>
+          </div>`
+      }
+
+      entry.innerHTML = gaugeHtml + infoHtml + voteHtml
+      return entry
+    }
+
+    function showMsg(entry, type, msgEl) {
+      msgEl.classList.add('show', type)
+      setTimeout(() => msgEl.classList.remove('show', type), 3000)
+    }
+
+    const attendee = getAttendeeSession()
+    const [events, drinks, voteCounts] = await Promise.all([
+      loadEvents(),
+      loadDrinks(),
+      loadAllVotes(),
+    ])
+
+    const currentEvent = resolveCurrentEvent(events)
+    const showVoting = currentEvent != null
+    const list = document.getElementById('menu-list')
+
+    let myVoteDrinkId = null
+    if (attendee && currentEvent) {
+      myVoteDrinkId = await getMyVote(attendee.id, currentEvent.id)
+    }
 
     if (drinks.length === 0) {
-      grid.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无酒单，敬请期待', 'No menu yet — check back soon.')}</p>`
+      list.innerHTML = `<p class="muted" style="font-style:italic">${t('暂无酒单，敬请期待', 'No menu yet — check back soon.')}</p>`
+    } else {
+      for (const drink of drinks) {
+        const count = voteCounts.get(drink.id) ?? 0
+        const isMyVote = myVoteDrinkId === drink.id
+        list.appendChild(buildEntry(drink, count, isMyVote, showVoting))
+      }
+
+      if (!showVoting) {
+        const note = document.createElement('p')
+        note.className = 'no-event-note'
+        note.textContent = t('投票将在活动期间开放', 'Voting opens during events')
+        list.appendChild(note)
+      }
     }
 
-    for (const drink of drinks) {
-      const comments = await loadCommentsForDrink(drink.id)
+    list.addEventListener('click', async e => {
+      const heartBtn = e.target.closest('.heart-btn')
+      if (heartBtn) {
+        const entry = heartBtn.closest('.drink-entry')
 
-      const commentsHtml = comments.length
-        ? comments.map(c => `
-          <div class="comment-entry">
-            <div class="comment-author">${escapeHtml(c.author_name) || t('匿名', 'Anonymous')}</div>
-            <div class="comment-body">${escapeHtml(c.body)}</div>
-          </div>`).join('')
-        : `<p class="muted" style="font-style:italic;margin:0">${t('暂无评论', 'No comments yet')}</p>`
+        if (!attendee) {
+          const msgEl = entry.querySelector('.vote-msg')
+          msgEl.textContent = t('请先登录以投票', 'Please log in to vote')
+          msgEl.classList.add('show', 'info')
+          setTimeout(() => msgEl.classList.remove('show', 'info'), 3000)
+          return
+        }
 
-      const card = document.createElement('div')
-      card.className = 'card drink-card'
-      card.innerHTML = `
-        ${drink.photo_url ? `<img src="${escapeHtml(drink.photo_url)}" alt="${escapeHtml(drink.name)}" loading="lazy">` : ''}
-        <h3>${escapeHtml(drink.name)}</h3>
-        <p class="drink-desc">${escapeHtml(drink.description)}</p>
-        <div class="comments-tooltip">${commentsHtml}</div>
-      `
-      grid.appendChild(card)
+        entry.querySelector('.vote-confirm').classList.toggle('open')
+        return
+      }
 
-      const opt = document.createElement('option')
-      opt.value = drink.id
-      opt.textContent = drink.name
-      select.appendChild(opt)
-    }
+      if (e.target.closest('.confirm-no')) {
+        e.target.closest('.vote-confirm').classList.remove('open')
+        return
+      }
 
-    document.getElementById('submit-comment').addEventListener('click', async () => {
-      const author = document.getElementById('comment-author').value.trim()
-      const drinkId = document.getElementById('comment-drink').value
-      const body = document.getElementById('comment-body').value.trim()
-      const status = document.getElementById('comment-status')
-      if (!body) { status.textContent = t('请写下您的评论', 'Please write a comment.'); status.className = 'error'; return }
-      if (!drinkId) { status.textContent = t('暂无饮品', 'No drinks available.'); status.className = 'error'; return }
-      const ok = await submitComment(drinkId, author || null, body)
-      if (ok) {
-        status.textContent = t('感谢评论，待审核后显示', 'Thank you — your comment is pending approval.')
-        status.className = 'success'
-        document.getElementById('comment-body').value = ''
-      } else {
-        status.textContent = t('出现错误，请重试', 'Something went wrong. Please try again.')
-        status.className = 'error'
+      if (e.target.closest('.confirm-yes')) {
+        const entry = e.target.closest('.drink-entry')
+        const drinkId = entry.dataset.drinkId
+        const confirm = entry.querySelector('.vote-confirm')
+        const msgEl = entry.querySelector('.vote-msg')
+
+        const result = await submitVote(drinkId, attendee.id, currentEvent.id)
+
+        if (!result.ok) {
+          confirm.classList.remove('open')
+          msgEl.textContent = t('出现错误，请重试', 'Something went wrong')
+          msgEl.classList.add('show', 'error')
+          setTimeout(() => msgEl.classList.remove('show', 'error'), 3000)
+          return
+        }
+
+        confirm.classList.remove('open')
+
+        if (result.previousDrinkId && result.previousDrinkId !== drinkId) {
+          const oldEntry = list.querySelector(`[data-drink-id="${result.previousDrinkId}"]`)
+          if (oldEntry) {
+            oldEntry.querySelector('.heart-btn').classList.remove('voted')
+            oldEntry.querySelector('.heart-btn').textContent = '♡'
+            const oldCount = oldEntry.querySelector('.vote-count')
+            oldCount.textContent = Math.max(0, parseInt(oldCount.textContent) - 1)
+            oldCount.classList.remove('voted')
+          }
+        }
+
+        const heart = entry.querySelector('.heart-btn')
+        const countEl = entry.querySelector('.vote-count')
+        if (!heart.classList.contains('voted')) {
+          countEl.textContent = parseInt(countEl.textContent) + 1
+        }
+        heart.classList.add('voted')
+        heart.textContent = '♥'
+        countEl.classList.add('voted')
+
+        myVoteDrinkId = drinkId
       }
     })
   </script>
