@@ -10,7 +10,8 @@ export async function loadDrinks() {
   return error ? [] : data
 }
 
-// Fetch all vote rows and return a Map<drinkId, count>
+// Fetch all vote rows and return a Map<drinkId, count>.
+// Counts are cumulative across all past events — intentional per design.
 export async function loadAllVotes() {
   const { data, error } = await supabase
     .from('drink_votes')
