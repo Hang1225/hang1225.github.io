@@ -1334,6 +1334,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       el.classList.add('active')
       document.getElementById('signup-gender').value = el.dataset.value
     }
+    window.signupSelectGender = signupSelectGender
 
     // ── MBTI carousel ─────────────────────────────────────────────────────────
     let mbtiCur = 0
@@ -1357,6 +1358,11 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
     function mbtiPrev() { mbtiGoSlide((mbtiCur + 3) % 4) }
     function mbtiNext() { mbtiGoSlide((mbtiCur + 1) % 4) }
+
+    window.mbtiGoSlide = mbtiGoSlide
+    window.mbtiPick    = mbtiPick
+    window.mbtiPrev    = mbtiPrev
+    window.mbtiNext    = mbtiNext
 
     // Swipe/drag on carousel
     ;(function() {
