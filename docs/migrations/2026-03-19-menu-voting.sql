@@ -1,7 +1,7 @@
 -- ============================================================
 -- Migration: Menu Voting System
 -- Run once in Supabase SQL Editor (Dashboard → SQL Editor)
--- Prerequisites: drinks and attendees tables must already exist
+-- Prerequisites: drinks, attendees, and events tables must already exist
 -- ============================================================
 
 -- 1. Add ABV and flavors to drinks table
@@ -12,9 +12,10 @@ alter table drinks add column if not exists flavors text[] default '{}';
 create table if not exists drink_votes (
   id           uuid primary key default gen_random_uuid(),
   drink_id     uuid references drinks(id) on delete cascade not null,
-  attendee_id  uuid references attendees(id) not null,
-  event_id     uuid references events(id) not null,
+  attendee_id  uuid references attendees(id) on delete cascade not null,
+  event_id     uuid references events(id) on delete cascade not null,
   created_at   timestamptz default now(),
+  -- One vote per attendee per event; drink_id is mutable via delete+insert
   unique (attendee_id, event_id)
 );
 
