@@ -203,8 +203,9 @@
       const WINDOW_MS = 36 * 60 * 60 * 1000
       return events
         .filter(e => {
-          if (e.status === 'cancelled' || e.status === 'closed') return false
+          // loadEvents() already excludes cancelled/closed at the DB layer
           if (!e.start_time) return false
+          // Parsed as local time (no Z/offset) — correct for co-located host and guests
           const dt = new Date(`${e.event_date}T${e.start_time}`)
           return dt.getTime() <= now && now < dt.getTime() + WINDOW_MS
         })
@@ -240,7 +241,7 @@
       if (showVoting) {
         voteHtml = `
           <div class="vote-col">
-            <button class="heart-btn ${isMyVote ? 'voted' : ''}">${isMyVote ? '♥' : '♡'}</button>
+            <button class="heart-btn ${isMyVote ? 'voted' : ''}" aria-label="${t('投票', 'Vote')}">${isMyVote ? '♥' : '♡'}</button>
             <span class="vote-count ${isMyVote ? 'voted' : ''}">${voteCount}</span>
             <div class="vote-confirm">
               <div class="confirm-text">${t('确认投给', 'Vote for')} 「${escapeHtml(drink.name)}」？</div>
@@ -257,10 +258,6 @@
       return entry
     }
 
-    function showMsg(entry, type, msgEl) {
-      msgEl.classList.add('show', type)
-      setTimeout(() => msgEl.classList.remove('show', type), 3000)
-    }
 
     const attendee = getAttendeeSession()
     const [events, drinks, voteCounts] = await Promise.all([
@@ -302,6 +299,7 @@
 
         if (!attendee) {
           const msgEl = entry.querySelector('.vote-msg')
+          if (!msgEl) return
           msgEl.textContent = t('请先登录以投票', 'Please log in to vote')
           msgEl.classList.add('show', 'info')
           setTimeout(() => msgEl.classList.remove('show', 'info'), 3000)
@@ -341,7 +339,7 @@
             oldEntry.querySelector('.heart-btn').classList.remove('voted')
             oldEntry.querySelector('.heart-btn').textContent = '♡'
             const oldCount = oldEntry.querySelector('.vote-count')
-            oldCount.textContent = Math.max(0, parseInt(oldCount.textContent) - 1)
+            oldCount.textContent = Math.max(0, parseInt(oldCount.textContent, 10) - 1)
             oldCount.classList.remove('voted')
           }
         }
@@ -349,7 +347,7 @@
         const heart = entry.querySelector('.heart-btn')
         const countEl = entry.querySelector('.vote-count')
         if (!heart.classList.contains('voted')) {
-          countEl.textContent = parseInt(countEl.textContent) + 1
+          countEl.textContent = parseInt(countEl.textContent, 10) + 1
         }
         heart.classList.add('voted')
         heart.textContent = '♥'
