@@ -314,10 +314,10 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
               <option value="ESTP">ESTP</option>
               <option value="ESFP">ESFP</option>
             </select>
-            <input type="password" id="signup-pin" maxlength="4"
-              data-placeholder-zh="设置密码（4位）" data-placeholder-en="Set PIN (4 digits)"
-              placeholder="设置密码（4位）" autocomplete="new-password">
-            <input type="password" id="signup-pin-confirm" maxlength="4"
+            <input type="password" id="signup-pin" maxlength="4" pattern="\d{4}" inputmode="numeric"
+              data-placeholder-zh="设置密码（4位数字）" data-placeholder-en="Set PIN (4 digits)"
+              placeholder="设置密码（4位数字）" autocomplete="new-password">
+            <input type="password" id="signup-pin-confirm" maxlength="4" pattern="\d{4}" inputmode="numeric"
               data-placeholder-zh="确认密码" data-placeholder-en="Confirm PIN"
               placeholder="确认密码" autocomplete="new-password">
             <button class="btn btn-solid" id="signup-btn" style="width:100%" data-zh="创建账户" data-en="Create Account">创建账户</button>
@@ -1005,7 +1005,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       const status = document.getElementById('signup-status')
 
       if (!username) { status.textContent = t('请选择用户名', 'Please choose a username'); status.className = 'error'; return }
-      if (pin.length !== 4) { status.textContent = t('密码须为4位', 'PIN must be exactly 4 characters'); status.className = 'error'; return }
+      if (!/^\d{4}$/.test(pin)) { status.textContent = t('密码须为4位数字', 'PIN must be exactly 4 digits'); status.className = 'error'; return }
       if (pin !== confirm) { status.textContent = t('两次密码不一致', 'PINs do not match'); status.className = 'error'; return }
 
       const gender = document.getElementById('signup-gender').value || null
