@@ -1599,6 +1599,60 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       document.getElementById('profile-gender-val').value = el.dataset.value
     }
     window.profileSelectGender = profileSelectGender
+
+    // ── Profile panel: Toggle ─────────────────────────────────────────────────
+    const mbtiGroupMap = {
+      INTJ:0,INTP:0,ENTJ:0,ENTP:0,
+      INFJ:1,INFP:1,ENFJ:1,ENFP:1,
+      ISTJ:2,ISFJ:2,ESTJ:2,ESFJ:2,
+      ISTP:3,ISFP:3,ESTP:3,ESFP:3
+    }
+
+    function openProfilePanel() {
+      const panel = document.getElementById('profile-edit-panel')
+      const st    = document.getElementById('profile-save-status')
+      if (st) st.textContent = ''
+
+      // Pre-fill alias
+      document.getElementById('profile-alias').value = currentAttendee.alias || currentAttendee.username || ''
+
+      // Pre-select gender
+      document.querySelectorAll('#profile-gender-pills .gender-pill').forEach(b => b.classList.remove('active'))
+      if (currentAttendee.gender) {
+        const gBtn = document.querySelector(`#profile-gender-pills [data-value="${currentAttendee.gender}"]`)
+        if (gBtn) { gBtn.classList.add('active'); document.getElementById('profile-gender-val').value = currentAttendee.gender }
+      } else {
+        document.getElementById('profile-gender-val').value = ''
+      }
+
+      // Pre-select MBTI
+      document.querySelectorAll('.profile-char-card').forEach(c => c.classList.remove('sel'))
+      document.getElementById('profile-mbti-val').value = currentAttendee.mbti || ''
+      if (currentAttendee.mbti) {
+        const groupIdx = mbtiGroupMap[currentAttendee.mbti] ?? 0
+        profileMbtiGoSlide(groupIdx)
+        const card = document.querySelector(`.profile-char-card[onclick="profileMbtiPick(this,'${currentAttendee.mbti}')"]`)
+        if (card) card.classList.add('sel')
+      } else {
+        profileMbtiGoSlide(0)
+      }
+
+      panel.style.display = 'block'
+    }
+
+    function closeProfilePanel() {
+      document.getElementById('profile-edit-panel').style.display = 'none'
+    }
+
+    function toggleProfilePanel() {
+      const panel = document.getElementById('profile-edit-panel')
+      if (panel.style.display === 'none' || panel.style.display === '') {
+        openProfilePanel()
+      } else {
+        closeProfilePanel()
+      }
+    }
+    window.toggleProfilePanel = toggleProfilePanel
   </script>
 </body>
 </html>
