@@ -1559,6 +1559,38 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         if (Math.abs(dx) > 40) dx < 0 ? mbtiNext() : mbtiPrev()
       })
     })()
+
+    // ── Profile panel: MBTI carousel ──────────────────────────────────────────
+    let profileMbtiCur = 0
+    const profileMbtiColors = ['122,160,216','168,136,208','90,144,104','201,168,76']
+
+    function profileMbtiGoSlide(idx) {
+      profileMbtiCur = idx
+      const track = document.getElementById('profile-mbti-track')
+      const wrap  = document.getElementById('profile-mbti-carousel')
+      if (track) track.style.transform = `translateX(${-idx * 100}%)`
+      if (wrap)  wrap.style.setProperty('--mbti-gr', profileMbtiColors[idx])
+      document.querySelectorAll('#profile-mbti-tabs .mbti-signup-tab').forEach((t,i) => t.classList.toggle('active', i === idx))
+      document.querySelectorAll('#profile-mbti-dots .mbti-nav-dot').forEach((d,i) => d.classList.toggle('active', i === idx))
+      const prev = document.getElementById('profile-mbti-prev')
+      const next = document.getElementById('profile-mbti-next')
+      if (prev) prev.disabled = idx === 0
+      if (next) next.disabled = idx === 3
+    }
+
+    function profileMbtiPick(el, type) {
+      document.querySelectorAll('.profile-char-card').forEach(c => c.classList.remove('sel'))
+      el.classList.add('sel')
+      document.getElementById('profile-mbti-val').value = type
+    }
+
+    function profileMbtiPrev() { if (profileMbtiCur > 0) profileMbtiGoSlide(profileMbtiCur - 1) }
+    function profileMbtiNext() { if (profileMbtiCur < 3) profileMbtiGoSlide(profileMbtiCur + 1) }
+
+    window.profileMbtiGoSlide = profileMbtiGoSlide
+    window.profileMbtiPick    = profileMbtiPick
+    window.profileMbtiPrev    = profileMbtiPrev
+    window.profileMbtiNext    = profileMbtiNext
   </script>
 </body>
 </html>
