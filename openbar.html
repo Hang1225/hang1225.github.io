@@ -299,7 +299,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 }
 .mbti-signup-tab {
   font-family: 'Cinzel', serif;
-  font-size: 0.34rem;
+  font-size: 0.54rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 0.28rem 0;
@@ -365,7 +365,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 }
 .mbti-char-name {
   font-family: 'Cinzel', serif;
-  font-size: 0.44rem;
+  font-size: 0.6rem;
   letter-spacing: 0.08em;
   color: var(--muted);
   transition: color 0.18s;
@@ -1350,8 +1350,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     }
 
     function mbtiPick(el, type) {
-      document.querySelectorAll('.mbti-char-card').forEach(c => c.classList.remove('active'))
-      el.classList.add('active')
+      document.querySelectorAll('.mbti-char-card').forEach(c => c.classList.remove('sel'))
+      el.classList.add('sel')
       document.getElementById('signup-mbti').value = type
     }
 
