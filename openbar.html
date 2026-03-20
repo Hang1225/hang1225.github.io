@@ -1478,12 +1478,27 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       document.getElementById('pin').value = ''
     })
 
+    function refreshProfileHeader() {
+      const name    = currentAttendee.alias || currentAttendee.username || ''
+      const initials = name.charAt(0).toUpperCase()
+      document.getElementById('profile-initials').textContent = initials
+      document.getElementById('greeting').textContent = name
+
+      // Badges
+      const badgeEl = document.getElementById('profile-badges')
+      if (!badgeEl) return
+      const gMap = { male:'<span class="g-badge g-m">M</span>', female:'<span class="g-badge g-f">F</span>', 'non-binary':'<span class="g-badge g-nb">NB</span>', 'prefer-not':'<span class="g-badge g-hidden">—</span>' }
+      const gBadge = currentAttendee.gender ? (gMap[currentAttendee.gender] || '') : ''
+      const mBadge = currentAttendee.mbti   ? `<span class="g-badge g-mbti">${escapeHtml(currentAttendee.mbti)}</span>` : ''
+      badgeEl.innerHTML = gBadge + mBadge
+    }
+
     async function showDashboard(attendee) {
       currentAttendee = attendee
       loadDashboardData()
       document.getElementById('auth-section').style.display = 'none'
       document.getElementById('dashboard-section').style.display = 'block'
-      document.getElementById('greeting').textContent = attendee.alias || attendee.username
+      refreshProfileHeader()
 
       // Wishlist
       const wishlist = await loadWishlist()
