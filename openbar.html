@@ -1591,6 +1591,14 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     window.profileMbtiPick    = profileMbtiPick
     window.profileMbtiPrev    = profileMbtiPrev
     window.profileMbtiNext    = profileMbtiNext
+
+    // ── Profile panel: Gender pills ───────────────────────────────────────────
+    function profileSelectGender(el) {
+      document.querySelectorAll('#profile-gender-pills .gender-pill').forEach(b => b.classList.remove('active'))
+      el.classList.add('active')
+      document.getElementById('profile-gender-val').value = el.dataset.value
+    }
+    window.profileSelectGender = profileSelectGender
   </script>
 </body>
 </html>
