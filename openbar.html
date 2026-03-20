@@ -244,6 +244,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 .g-f { background: rgba(200,120,160,0.15); border: 1px solid rgba(200,120,160,0.3); color: #D888B0; }
 .g-nb { background: rgba(140,160,120,0.15); border: 1px solid rgba(140,160,120,0.3); color: #A0BE90; }
 .g-hidden { background: rgba(106,94,74,0.1); border: 1px solid rgba(106,94,74,0.2); color: var(--muted); }
+.g-mbti { background: rgba(160,140,100,0.12); border: 1px solid rgba(160,140,100,0.25); color: var(--muted); }
   </style>
 </head>
 <body>
@@ -288,11 +289,36 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
             <input type="text" id="signup-username"
               data-placeholder-zh="选择用户名" data-placeholder-en="Choose a username"
               placeholder="选择用户名" autocomplete="username">
-            <input type="password" id="signup-pin"
-              data-placeholder-zh="设置密码（至少4位）" data-placeholder-en="Set password (min 4 chars)"
-              placeholder="设置密码（至少4位）" autocomplete="new-password">
-            <input type="password" id="signup-pin-confirm"
-              data-placeholder-zh="确认密码" data-placeholder-en="Confirm password"
+            <select id="signup-gender" style="width:100%">
+              <option value="">性别（可选）/ Gender (optional)</option>
+              <option value="male">男 / Male</option>
+              <option value="female">女 / Female</option>
+              <option value="non-binary">非二元 / Non-binary</option>
+            </select>
+            <select id="signup-mbti" style="width:100%">
+              <option value="">MBTI（可选）/ MBTI (optional)</option>
+              <option value="INTJ">INTJ</option>
+              <option value="INTP">INTP</option>
+              <option value="ENTJ">ENTJ</option>
+              <option value="ENTP">ENTP</option>
+              <option value="INFJ">INFJ</option>
+              <option value="INFP">INFP</option>
+              <option value="ENFJ">ENFJ</option>
+              <option value="ENFP">ENFP</option>
+              <option value="ISTJ">ISTJ</option>
+              <option value="ISFJ">ISFJ</option>
+              <option value="ESTJ">ESTJ</option>
+              <option value="ESFJ">ESFJ</option>
+              <option value="ISTP">ISTP</option>
+              <option value="ISFP">ISFP</option>
+              <option value="ESTP">ESTP</option>
+              <option value="ESFP">ESFP</option>
+            </select>
+            <input type="password" id="signup-pin" maxlength="4"
+              data-placeholder-zh="设置密码（4位）" data-placeholder-en="Set PIN (4 digits)"
+              placeholder="设置密码（4位）" autocomplete="new-password">
+            <input type="password" id="signup-pin-confirm" maxlength="4"
+              data-placeholder-zh="确认密码" data-placeholder-en="Confirm PIN"
               placeholder="确认密码" autocomplete="new-password">
             <button class="btn btn-solid" id="signup-btn" style="width:100%" data-zh="创建账户" data-en="Create Account">创建账户</button>
             <span id="signup-status"></span>
@@ -552,8 +578,9 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
               const pills = gl.guests.map(g => {
                 const name = escapeHtml(g.name || 'Guest ◆')
                 const gBadge = ev.show_gender ? ` ${renderGenderBadge(g.gender)}` : ''
+                const mBadge = ev.show_gender && g.mbti ? ` <span class="g-badge g-mbti">${escapeHtml(g.mbti)}</span>` : ''
                 const plus = g.guestCount === 2 ? ` <span class="badge" style="font-size:0.44rem">+1</span>` : ''
-                return `<span class="guest-pill">${name}${gBadge}${plus}</span>`
+                return `<span class="guest-pill">${name}${gBadge}${mBadge}${plus}</span>`
               }).join('')
               inner += `<div class="guest-pills">${pills}</div>`
             }
@@ -950,7 +977,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         .from('attendees').select('pin_hash').eq('username', username).single()
       if (existing && existing.pin_hash === '') {
         const errEl = document.getElementById('login-error')
-        errEl.textContent = t('首次登录？请通过「加入Open Bar」标签设置密码。', 'First time? Please set your password via the "Join Open Bar" tab.')
+        errEl.textContent = t('首次登录？请通过「加入Open Bar」标签设置密码。', 'First time? Please set your PIN via the "Join Open Bar" tab.')
         errEl.style.display = 'block'
         return
       }
@@ -978,13 +1005,23 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       const status = document.getElementById('signup-status')
 
       if (!username) { status.textContent = t('请选择用户名', 'Please choose a username'); status.className = 'error'; return }
-      if (pin.length < 4) { status.textContent = t('密码至少4位', 'Password must be at least 4 characters'); status.className = 'error'; return }
-      if (pin !== confirm) { status.textContent = t('两次密码不一致', 'Passwords do not match'); status.className = 'error'; return }
+      if (pin.length !== 4) { status.textContent = t('密码须为4位', 'PIN must be exactly 4 characters'); status.className = 'error'; return }
+      if (pin !== confirm) { status.textContent = t('两次密码不一致', 'PINs do not match'); status.className = 'error'; return }
 
+      const gender = document.getElementById('signup-gender').value || null
+      const mbti   = document.getElementById('signup-mbti').value || null
       const pin_hash = await hashPin(pin)
       const { error } = await supabase
         .from('attendees')
-        .insert({ username, pin_hash, credits: 0, alias: null })
+        .insert({
+          username,
+          pin_hash,
+          credits: 0,
+          alias: null,
+          gender,
+          mbti,
+          gender_visibility: gender ? 'public' : 'admin_only'
+        })
 
       if (error) {
         status.textContent = error.code === '23505'
