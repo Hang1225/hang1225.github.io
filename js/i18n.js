@@ -6,7 +6,7 @@ export function getLang() {
 
 export function setLang(lang) {
   localStorage.setItem(LANG_KEY, lang)
-  applyLang(lang)
+  location.reload()
 }
 
 export function applyLang(lang) {
