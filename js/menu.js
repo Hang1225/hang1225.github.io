@@ -54,7 +54,7 @@ export async function submitVote(drinkId, attendeeId, eventId) {
       .delete()
       .eq('attendee_id', attendeeId)
       .eq('event_id', eventId)
-    if (delError) return { ok: false, previousDrinkId: null }
+    if (delError) return { ok: false, previousDrinkId }
   }
 
   // Step 2: insert new vote
