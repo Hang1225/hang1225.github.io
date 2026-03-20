@@ -23,7 +23,7 @@ export async function loadEventGuestList(eventId, showCount, showNames, showGend
 
   const { data, error } = await supabase
     .from('reservations')
-    .select('id, guest_count, attendees(alias, username, gender, gender_visibility)')
+    .select('id, guest_count, attendees(alias, username, gender, gender_visibility, mbti)')
     .eq('event_id', eventId)
     .eq('status', 'confirmed')
     .order('created_at', { ascending: true })
@@ -40,6 +40,7 @@ export async function loadEventGuestList(eventId, showCount, showNames, showGend
       gender: showGender && r.attendees.gender_visibility === 'public'
         ? r.attendees.gender
         : null,
+      mbti: showGender ? r.attendees.mbti : null,
       guestCount: r.guest_count
     }))
   }
