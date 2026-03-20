@@ -768,10 +768,10 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           <div class="mbti-carousel-nav">
             <button type="button" class="mbti-nav-arrow" id="profile-mbti-prev" onclick="profileMbtiPrev()" disabled>← 上一组</button>
             <div class="mbti-nav-dots" id="profile-mbti-dots">
-              <div class="mbti-nav-dot active" onclick="profileMbtiGoSlide(0)"></div>
-              <div class="mbti-nav-dot" onclick="profileMbtiGoSlide(1)"></div>
-              <div class="mbti-nav-dot" onclick="profileMbtiGoSlide(2)"></div>
-              <div class="mbti-nav-dot" onclick="profileMbtiGoSlide(3)"></div>
+              <div class="mbti-nav-dot active" id="profile-dot-0" onclick="profileMbtiGoSlide(0)"></div>
+              <div class="mbti-nav-dot" id="profile-dot-1" onclick="profileMbtiGoSlide(1)"></div>
+              <div class="mbti-nav-dot" id="profile-dot-2" onclick="profileMbtiGoSlide(2)"></div>
+              <div class="mbti-nav-dot" id="profile-dot-3" onclick="profileMbtiGoSlide(3)"></div>
             </div>
             <button type="button" class="mbti-nav-arrow" id="profile-mbti-next" onclick="profileMbtiNext()">下一组 →</button>
           </div>
@@ -1487,8 +1487,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       // Badges
       const badgeEl = document.getElementById('profile-badges')
       if (!badgeEl) return
-      const gMap = { male:'<span class="g-badge g-m">M</span>', female:'<span class="g-badge g-f">F</span>', 'non-binary':'<span class="g-badge g-nb">NB</span>', 'prefer-not':'<span class="g-badge g-hidden">—</span>' }
-      const gBadge = currentAttendee.gender ? (gMap[currentAttendee.gender] || '') : ''
+      const gMap = { male:'<span class="g-badge g-m">M</span>', female:'<span class="g-badge g-f">F</span>', 'non-binary':'<span class="g-badge g-nb">NB</span>' }
+      const gBadge = (currentAttendee.gender && currentAttendee.gender !== 'prefer-not') ? (gMap[currentAttendee.gender] || '') : ''
       const mBadge = currentAttendee.mbti   ? `<span class="g-badge g-mbti">${escapeHtml(currentAttendee.mbti)}</span>` : ''
       badgeEl.innerHTML = gBadge + mBadge
     }
@@ -1599,8 +1599,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       document.getElementById('profile-mbti-val').value = type
     }
 
-    function profileMbtiPrev() { if (profileMbtiCur > 0) profileMbtiGoSlide(profileMbtiCur - 1) }
-    function profileMbtiNext() { if (profileMbtiCur < 3) profileMbtiGoSlide(profileMbtiCur + 1) }
+    function profileMbtiPrev() { profileMbtiGoSlide((profileMbtiCur - 1 + 4) % 4) }
+    function profileMbtiNext() { profileMbtiGoSlide((profileMbtiCur + 1) % 4) }
 
     window.profileMbtiGoSlide = profileMbtiGoSlide
     window.profileMbtiPick    = profileMbtiPick
@@ -1657,6 +1657,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
 
     function closeProfilePanel() {
       document.getElementById('profile-edit-panel').style.display = 'none'
+      document.getElementById('profile-save-status').textContent = ''
+      document.getElementById('profile-save-status').className = ''
     }
 
     function toggleProfilePanel() {
@@ -1667,6 +1669,8 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         closeProfilePanel()
       }
     }
+    window.openProfilePanel   = openProfilePanel
+    window.closeProfilePanel  = closeProfilePanel
     window.toggleProfilePanel = toggleProfilePanel
 
     // ── Profile panel: Save ───────────────────────────────────────────────────
