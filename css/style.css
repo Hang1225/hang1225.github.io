@@ -35,7 +35,7 @@ body {
   flex-direction: column;
 }
 
-main { flex: 1; }
+main { flex-grow: 1; }
 /* Chinese characters render visually smaller — compensate for parity */
 html[lang="zh"] body { font-size: 20px; }
 
