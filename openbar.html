@@ -637,9 +637,19 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     <div id="dashboard-section" style="display:none">
       <div class="dashboard">
         <div class="dashboard-header fade-in">
-          <div>
-            <span class="eyebrow" data-zh="欢迎回来" data-en="Welcome Back">欢迎回来</span>
-            <h1 class="dashboard-name" id="greeting"></h1>
+          <div class="profile-header-left">
+            <div style="display:flex;flex-direction:column;align-items:center">
+              <div class="profile-avatar" id="profile-avatar-btn" onclick="toggleProfilePanel()">
+                <span id="profile-initials"></span>
+                <div class="profile-avatar-pencil">✎</div>
+              </div>
+              <div class="profile-edit-hint" data-zh="编辑资料" data-en="Edit Profile">编辑资料</div>
+            </div>
+            <div>
+              <span class="eyebrow" data-zh="欢迎回来" data-en="Welcome Back">欢迎回来</span>
+              <h1 class="dashboard-name" id="greeting"></h1>
+              <div class="profile-header-badges" id="profile-badges"></div>
+            </div>
           </div>
           <button class="btn btn-sm" id="logout-btn" data-zh="退出" data-en="Sign Out">退出</button>
         </div>
