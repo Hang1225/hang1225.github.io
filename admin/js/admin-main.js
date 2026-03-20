@@ -282,7 +282,7 @@ document.getElementById('add-wishlist-btn').addEventListener('click', async () =
 async function loadSignupsAdmin() {
   const { data } = await supabase
     .from('attendees')
-    .select('id, username, alias, nickname, gender, gender_visibility, created_at, removed_at')
+    .select('id, username, alias, nickname, mbti, gender, gender_visibility, created_at, removed_at')
     .order('created_at', { ascending: false })
 
   window._attendeesCache = data || []
@@ -303,6 +303,9 @@ async function loadSignupsAdmin() {
     const selfLabel = !a.gender
       ? `<span class="muted" style="font-size:0.78rem;font-style:italic"> (prefers not to say)</span>`
       : ''
+    const mbtiLabel = a.mbti
+      ? `<span style="font-size:0.75rem;color:var(--muted);margin-left:0.4rem">${escapeHtml(a.mbti)}</span>`
+      : ''
 
     // data-alias uses escapeHtml() for HTML attribute safety (e.g. quotes in alias names).
     // dataset.alias in JS automatically un-decodes HTML entities, so input.value receives the literal string.
@@ -318,7 +321,7 @@ async function loadSignupsAdmin() {
     row.innerHTML = `
       <div>
         ${aliasDisplay}
-        <span class="muted"> @${escapeHtml(a.username)}</span>${selfLabel}
+        <span class="muted"> @${escapeHtml(a.username)}</span>${selfLabel}${mbtiLabel}
         <div class="muted" style="font-size:0.8rem;margin-top:0.2rem">${new Date(a.created_at).toLocaleDateString()}</div>
         <input type="text" class="nickname-input" data-attendee-id="${a.id}"
           value="${escapeHtml(a.nickname || '')}"
