@@ -24,6 +24,20 @@ export function formatTimeRange(start_time, end_time) {
     : fmt12h(start_time)
 }
 
+// Returns an HTML string: pip meter + "N seats left" / "Full" label.
+// t() is intentionally absent — this module has no i18n dependency.
+// English-only output is acceptable because language switching triggers a full page reload.
+export function renderSlotMeter(used, capacity) {
+  const pips = Array.from({ length: capacity }, (_, i) =>
+    `<span class="slot-pip${i < used ? ' filled' : ''}"></span>`
+  ).join('')
+  const available = capacity - used
+  const label = available > 0
+    ? `<span class="slot-label">${available} seats left</span>`
+    : `<span class="slot-label" style="color:var(--muted)">Full</span>`
+  return `<span class="slot-meter">${pips}${label}</span>`
+}
+
 function fmt12h(timeStr) {
   const [hStr, mStr] = timeStr.split(':')
   let h = parseInt(hStr, 10)
