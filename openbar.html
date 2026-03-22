@@ -808,7 +808,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     import { loadWishlist } from './js/openbar.js'
     import { supabase } from './js/supabase-client.js'
     import { t } from './js/i18n.js'
-    import { loadEvents, formatTimeRange } from './js/events.js'
+    import { loadEvents, formatTimeRange, renderSlotMeter } from './js/events.js'
     import { createReservation, cancelReservation, loadAttendeeReservations, loadEventGuestList, reapplyReservation, acceptInvite, declineInvite } from './js/reservations.js'
 
     requirePasscode()
@@ -822,17 +822,6 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
     }
 
     // ---- HELPERS ----
-
-    function renderSlotMeter(used, capacity) {
-      const pips = Array.from({ length: capacity }, (_, i) =>
-        `<span class="slot-pip${i < used ? ' filled' : ''}"></span>`
-      ).join('')
-      const available = capacity - used
-      const label = available > 0
-        ? `<span class="slot-label">${available} ${t('位', 'seats left')}</span>`
-        : `<span class="slot-label" style="color:var(--muted)">${t('已满', 'Full')}</span>`
-      return `<span class="slot-meter">${pips}${label}</span>`
-    }
 
     function renderGenderBadge(gender) {
       if (!gender) return `<span class="g-badge g-hidden">—</span>`
