@@ -881,11 +881,11 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
           slotHtml = `<span class="badge badge-curated">${t('策划活动 · 邀请制', 'Curated · By Invitation')}</span>`
           ctaKey = t('登录后表达意愿', 'Sign In to Express Interest')
         } else if (isFull) {
-          slotHtml = renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
+          slotHtml = `<span class="badge">Open Bar</span> ` + renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
           if (waitCount) slotHtml += ` <span class="badge" style="margin-left:0.3rem">${waitCount} ${t('人等候', 'on waitlist')}</span>`
           ctaKey = t('登录加入等候', 'Sign In to Join Waitlist')
         } else {
-          slotHtml = renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
+          slotHtml = `<span class="badge">Open Bar</span> ` + renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
           ctaKey = t('登录预订', 'Sign In to Reserve')
         }
 
