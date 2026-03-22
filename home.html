@@ -60,6 +60,31 @@
       font-size: 1rem;
       color: var(--cream);
     }
+    .home-event-card-meta {
+      margin-top: 0.3rem;
+    }
+    .home-event-card-meta--invited {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .slot-meter { display: flex; gap: 3px; align-items: center; }
+    .slot-pip {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+    }
+    .slot-pip.filled { background: var(--gold); border-color: var(--gold); }
+    .slot-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-left: 0.3rem;
+    }
     .home-event-card-badge {
       font-family: 'Cinzel', serif;
       font-size: 0.62rem;
@@ -138,7 +163,8 @@
   <script type="module">
     import { requirePasscode } from './js/auth.js'
     import { renderNav, renderFooter, initLang } from './js/nav.js'
-    import { loadEvents, formatTimeRange } from './js/events.js'
+    import { loadEvents, formatTimeRange, renderSlotMeter } from './js/events.js'
+    import { supabase } from './js/supabase-client.js'
     requirePasscode()
     document.getElementById('nav').innerHTML = renderNav('首页')
     document.getElementById('footer').innerHTML = renderFooter()
@@ -158,7 +184,17 @@
 
     async function renderHomeEvents() {
       const today = new Date().toISOString().split('T')[0]
-      const allEvents = await loadEvents()
+
+      const [allEvents, slotRes] = await Promise.all([
+        loadEvents(),
+        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed').eq('admin_added', false)
+      ])
+
+      const slotsByEvent = {}
+      ;(slotRes.data || []).forEach(r => {
+        slotsByEvent[r.event_id] = (slotsByEvent[r.event_id] || 0) + r.guest_count
+      })
+
       const upcoming = allEvents.filter(e => e.event_date >= today)
 
       const section = document.getElementById('home-events-section')
@@ -168,10 +204,20 @@
 
       list.innerHTML = ''
       upcoming.forEach(ev => {
+        const isCurated = ev.event_type === 'curated'
         const isOpenBar = ev.event_type === 'open'
         const timeRange = formatTimeRange(ev.start_time, ev.end_time)
         const dateStr = escapeHtml(formatHomeEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
-        const badgeText = isOpenBar ? 'Open Bar' : 'Home Bar'
+        const badgeText = isCurated ? 'Home Bar' : 'Open Bar'
+
+        let metaHtml = ''
+        if (isCurated) {
+          metaHtml = `<div class="home-event-card-meta home-event-card-meta--invited">Home Bar · By Invitation</div>`
+        } else {
+          const used = slotsByEvent[ev.id] || 0
+          const capacity = ev.capacity - (ev.admin_reserved || 0)
+          metaHtml = `<div class="home-event-card-meta">${renderSlotMeter(used, capacity)}</div>`
+        }
 
         const card = document.createElement(isOpenBar ? 'a' : 'div')
         card.className = 'home-event-card'
@@ -180,6 +226,7 @@
           <div>
             <div class="home-event-card-date">${dateStr}</div>
             <div class="home-event-card-title">${escapeHtml(ev.title)}</div>
+            ${metaHtml}
           </div>
           <span class="home-event-card-badge">${badgeText}</span>
         `
