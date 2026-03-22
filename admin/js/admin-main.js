@@ -524,7 +524,7 @@ function buildEventBlockHtml(ev) {
   const usedSlots = confirmed.reduce((s, r) => s + r.guest_count, 0)
   const isCurated = ev.event_type === 'curated'
   const typeBadge = isCurated
-    ? `<span class="badge" style="border-color:rgba(184,156,216,0.3);color:#B89CD8;font-size:0.7rem">Curated</span>`
+    ? `<span class="badge" style="border-color:rgba(184,156,216,0.3);color:#B89CD8;font-size:0.7rem">Home Bar</span>`
     : `<span class="badge" style="font-size:0.7rem">Open</span>`
 
   const slotInfo = isCurated

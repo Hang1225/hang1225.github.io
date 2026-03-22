@@ -878,7 +878,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         let slotHtml = ''
         let ctaKey = ''
         if (isCurated) {
-          slotHtml = `<span class="badge badge-curated">${t('策划活动 · 邀请制', 'Curated · By Invitation')}</span>`
+          slotHtml = `<span class="badge badge-curated">${t('家庭酒吧 · 邀请制', 'Home Bar · By Invitation')}</span>`
           ctaKey = t('登录后表达意愿', 'Sign In to Express Interest')
         } else if (isFull) {
           slotHtml = `<span class="badge">Open Bar</span> ` + renderSlotMeter(used, ev.capacity - (ev.admin_reserved || 0))
@@ -1028,7 +1028,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
       const dateStr = escapeHtml(formatEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
       const titleStr = escapeHtml(ev.title)
       const curatedBadge = isCurated
-        ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Curated')}</span>`
+        ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('家庭酒吧', 'Home Bar')}</span>`
         : ''
 
       // Status / action (right side of header)
@@ -1243,7 +1243,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         const dateStr = escapeHtml(formatEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
         const isCurated = ev.event_type === 'curated'
         const typeBadge = isCurated
-          ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Home Bar')}</span>`
+          ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('家庭酒吧', 'Home Bar')}</span>`
           : ''
 
         const row = document.createElement('div')
@@ -1292,7 +1292,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         const dateStr = escapeHtml(formatEventDate(ev.event_date)) + (timeRange ? ' · ' + timeRange : '')
         const isCurated = ev.event_type === 'curated'
         const typeBadge = isCurated
-          ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('策划', 'Home Bar')}</span>`
+          ? ` <span class="badge badge-curated" style="font-size:0.46rem;vertical-align:middle">${t('家庭酒吧', 'Home Bar')}</span>`
           : ''
 
         const row = document.createElement('div')
@@ -1355,7 +1355,7 @@ textarea.event-message::placeholder { color: var(--muted); font-style: italic; }
         }
         const { label, cls } = statusMap[r.status] || { label: escapeHtml(r.status), cls: 'badge-muted' }
         const curatedBadge = ev.event_type === 'curated'
-          ? ` <span class="badge badge-curated" style="font-size:0.42rem;vertical-align:middle">Curated</span>`
+          ? ` <span class="badge badge-curated" style="font-size:0.42rem;vertical-align:middle">Home Bar</span>`
           : ''
         const row = document.createElement('div')
         row.className = 'history-row'
