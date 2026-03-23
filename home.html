@@ -185,10 +185,15 @@
     async function renderHomeEvents() {
       const today = new Date().toISOString().split('T')[0]
 
-      const [allEvents, slotRes] = await Promise.all([
-        loadEvents(),
-        supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed').eq('admin_added', false)
-      ])
+      let allEvents, slotRes
+      try {
+        ;[allEvents, slotRes] = await Promise.all([
+          loadEvents(),
+          supabase.from('reservations').select('event_id, guest_count').eq('status', 'confirmed').eq('admin_added', false)
+        ])
+      } catch {
+        return // section stays hidden on fetch failure
+      }
 
       const slotsByEvent = {}
       ;(slotRes.data || []).forEach(r => {
