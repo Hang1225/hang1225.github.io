@@ -91,6 +91,11 @@
       letter-spacing: 0.1em;
       color: var(--muted);
       border: 1px solid var(--border);
+    }
+    .home-event-card-badge.badge-curated {
+      background: rgba(184,156,216,0.12);
+      border-color: rgba(184,156,216,0.3);
+      color: #B89CD8;
       border-radius: 2px;
       padding: 0.2rem 0.5rem;
       white-space: nowrap;
@@ -233,7 +238,7 @@
             <div class="home-event-card-title">${escapeHtml(ev.title)}</div>
             ${metaHtml}
           </div>
-          <span class="home-event-card-badge">${badgeText}</span>
+          <span class="home-event-card-badge${isCurated ? ' badge-curated' : ''}">${badgeText}</span>
         `
         list.appendChild(card)
       })
