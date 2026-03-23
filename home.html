@@ -92,6 +92,10 @@
       color: var(--muted);
       border: 1px solid var(--border);
     }
+    .home-event-card-badge.badge-openbar {
+      background: rgba(201,168,76,0.1);
+      color: var(--gold);
+    }
     .home-event-card-badge.badge-curated {
       background: rgba(184,156,216,0.12);
       border-color: rgba(184,156,216,0.3);
@@ -238,7 +242,7 @@
             <div class="home-event-card-title">${escapeHtml(ev.title)}</div>
             ${metaHtml}
           </div>
-          <span class="home-event-card-badge${isCurated ? ' badge-curated' : ''}">${badgeText}</span>
+          <span class="home-event-card-badge${isCurated ? ' badge-curated' : ' badge-openbar'}">${badgeText}</span>
         `
         list.appendChild(card)
       })
